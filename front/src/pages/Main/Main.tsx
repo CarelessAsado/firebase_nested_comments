@@ -27,7 +27,7 @@ const Center = styled.div`
   background-color: white;
 `;
 export const Main = () => {
-  const { tareas, isFetching } = useTareasGlobalContext();
+  const { tareas, loading } = useTareasGlobalContext();
   return (
     <Container>
       <NewTaskForm></NewTaskForm>
@@ -36,7 +36,7 @@ export const Main = () => {
           ? tareas.map((i) => {
               return <Tasks key={i._id} tarea={i} />;
             })
-          : !isFetching && <Notasks>No tasks saved yet.</Notasks>}
+          : !loading && <Notasks>No tasks saved yet.</Notasks>}
       </Center>
     </Container>
   );

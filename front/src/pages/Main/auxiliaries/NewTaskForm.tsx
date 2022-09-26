@@ -54,7 +54,7 @@ const Error = styled.div`
 `;
 
 const NewTaskForm = () => {
-  const { isFetching, error, getTasks, postNewTask } = useTareasGlobalContext();
+  const { loading, error, getTasks, postNewTask } = useTareasGlobalContext();
   const [inputTask, setInputTask] = useState<string>("");
   const addTask = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -90,7 +90,7 @@ const NewTaskForm = () => {
         <SubmitBtn>Add task</SubmitBtn>
       </Decoration>
       <LoadingRelative>
-        {isFetching && (
+        {loading && (
           <Loading>
             <Spinner fz="3rem" h="100%" />
           </Loading>

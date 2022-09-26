@@ -28,7 +28,7 @@ const RegisterLink = styled(Link)`
 export const Register = () => {
   const navigate = useNavigate();
   const errorAssert = useRef() as React.MutableRefObject<HTMLDivElement>;
-  const { register, error, isFetching } = useTareasGlobalContext();
+  const { register, error, loading } = useTareasGlobalContext();
   const [registerInput, setregisterInput] = useState<IRegisterInput>({
     username: "",
     email: "",
@@ -87,10 +87,7 @@ export const Register = () => {
           placeholder="Confirm password *"
           id="Confirmpassword"
         ></Input>
-        <Input
-          type="submit"
-          value={isFetching ? "Loading..." : "Submit"}
-        ></Input>
+        <Input type="submit" value={loading ? "Loading..." : "Submit"}></Input>
         <Bottom>
           Already have an account?
           <RegisterLink to={FRONTEND_ENDPOINTS.LOGIN}>

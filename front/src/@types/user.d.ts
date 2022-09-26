@@ -27,7 +27,7 @@ type State = {
   tareas: ITarea[];
   user: IUser;
   error: boolean | string;
-  isFetching: boolean;
+  loading: boolean;
   successRegister: string;
 };
 

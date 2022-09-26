@@ -28,7 +28,7 @@ const defaultState: State = {
   tareas: [],
   user: null,
   error: false,
-  isFetching: false,
+  loading: false,
   successRegister: "",
 };
 const TareaContextProvider = ({ children }: ProviderProps) => {

@@ -19,21 +19,21 @@ export const taskReducer = (state: State, action: Actions) => {
     case ActionsEnum.RESET_ERRORS:
       return {
         ...state,
-        isFetching: false,
+        loading: false,
         error: false,
       };
     /*---------------LOGIN-----------------*/
     case ActionsEnum.SUCCESS_LOGIN:
       return {
         ...state,
-        isFetching: false,
+        loading: false,
         user: action.payload,
       };
     /*---------------LOGOUT-----------------*/
     case ActionsEnum.LOG_OUT:
       return {
         ...state,
-        isFetching: false,
+        loading: false,
         error: false,
         user: null,
       };
@@ -41,30 +41,30 @@ export const taskReducer = (state: State, action: Actions) => {
     case ActionsEnum.SUCCESS_REGISTER:
       return {
         ...state,
-        isFetching: false,
+        loading: false,
         successRegister: "You have registered successfully. You can now login.",
       };
     /*------------------CREATE NEW TASK API CALL---------------------*/
     case ActionsEnum.SUCCESS_POST_NEW_TASK:
       return {
         ...state,
-        isFetching: false,
+        loading: false,
         tareas: [...copia, action.payload],
       };
     /*---------------------------------------------------------*/
     /*------------------GET ALL TASKS API CALL---------------------*/
     case ActionsEnum.START_FETCH_ALL:
-      return { ...state, error: false, isFetching: true, successRegister: "" };
+      return { ...state, error: false, loading: true, successRegister: "" };
     case ActionsEnum.FAILURE_FETCH_ALL:
-      return { ...state, isFetching: false, error: action.payload };
+      return { ...state, loading: false, error: action.payload };
     case ActionsEnum.SUCCESS_FETCH_ALL:
-      return { ...state, isFetching: false, tareas: action.payload };
+      return { ...state, loading: false, tareas: action.payload };
     /*---------------------------------------------------------*/
     /*------------------DELETE API CALL---------------------*/
     case ActionsEnum.SUCCESS_DELETE:
       return {
         ...state,
-        isFetching: false,
+        loading: false,
         tareas: copia.filter((i: ITarea) => i._id !== action.payload),
       };
     /*-----------------------UPDATE TASK------------------------------------*/
@@ -72,7 +72,7 @@ export const taskReducer = (state: State, action: Actions) => {
     case ActionsEnum.SUCCESS_UPDATE:
       return {
         ...state,
-        isFetching: false,
+        loading: false,
         tareas: copia.map((i: ITarea) =>
           i._id === action.payload._id ? action.payload : i
         ),
