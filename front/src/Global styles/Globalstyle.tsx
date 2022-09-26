@@ -18,17 +18,17 @@ scroll-behavior:smooth;
   --mainGreenHover:#187829;
   --mainPink:#ff8000;
 /*    --mainPink:#ffa2a2;  */
---fontSmall:1.2rem;
-  --fontMed:1.6rem;
-  --fontBig:2rem;
-  --fontLarge:2.5rem;
+--fontSmall:1rem;
+  --fontMed:1.2rem;
+  --fontBig:1.4rem;
+  --fontLarge:2rem;
 }
 @media (max-width:640px){
   :root{
-    --fontSmall:1rem;
-    --fontMed:1.4rem;
-    --fontBig:1.6rem;
-    --fontLarge:2.1rem;
+   /*  --fontSmall:.9rem; */
+    /* --fontMed:2rem; */
+    --fontBig:1.2rem;
+    --fontLarge:1.8rem;
   }
 }
 a{

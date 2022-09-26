@@ -3,7 +3,7 @@ import { Login, Register, Main } from "pages/Index";
 import { useTareasGlobalContext } from "hooks/useTareasGlobalContext";
 import { ProtectedByAuth } from "components/ProtectedByAuth";
 import { PersistLogin } from "components/PersistLogin";
-import { Nav } from "components/Nav";
+import { Nav } from "components/Nav/Nav";
 import { UserProfile } from "pages/UserProfile";
 import { useInterceptor } from "hooks/useInterceptor";
 import { FRONTEND_ENDPOINTS } from "config/constants";

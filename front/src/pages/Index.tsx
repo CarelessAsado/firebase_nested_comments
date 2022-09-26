@@ -1,5 +1,5 @@
-import { Login } from "./Login";
+import { Login } from "./auth/Login";
 import { Main } from "./Main/Main";
-import { Register } from "./Register";
+import { Register } from "./auth/Register";
 import { UserProfile } from "./UserProfile";
 export { Login, Main, Register, UserProfile };

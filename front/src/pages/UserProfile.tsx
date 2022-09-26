@@ -1,5 +1,6 @@
 import styled from "styled-components";
 import { Link } from "react-router-dom";
+import { FRONTEND_ENDPOINTS } from "config/constants";
 const Error = styled.div`
   color: crimson;
   font-size: 1.5rem;
@@ -26,7 +27,7 @@ export const UserProfile = () => {
         Still in development. Soon you will be able to view and modify your
         profile.<Bold>We are sorry for the inconvenience</Bold>
       </Error>
-      <HomeLink to="/">Back to home</HomeLink>
+      <HomeLink to={FRONTEND_ENDPOINTS.HOME}>Back to home</HomeLink>
     </>
   );
 };
