@@ -6,18 +6,19 @@ import axiosInstanceJWT from "./axiosInstanceJWT";
 
 export const login = function (loginInput: ILoginInput) {
   return loginAxiosInstance.post<LoginSuccessful>(
-    BACKEND_URL.login(),
+    BACKEND_URL.LOGIN,
     loginInput
   );
 };
 
 export const register = function (registerInput: IRegisterInput) {
-  return loginAxiosInstance.post(BACKEND_URL.register(), registerInput);
+  return loginAxiosInstance.post(BACKEND_URL.REGISTER, registerInput);
 };
+
 export const logout = function () {
-  return axiosInstanceJWT.get<void>(BACKEND_URL.logout());
+  return axiosInstanceJWT.get<void>(BACKEND_URL.LOGOUT);
 };
 
 export const refresh = function () {
-  return axiosInstanceJWT.get<LoginSuccessful>(BACKEND_URL.refresh());
+  return axiosInstanceJWT.get<LoginSuccessful>(BACKEND_URL.REFRESH);
 };
