@@ -1,14 +1,10 @@
 import { configureStore } from "@reduxjs/toolkit";
-import userReducer /*, { listenerMiddleware }  */ from "./userSlice";
+import userReducer from "./userSlice";
 
-/* import type { TypedUseSelectorHook } from "react-redux"; */
 const store = configureStore({
   reducer: {
     user: userReducer,
-    /*     general: generalReducer, */
   },
-  /*   middleware: (getDefaultMid) =>
-    getDefaultMid().prepend(listenerMiddleware.middleware), */
 });
 
 //esto lo exporto p/el custom hook del useSelector y capaz algo +

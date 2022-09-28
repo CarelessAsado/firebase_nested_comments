@@ -1,9 +1,4 @@
-import {
-  createSlice,
-  createAsyncThunk,
-  AnyAction,
-  AsyncThunk,
-} from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk, isPending } from "@reduxjs/toolkit";
 import * as authAPI from "API/authAPI";
 import { setHeaders } from "API/axiosInstanceJWT";
 import { tasksAPI } from "API/tasksAPI";
@@ -152,6 +147,7 @@ export const userSlice = createSlice({
       state.loading = false;
       state.error = action.payload;
     },
+    //reseteo el error al cambiar la url/location.pathname, capaz dsp lo quite
     resetError: (state) => {
       state.loading = false;
       state.error = false;
@@ -159,7 +155,6 @@ export const userSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder.addCase(login.fulfilled, (state, action) => {
-      console.log(action, 666);
       state.user = action.payload.user;
       state.loading = false;
     });
@@ -201,35 +196,15 @@ export const userSlice = createSlice({
     //https://redux-toolkit.js.org/api/createReducer#builderaddmatcher
     //calculo q si queres overridear el matcher tenés q agregar otro dsp no?
     // matcher can be defined outside as a type predicate function
-    builder.addMatcher(isPendingAction, (state, action) => {
+    builder.addMatcher(isPending, (state, action) => {
       console.log(action, 666);
 
       state.loading = true;
       state.error = false;
       state.successRegister = "";
     });
-
-    /*     builder.addMatcher(isRejected, (state, action) => {
-      alert("hola en builder MATCHER");
-      console.log(action);
-      state.loading = false;
-      state.error = action.payload as string;
-    }); */
   },
 });
-/* -------------------------todo esto lo saqué directamente de la pag oficial de toolkit--------- */
-type GenericAsyncThunk = AsyncThunk<unknown, unknown, any>;
-type PendingAction = ReturnType<GenericAsyncThunk["pending"]>;
-
-// Create the middleware instance and methods
-/*export const listenerMiddleware = createListenerMiddleware();
- listenerMiddleware.startListening({
-  matcher: isRejectedWithValue,
-  effect: errorHandler,
-}); */
-function isPendingAction(action: AnyAction): action is PendingAction {
-  return action.type.endsWith("/pending");
-}
 
 export const { renderError, resetError } = userSlice.actions;
 

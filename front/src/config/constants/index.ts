@@ -2,6 +2,10 @@ class URL_FRONT_ENDPOINTS {
   LOGIN = "/login";
   REGISTER = "/register";
   HOME = "/";
+  PROFILE = "/profile/user/:id";
+  PROFILEdyn = (id: string) => {
+    return this.PROFILE.replace(":_id", id);
+  };
 }
 export const FRONTEND_ENDPOINTS = new URL_FRONT_ENDPOINTS();
 
@@ -15,24 +19,7 @@ class URL_BACK_ENDPOINTS {
   TASKS = `/tasks`;
 }
 export const BACKEND_URL = new URL_BACK_ENDPOINTS();
-/* export const BACKEND_URL = {
-  auth: "/auth",
-  login() {
-    return `${this.auth}/login`;
-  },
-  logout() {
-    return `${this.auth}/logout`;
-  },
-  register() {
-    return `${this.auth}/register`;
-  },
-  refresh() {
-    return `${this.auth}/refresh`;
-  },
-  tasks() {
-    return "/tasks";
-  },
-}; */
+
 export const BACKEND_ROOT =
   !process.env.NODE_ENV || process.env.NODE_ENV === "development"
     ? "http://localhost:5000/api/v1"

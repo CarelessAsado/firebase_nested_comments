@@ -105,7 +105,7 @@ export const Nav = () => {
                 </NavLink>
               </LinkItem>
               <LinkItem>
-                <NavLink to={`/profile/user/${user._id}`}>
+                <NavLink to={FRONTEND_ENDPOINTS.PROFILEdyn(user._id)}>
                   <BiUser />
                   {user.username.split(" ")[0].length > 10
                     ? "user"
