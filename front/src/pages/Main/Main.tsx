@@ -1,7 +1,7 @@
-import NewTaskForm from "pages/Main/auxiliaries/NewTaskForm";
-import Tasks from "pages/Main/auxiliaries/Tasks";
-import { useTareasGlobalContext } from "hooks/useTareasGlobalContext";
+import NewTaskForm from "pages/main/auxiliaries/CreateTaskForm";
+import TaskItem from "pages/main/auxiliaries/TaskItem";
 import styled from "styled-components";
+import { useAppSelector } from "hooks/reduxDispatchAndSelector";
 
 const Notasks = styled.div`
   color: #385f92;
@@ -27,14 +27,15 @@ const Center = styled.div`
   background-color: white;
 `;
 export const Main = () => {
-  const { tareas, loading } = useTareasGlobalContext();
+  const { tareas, loading } = useAppSelector((state) => state.user);
+
   return (
     <Container>
       <NewTaskForm></NewTaskForm>
       <Center>
         {tareas.length > 0
           ? tareas.map((i) => {
-              return <Tasks key={i._id} tarea={i} />;
+              return <TaskItem key={i._id} tarea={i} />;
             })
           : !loading && <Notasks>No tasks saved yet.</Notasks>}
       </Center>

@@ -1,4 +1,3 @@
-import { useTareasGlobalContext } from "hooks/useTareasGlobalContext";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
 import {
@@ -9,6 +8,8 @@ import {
   BiUserPlus,
 } from "react-icons/bi";
 import { FRONTEND_ENDPOINTS } from "config/constants";
+import { useAppDispatch, useAppSelector } from "hooks/reduxDispatchAndSelector";
+import { logout } from "context/userSlice";
 const BlockBehindNavBar = styled.div`
   height: 60px;
 `;
@@ -85,8 +86,8 @@ const Span = styled.span`
   }
 `;
 export const Nav = () => {
-  const { user, logout } = useTareasGlobalContext();
-
+  const { user } = useAppSelector((state) => state.user);
+  const dispatch = useAppDispatch();
   return (
     <>
       <BlockBehindNavBar />
@@ -111,7 +112,7 @@ export const Nav = () => {
                     : user.username.split(" ")[0]}
                 </NavLink>
               </LinkItem>
-              <LinkItem onClick={logout}>
+              <LinkItem onClick={() => dispatch(logout())}>
                 <BiLogOut />
                 <Span>Logout</Span>
               </LinkItem>

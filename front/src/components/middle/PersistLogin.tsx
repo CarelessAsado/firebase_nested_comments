@@ -1,14 +1,15 @@
 import { useEffect, useState } from "react";
-import * as authAPI from "API/authAPI";
 import { Outlet } from "react-router-dom";
-import { useTareasGlobalContext } from "hooks/useTareasGlobalContext";
 import { LSTORAGE_KEY } from "config/constants";
-import setHeaders_User_LStorage from "config/utils/setHeadersAndUsers";
+import { useAppDispatch, useAppSelector } from "hooks/reduxDispatchAndSelector";
+import { refresh } from "context/userSlice";
 
 export const PersistLogin = () => {
-  const { user, dispatch } = useTareasGlobalContext();
+  const { user } = useAppSelector((state) => state.user);
+  const dispatch = useAppDispatch();
   console.log("estamos en user PERSIST", !!user);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+
   useEffect(() => {
     async function checkStorage() {
       console.log(
@@ -20,21 +21,10 @@ export const PersistLogin = () => {
         console.log(storage, "ver q este todo bien con LSTORAGE_KEY");
         if (storage && JSON.parse(storage)) {
           //tengo q llamar al refresh y luego setear headers y user (o sea q tengo q enviar el user desde el back)
-          const { data } = await authAPI.refresh();
-
-          //setheaders and user
-          setHeaders_User_LStorage(dispatch, data);
+          //el unico caso q en este momento se me ocurre, q no tengo "cubierto", es si el user logged in hace refresh, y no hay internet en el back, el error no pasa x el interceptor (x ser url==="/refresh") y va al errorHandler en donde simplemente despachamos error de 'no hay internet', y x ultimo, el ProtectedByAuth me va a  expulsar, pero no me loguea out, capaz tendria poner un erase user=true en el LSTORAGE no??, de todas maneras la cookie va a seguir vigente. Me puede causar un "hacker te hemos atrapado dsp??", xq si viene otro user y se loguea me va a mandar una cookie q no le pertenece, pensar bien dsp
+          await dispatch(refresh());
         }
       } catch (error) {
-        //necesito abortar xq sino la doble request hace q hacker you have been caught
-
-        // PROBLEMA: a. NO SE ESTA CANCELANDO, y hay un error en el backend, Promise not catched
-        // b. al backend llegan 2 requests, es como q no anda el AbortController, y sin embargo, en Network figuran las dos reqs canceladas
-
-        //PersistLogin
-        //=>double render so CleanUP Fn where AbortControllers cancels
-        //=> INTERCEPTOR => if message canceled devolvemos
-        //=>al catch de PersistLogin y DSP????
         console.log(
           error,
           "esto deberia de ser dsp de devolver el error el interceptor"

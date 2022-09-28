@@ -1,16 +1,18 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import { Login, Register, Main } from "pages/Index";
-import { useTareasGlobalContext } from "hooks/useTareasGlobalContext";
-import { ProtectedByAuth } from "components/ProtectedByAuth";
-import { PersistLogin } from "components/PersistLogin";
+import { ProtectedByAuth } from "components/middle/ProtectedByAuth";
+import { PersistLogin } from "components/middle/PersistLogin";
 import { Nav } from "components/Nav/Nav";
 import { UserProfile } from "pages/UserProfile";
 import { useInterceptor } from "hooks/useInterceptor";
 import { FRONTEND_ENDPOINTS } from "config/constants";
+import { useAppSelector } from "hooks/reduxDispatchAndSelector";
+import { useResetErrors } from "hooks/useResetErrors";
 
 function App() {
-  const { user } = useTareasGlobalContext();
+  const { user } = useAppSelector((state) => state.user);
   useInterceptor();
+  useResetErrors();
 
   return (
     <>

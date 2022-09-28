@@ -2,7 +2,8 @@ import React, { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import { AiFillDelete, AiFillEdit } from "react-icons/ai";
 import { ImCheckboxChecked, ImCheckboxUnchecked } from "react-icons/im";
-import { useTareasGlobalContext } from "hooks/useTareasGlobalContext";
+import { useAppDispatch, useAppSelector } from "hooks/reduxDispatchAndSelector";
+import { deleteTasks, updateTasks } from "context/userSlice";
 
 interface StyledProps {
   done: boolean;
@@ -67,8 +68,8 @@ interface Props {
   tarea: ITarea;
 }
 const Tasks: React.FC<Props> = ({ tarea }) => {
-  const { user, deleteTask, updateTask } = useTareasGlobalContext();
-
+  const { user } = useAppSelector((state) => state.user);
+  const dispatch = useAppDispatch();
   const { name, _id, done } = tarea;
 
   const editInput = useRef() as React.MutableRefObject<HTMLInputElement>;
@@ -77,7 +78,7 @@ const Tasks: React.FC<Props> = ({ tarea }) => {
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [clicked, setClicked] = useState<boolean>(false);
 
-  const userId = user?._id || "";
+  const userID = user?._id || "";
 
   function changeEditStatus() {
     if (isEditing) {
@@ -102,13 +103,13 @@ const Tasks: React.FC<Props> = ({ tarea }) => {
       //esto es p/el caso q el blur ev coincida con el click ev en el icono de update. En ese caso, durante medio segundo dejamos justEdited true, p/q la funcion en el click handler no vuelva a cambiar el isEditing a true (el Blur ev sucede primero, y cambia isEditing a false. Entonces pasaba q el click ev veia isEditing false, y lo cambiaba a true)
       setJustEdited(false);
     }, 500);
-    if (editInput.current.value === name) return;
-    updateTask({ ...tarea, name: editInputBis }, userId);
+    if (editInput?.current?.value === name) return;
+    dispatch(updateTasks({ task: { ...tarea, name: editInputBis }, userID }));
   }
 
   useEffect(() => {
     if (isEditing) {
-      editInput.current.focus();
+      editInput?.current?.focus();
     }
   }, [isEditing]);
 
@@ -129,11 +130,15 @@ const Tasks: React.FC<Props> = ({ tarea }) => {
           <AiFillEdit />
         </Update>
         <CheckDone
-          onClick={() => updateTask({ ...tarea, done: !tarea.done }, userId)}
+          onClick={() =>
+            dispatch(
+              updateTasks({ task: { ...tarea, done: !tarea.done }, userID })
+            )
+          }
         >
           {done ? <ImCheckboxChecked /> : <ImCheckboxUnchecked />}
         </CheckDone>
-        <Delete onClick={() => deleteTask(_id, userId)}>
+        <Delete onClick={() => dispatch(deleteTasks({ id: _id, userID }))}>
           <AiFillDelete></AiFillDelete>
         </Delete>
       </Functionality>

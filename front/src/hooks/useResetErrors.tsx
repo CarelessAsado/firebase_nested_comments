@@ -1,14 +1,15 @@
+import { resetError } from "context/userSlice";
 import { useEffect } from "react";
-import { ActionsEnum } from "context/actions";
-import { useTareasGlobalContext } from "./useTareasGlobalContext";
+import { useLocation } from "react-router-dom";
+
+import { useAppDispatch } from "./reduxDispatchAndSelector";
 
 export const useResetErrors = () => {
-  const { dispatch /* , error */ } = useTareasGlobalContext();
+  const location = useLocation();
+
+  const dispatch = useAppDispatch();
   useEffect(() => {
-    function resetErrors() {
-      dispatch({ type: ActionsEnum.RESET_ERRORS });
-    }
-    /*  error && */ resetErrors();
-  }, [dispatch]);
+    dispatch(resetError());
+  }, [dispatch, location?.pathname]);
   return undefined;
 };

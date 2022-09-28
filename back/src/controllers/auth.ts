@@ -150,7 +150,7 @@ export const refreshMyToken = errorWrapper(async (req, res, next) => {
       //front espera user y accessTkn
       return res
         .status(200)
-        .json({ accessToken: newAccessToken, user: userFound });
+        .json({ accessToken: newAccessToken, user: getCleanUser(userFound) });
     } catch (error) {
       next(error);
     }

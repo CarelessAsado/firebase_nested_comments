@@ -1,25 +1,17 @@
-import * as authAPI from "API/authAPI";
 import axiosPOSTLogin, { headerKey } from "API/axiosInstanceJWT";
 import { BACKEND_URL } from "config/constants";
-import setHeaders_User_LStorage from "config/utils/setHeadersAndUsers";
+import { refresh } from "context/userSlice";
 import { useRef } from "react";
-import { useTareasGlobalContext } from "./useTareasGlobalContext";
+import { useAppDispatch } from "./reduxDispatchAndSelector";
 
 export const useInterceptor = () => {
-  const { dispatch } = useTareasGlobalContext();
+  const dispatch = useAppDispatch();
   useRef(
     axiosPOSTLogin.interceptors.response.use(
       (response) => {
         return response;
       },
       async (error) => {
-        console.log(
-          "entramos al interceptor",
-          "siento q es como queda en un limbo esto",
-          666
-        );
-        console.log(JSON.stringify(error));
-        console.log("ESTO ES SIEMPRE DSP del CLEAN-UP, o sea q es medio raro");
         /*  AbortController,antes hacia un simple return, y es como q no volvia al catch, iba al try y la cagaba */
         if (error?.message === "canceled") return Promise.reject(error);
 
@@ -39,13 +31,10 @@ export const useInterceptor = () => {
           previousRequest.sent = true;
 
           try {
-            const { data } = await authAPI.refresh();
+            const data = await dispatch(refresh()).unwrap();
             console.log(data, "ACCESS TOKEN AFTER REFRESH");
             if (data?.accessToken) {
               previousRequest.headers[headerKey] = data.accessToken;
-
-              //setheaders (and user??? for the time being I leave it like this
-              setHeaders_User_LStorage(dispatch, data);
             }
             return axiosPOSTLogin(previousRequest);
           } catch (error) {

@@ -1,7 +1,7 @@
 import { BACKEND_URL } from "config/constants";
 import axios from "./axiosInstanceJWT";
 
-export const API = {
+export const tasksAPI = {
   /*-----------------POST NEW TASK------------*/
   postNewTask(nameNewTask: string) {
     return axios.post<ITarea>(BACKEND_URL.TASKS, {
@@ -15,9 +15,9 @@ export const API = {
       task
     );
   },
-  getTasks: function (controller: AbortController) {
+  getTasks: function (controller?: AbortController) {
     return axios.get<ITarea[]>(BACKEND_URL.TASKS, {
-      signal: controller.signal,
+      signal: controller?.signal,
     });
   },
   deleteTask: async function (id: string, userID: string) {

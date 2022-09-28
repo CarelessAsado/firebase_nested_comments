@@ -1,7 +1,8 @@
 import React, { ChangeEvent, useEffect, useState } from "react";
 import styled from "styled-components";
-import { useTareasGlobalContext } from "hooks/useTareasGlobalContext";
 import Spinner from "components/loaders/loader";
+import { useAppDispatch, useAppSelector } from "hooks/reduxDispatchAndSelector";
+import { getTasks, postNewTasks } from "context/userSlice";
 
 const Form = styled.form`
   margin: 0 auto;
@@ -54,27 +55,21 @@ const Error = styled.div`
 `;
 
 const NewTaskForm = () => {
-  const { loading, error, getTasks, postNewTask } = useTareasGlobalContext();
+  const { loading, error } = useAppSelector((state) => state.user);
+  const dispatch = useAppDispatch();
   const [inputTask, setInputTask] = useState<string>("");
   const addTask = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     /*-----HACER UN CUSTOM ALERT if task is empty-----*/
-    postNewTask(inputTask);
-    setInputTask("");
+    dispatch(postNewTasks(inputTask))
+      .unwrap()
+      .then(() => setInputTask(""));
   };
 
   /*----------------GET ALL TASKS--------*/
   useEffect(() => {
-    console.log("useeffect get tasks NEWTASKFORM.JSX");
-    const controller = new AbortController();
-    getTasks(controller);
-
-    return () => {
-      controller.abort();
-      console.log("CANCELLLLING the controller CLEAN UP GET TASKS");
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    dispatch(getTasks());
+  }, [dispatch]);
   /*-------------------------------------*/
   return (
     <Form onSubmit={addTask}>
