@@ -1,5 +1,5 @@
-import NewTaskForm from "pages/main/auxiliaries/CreateTaskForm";
-import TaskItem from "pages/main/auxiliaries/TaskItem";
+import NewTaskForm from "pages/ttt/auxiliaries/CreateTaskForm";
+import TaskItem from "pages/ttt/auxiliaries/TaskItem";
 import styled from "styled-components";
 import { useAppSelector } from "hooks/reduxDispatchAndSelector";
 
