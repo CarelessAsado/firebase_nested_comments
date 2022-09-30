@@ -22,6 +22,7 @@ class URL_BACK_ENDPOINTS {
   ROOT = "/api/v1";
   ROOT_AUTH = `${this.ROOT}/auth`;
   ROOT_TASKS = `${this.ROOT}/tasks`;
+  ROOT_COMMENTS = `${this.ROOT}/comments`;
   LOGIN = "/login";
   REGISTER = "/register";
   REFRESH = `/refresh`;

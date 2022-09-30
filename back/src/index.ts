@@ -30,6 +30,8 @@ app.use(BACKEND_ENDPOINTS.ROOT_AUTH, authRoutes);
 /*-----------PROTECTED ROUTES--------*/
 /*---MIDDLEWARE-*/
 app.use(verifyToken);
+const commentsRoutes = require("./routes/comments");
+app.use(BACKEND_ENDPOINTS.ROOT_COMMENTS, commentsRoutes);
 const tasksRoutes = require("./routes/tasks");
 app.use(BACKEND_ENDPOINTS.ROOT_TASKS, tasksRoutes);
 const usersRoutes = require("./routes/users");

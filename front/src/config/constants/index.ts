@@ -17,6 +17,7 @@ class URL_BACK_ENDPOINTS {
   REFRESH = `${this.ROOT_AUTH}/refresh`;
   LOGOUT = `${this.ROOT_AUTH}/logout`;
   TASKS = `/tasks`;
+  COMMENTS = `/comments`;
 }
 export const BACKEND_URL = new URL_BACK_ENDPOINTS();
 

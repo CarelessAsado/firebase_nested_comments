@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk, isPending } from "@reduxjs/toolkit";
 import * as authAPI from "API/authAPI";
+import * as commentsAPI from "API/commentsAPI";
 import { setHeaders } from "API/axiosInstanceJWT";
 import { tasksAPI } from "API/tasksAPI";
 import { LSTORAGE_KEY } from "config/constants";
@@ -11,6 +12,7 @@ const initialState: State = {
   successRegister: "",
   tareas: [],
   error: false,
+  comments: [],
 };
 
 export const login = createAsyncThunk(
@@ -43,6 +45,49 @@ export const getTasks = createAsyncThunk(
     }
   }
 );
+export const getComments = createAsyncThunk(
+  "users/getComments",
+  async function (_, { dispatch }) {
+    try {
+      const { data } = await commentsAPI.getComments();
+      return data;
+    } catch (error) {
+      errorHandler(error, dispatch);
+      //este error lo tiro xq si hago el unwrap en el front voy directo al .then()
+      throw error;
+    }
+  }
+);
+
+export const postNewComment = createAsyncThunk(
+  "users/postNewComments",
+  async function (obj: INewCommentInput, { dispatch }) {
+    try {
+      const { data } = await commentsAPI.postNewComment(obj);
+      console.log("volvio la data, vamos a despachar success fetch all");
+      return data;
+    } catch (error) {
+      await errorHandler(error, dispatch);
+      //este error lo tiro xq si hago el unwrap en el front voy directo al .then()
+      throw error;
+    }
+  }
+);
+
+export const deleteComment = createAsyncThunk(
+  "users/deleteComment",
+  async function (obj: IComment, { dispatch }) {
+    try {
+      await commentsAPI.deleteComment(obj);
+      return obj;
+    } catch (error) {
+      await errorHandler(error, dispatch);
+      //este error lo tiro xq si hago el unwrap en el front voy directo al .then()
+      throw error;
+    }
+  }
+);
+
 export const postNewTasks = createAsyncThunk(
   "users/postNewTasks",
   async function (nameNewTask: string, { dispatch }) {
@@ -163,6 +208,28 @@ export const userSlice = createSlice({
       state.tareas = action.payload;
       state.loading = false;
     });
+    /* ------------------------------------------------------------------- */
+    builder.addCase(getComments.fulfilled, (state, action) => {
+      state.comments = action.payload;
+      state.loading = false;
+    });
+    builder.addCase(postNewComment.fulfilled, (state, action) => {
+      state.comments = [...state.comments, action.payload];
+      state.loading = false;
+    });
+    builder.addCase(deleteComment.fulfilled, (state, action) => {
+      const { path, _id } = action.payload;
+      state.comments = state.comments.filter(
+        (
+          i //si estan al mismo level dos folders, el path va a coincidir pero no la tengo q borrar, x eso agrego doble check
+        ) =>
+          (!i.path.includes(path) && i.path === path) ||
+          //con este borro el item q clickeo, e incluyo todos (x ende tengo q filtrar +)
+          i._id !== _id
+      );
+      state.loading = false;
+    });
+    /* ------------------------------------------------------------------- */
     builder.addCase(postNewTasks.fulfilled, (state, action) => {
       state.tareas = [...state.tareas, action.payload];
       state.loading = false;

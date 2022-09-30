@@ -1,8 +1,11 @@
 import NewTaskForm from "pages/main/auxiliaries/CreateTaskForm";
 import TaskItem from "pages/main/auxiliaries/TaskItem";
 import styled from "styled-components";
-import { useAppSelector } from "hooks/reduxDispatchAndSelector";
+import { useAppDispatch, useAppSelector } from "hooks/reduxDispatchAndSelector";
 import { useEffect, useState } from "react";
+import { dataPuppy } from "./data";
+import { deleteComment, getComments, postNewComment } from "context/userSlice";
+import { Bottom } from "components/styled-components/styled";
 
 const Notasks = styled.div`
   color: #385f92;
@@ -58,64 +61,27 @@ export const ContainerComments = styled.div`
     border-radius: 5px;
   }
 `;
-const dataPuppy = [
-  {
-    val: "PARENT",
-    path: "",
-    id: "1664503411565",
-  },
-  {
-    val: "HIJO 1",
-    path: ",1664503411565",
-    id: "1664503415653",
-  },
-  {
-    val: "cc",
-    path: ",1664503411565",
-    id: "1664503459327",
-  },
-  {
-    val: "2DO PARENT",
-    path: "",
-    id: "1664503618831",
-  },
-  {
-    val: "HIJO 2DO PARENT",
-    path: ",1664503618831",
-    id: "16645036188666",
-  },
-  {
-    val: "HIJO DEL HIJO",
-    path: ",1664503618831,16645036188666",
-    id: "166450361883156",
-  },
 
-  {
-    val: "ddd",
-    path: ",1664503411565",
-    id: "1664503708038",
-  },
-];
-interface IComment {
-  val: string;
-  path: string;
-  id: string;
-}
 interface IProps {
   comment: IComment;
   children?: JSX.Element | JSX.Element[];
-  setData: (value: React.SetStateAction<IComment[]>) => void;
+  /*   setData: (value: React.SetStateAction<IComment[]>) => void; */
   data: IComment[];
 }
 
 export const Main = () => {
-  const { tareas, loading } = useAppSelector((state) => state.user);
+  const { tareas, loading, comments } = useAppSelector((state) => state.user);
   const [comment, setComment] = useState("");
-  const [data, setData] = useState<IComment[]>(dataPuppy);
+  const dispatch = useAppDispatch();
   const handleSubmit = () => {
-    setData([...data, { val: comment, path: "", id: "" + Date.now() }]);
-    setComment("");
+    dispatch(postNewComment({ value: comment, id: "", path: "" }))
+      .unwrap()
+      .then(() => setComment(""));
   };
+  useEffect(() => {
+    dispatch(getComments());
+  }, [dispatch]);
+
   return (
     <Container>
       <NewTaskForm></NewTaskForm>
@@ -133,14 +99,14 @@ export const Main = () => {
         ></Input>
         <Input type="submit" value={"POSTEAR"} onClick={handleSubmit}></Input>
         <ContainerComments>
-          {data
+          {comments
             .filter((it) => !it.path)
             .map((c) => (
               <CommentComp
                 comment={c}
-                setData={setData}
-                data={data}
-                key={c.id}
+                /* setData={setData} */
+                data={comments}
+                key={c._id}
               />
             ))}
         </ContainerComments>
@@ -149,18 +115,35 @@ export const Main = () => {
   );
 };
 
-function CommentComp({ comment, setData, data }: IProps) {
+function CommentComp({ comment, /* setData, */ data }: IProps) {
   const [newChildComment, setNewChildComment] = useState("");
-
-  const expression = comment.path + "," + comment.id;
+  const dispatch = useAppDispatch();
+  const expression = comment.path + "," + comment._id;
   const [children, setChildren] = useState<IComment[]>([]);
   const handleSubmit = () => {
-    const id = JSON.stringify(Date.now());
-    const path = comment.path
-      ? `${comment.path},${comment.id}`
-      : `,${comment.id}`;
-    setData((v) => [...v, { val: newChildComment, path, id }]);
-    setNewChildComment("");
+    dispatch(
+      //armar esto dsp en el backend
+      postNewComment({
+        value: newChildComment,
+        id: comment._id,
+        path: comment.path,
+      })
+    )
+      .unwrap()
+      .then(() => setNewChildComment(""));
+  };
+  const handleDelete = () => {
+    dispatch(deleteComment(comment));
+    /*     setData((v) =>
+      v.filter(
+        (
+          i //si estan al mismo level dos folders, el path va a coincidir pero no la tengo q borrar, x eso agrego doble check
+        ) =>
+          (!i.path.includes(comment.path) && i.path === comment.path) ||
+          //con este borro el item q clickeo, e incluyo todos (x ende tengo q filtrar +)
+          i.id !== comment.id
+      )
+    ); */
   };
 
   useEffect(() => {
@@ -173,7 +156,7 @@ function CommentComp({ comment, setData, data }: IProps) {
 
   return (
     <div>
-      <Value>{comment.val}</Value>{" "}
+      <Value>{comment.value}</Value>{" "}
       <div>
         <Input
           placeholder="Agregar comentario/child"
@@ -181,12 +164,19 @@ function CommentComp({ comment, setData, data }: IProps) {
           onChange={(e) => setNewChildComment(e.target.value)}
         ></Input>{" "}
         <Button onClick={handleSubmit}>Comentar</Button>
+        <Button style={{ backgroundColor: "crimson" }} onClick={handleDelete}>
+          Eliminar
+        </Button>
         {/* <Button>Likear</Button> */}
       </div>
       {children.length > 0 && (
         <ContainerComments>
           {children.map((c) => (
-            <CommentComp comment={c} setData={setData} data={data} key={c.id} />
+            <CommentComp
+              comment={c}
+              /* setData={setData} */ data={data}
+              key={c._id}
+            />
           ))}
         </ContainerComments>
       )}

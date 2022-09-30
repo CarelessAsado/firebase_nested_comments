@@ -25,6 +25,7 @@ type IRegisterInput = Pick<UserNotNull, "username" | "email"> & {
 
 type State = {
   tareas: ITarea[];
+  comments: IComment[];
   user: IUser;
   error: boolean | string;
   loading: boolean;
