@@ -3,9 +3,8 @@ import * as authAPI from "API/authAPI";
 import * as commentsAPI from "API/commentsAPI";
 import { setHeaders } from "API/axiosInstanceJWT";
 import { tasksAPI } from "API/tasksAPI";
-import { LSTORAGE_KEY } from "config/constants";
-import setHeaders_User_LStorage from "config/utils/setHeadersAndUsers";
 import errorHandler from "./errorHandler";
+import { fireBaseAuth } from "services/firebaseConfig";
 const initialState: State = {
   user: null,
   loading: false,
@@ -19,11 +18,14 @@ export const login = createAsyncThunk(
   "users/login",
   async (input: ILoginInput, { dispatch }) => {
     try {
-      const { data } = await authAPI.login(input);
-      console.log(data, "LOGIN SUCCESFUL");
+      const firebaseData = await authAPI.loginF(input);
+      console.log(firebaseData, "LOGIN SUCCESFUL");
       /* SET HEADER USER AND LSTORAGE  */
-      setHeaders_User_LStorage(data);
-      return data;
+      const idtoken = await fireBaseAuth.currentUser?.getIdToken(true);
+      setHeaders(idtoken);
+      const { data } = await authAPI.loginNode();
+      console.log(data, "user returned from Node");
+      return data.user;
     } catch (error: any) {
       await errorHandler(error, dispatch);
       //este error lo tiro xq si hago el unwrap en el front voy directo al .then()
@@ -31,6 +33,70 @@ export const login = createAsyncThunk(
     }
   }
 );
+
+export const register = createAsyncThunk(
+  "users/register",
+  async function (input: IRegisterInput, { dispatch }) {
+    let saved = false;
+    try {
+      const firebaseData = await authAPI.registerFireBase(input);
+      saved = true;
+      console.log(firebaseData, 999);
+      const idtoken = await fireBaseAuth.currentUser?.getIdToken(true);
+
+      setHeaders(idtoken);
+      const { data } = await authAPI.registerNode(input);
+      console.log(data);
+      return data;
+    } catch (error: any) {
+      if (saved) {
+        alert("aca tendria q borrar el user xq fallo mongo");
+      }
+      //ANTIGUAMENTE mz parecía q si ponías 'return' en vez de 'throw' salía x EL builder.FULFILLED, pero ahora testeé y el catch lo agarra perfecto en el component
+      //FLOW DEL ERROR => arranca aca
+      //                => se va para el builder.add
+      //              => dsp p el builder.match
+      //              => x ultimo pasa x el .catch (ahi en ese ultimo paso, es donde tiene sentido poner acá el rejectWithValue, p/poder tener acceso al custom error COMPLETOOOO. En el builder podés tener acceso al error string, lo cual es una japa, xq dependiendo del tipo de error, yo accedo de manera diferente al string, x ej, si no hay internet, uso error.message, pero si uso error.message con axios, me salta el error x default q implica el statusCode)
+      /* IMPORTANT, rejectWithValue si queres catcharlo dentro del builder, SI O SI, tenés q mandar un string, si mandas el entire object te salta error, ver : https://stackoverflow.com/questions/73259876/a-non-serializable-value-was-detected-in-an-action  */
+      await errorHandler(error, dispatch);
+      //este error lo tiro xq si hago el unwrap en el front voy directo al .then()
+      throw error;
+    }
+  }
+);
+// creo q el refresh ya no es necesario, ni los interceptors
+export const refresh = createAsyncThunk(
+  "users/login", //uso mismo id login
+  async function (_, { dispatch }) {
+    try {
+      const idtoken = await fireBaseAuth.currentUser?.getIdToken(true);
+
+      setHeaders(idtoken);
+      const { data } = await authAPI.loginNode();
+      console.log(data, "user returned from Node");
+      return data.user;
+    } catch (error) {
+      await errorHandler(error, dispatch);
+      //este error lo tiro xq si hago el unwrap en el front voy directo al .then()
+      throw error;
+    }
+  }
+);
+
+export const logout = createAsyncThunk(
+  "users/logout",
+  async function (_, { dispatch }) {
+    try {
+      await authAPI.logout();
+      setHeaders();
+    } catch (error) {
+      errorHandler(error, dispatch);
+      //este error lo tiro xq si hago el unwrap en el front voy directo al .then()
+      throw error;
+    }
+  }
+);
+
 export const getTasks = createAsyncThunk(
   "users/getTasks",
   async function (_, { dispatch }) {
@@ -45,6 +111,7 @@ export const getTasks = createAsyncThunk(
     }
   }
 );
+/* ------------------------COMMENTS SUCCESS ACTIONS--------------------- */
 export const getComments = createAsyncThunk(
   "users/getComments",
   async function (_, { dispatch }) {
@@ -87,7 +154,7 @@ export const deleteComment = createAsyncThunk(
     }
   }
 );
-
+/* ------------------------COMMENTS SUCCESS ACTIONS--------------------- */
 export const postNewTasks = createAsyncThunk(
   "users/postNewTasks",
   async function (nameNewTask: string, { dispatch }) {
@@ -131,58 +198,6 @@ export const updateTasks = createAsyncThunk(
   }
 );
 
-export const refresh = createAsyncThunk(
-  "users/login", //uso mismo id login
-  async function (_, { dispatch }) {
-    try {
-      //dejar de recibir accessToken en HEADERS AXIOS
-      const { data } = await authAPI.refresh();
-      console.log(data, "REFRESH SUCCESFUL");
-      //Pensaba pasarlo a un useEffect pero al final lo dejo asi
-      /* SET HEADER USER AND LSTORAGE  */
-      setHeaders_User_LStorage(data);
-      return data;
-    } catch (error) {
-      await errorHandler(error, dispatch);
-      //este error lo tiro xq si hago el unwrap en el front voy directo al .then()
-      throw error;
-    }
-  }
-);
-export const register = createAsyncThunk(
-  "users/register",
-  async function (input: IRegisterInput, { dispatch }) {
-    try {
-      await authAPI.register(input);
-    } catch (error: any) {
-      //ANTIGUAMENTE mz parecía q si ponías 'return' en vez de 'throw' salía x EL builder.FULFILLED, pero ahora testeé y el catch lo agarra perfecto en el component
-      //FLOW DEL ERROR => arranca aca
-      //                => se va para el builder.add
-      //              => dsp p el builder.match
-      //              => x ultimo pasa x el .catch (ahi en ese ultimo paso, es donde tiene sentido poner acá el rejectWithValue, p/poder tener acceso al custom error COMPLETOOOO. En el builder podés tener acceso al error string, lo cual es una japa, xq dependiendo del tipo de error, yo accedo de manera diferente al string, x ej, si no hay internet, uso error.message, pero si uso error.message con axios, me salta el error x default q implica el statusCode)
-      /* IMPORTANT, rejectWithValue si queres catcharlo dentro del builder, SI O SI, tenés q mandar un string, si mandas el entire object te salta error, ver : https://stackoverflow.com/questions/73259876/a-non-serializable-value-was-detected-in-an-action  */
-      await errorHandler(error, dispatch);
-      //este error lo tiro xq si hago el unwrap en el front voy directo al .then()
-      throw error;
-    }
-  }
-);
-
-export const logout = createAsyncThunk(
-  "users/logout",
-  async function (_, { dispatch }) {
-    try {
-      await authAPI.logout();
-      setHeaders();
-      localStorage.removeItem(LSTORAGE_KEY);
-    } catch (error) {
-      errorHandler(error, dispatch);
-      //este error lo tiro xq si hago el unwrap en el front voy directo al .then()
-      throw error;
-    }
-  }
-);
-
 export const userSlice = createSlice({
   name: "user",
   initialState: initialState,
@@ -200,7 +215,7 @@ export const userSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder.addCase(login.fulfilled, (state, action) => {
-      state.user = action.payload.user;
+      state.user = action.payload;
       state.loading = false;
     });
 
@@ -245,16 +260,17 @@ export const userSlice = createSlice({
       state.loading = false;
     });
 
+    //el register setea user directamente, ver si hice los headers tmb
     builder.addCase(register.fulfilled, (state, action) => {
       state.loading = false;
-      state.successRegister =
-        "You have registered successfully. You can now login.";
+      state.user = action.payload;
     });
 
     builder.addCase(logout.fulfilled, (state, action) => {
       state.loading = initialState.loading;
       state.user = initialState.user;
       state.tareas = initialState.tareas;
+      state.comments = initialState.comments;
       state.successRegister = initialState.successRegister;
     });
 

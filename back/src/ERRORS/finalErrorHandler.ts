@@ -4,6 +4,7 @@ import { CustomError } from "./customErrors";
 const finalErrorHandler: ErrorRequestHandler = (error, req, res, next) => {
   console.log(error instanceof CustomError, "final error handler middle");
   console.log(error.message);
+  console.log(error);
 
   /*---------- MONGO VALIDATION ERROR */
   if (error.name == "ValidationError") {

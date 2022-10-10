@@ -4,7 +4,7 @@ import connectDB from "./db/connect";
 const app = express();
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import verifyToken from "./middleware/verifyToken";
+import verifyMongoUser, { verifyFirebaseToken } from "./middleware/verifyToken";
 import finalErrorHandler from "./ERRORS/finalErrorHandler";
 import { BACKEND_ENDPOINTS, FRONTEND_URL } from "./constants";
 
@@ -19,6 +19,7 @@ const PORT = process.env.PORT || 5000;
 const connectServer = () => {
   app.listen(PORT, () => {
     console.log("Port is good " + PORT);
+    console.log(process.env.GOOGLE_APPLICATION_CREDENTIALS, "hola");
   });
 };
 connectDB(process.env.MONGODB_URI as string, connectServer);
@@ -29,7 +30,8 @@ const authRoutes = require("./routes/auth");
 app.use(BACKEND_ENDPOINTS.ROOT_AUTH, authRoutes);
 /*-----------PROTECTED ROUTES--------*/
 /*---MIDDLEWARE-*/
-app.use(verifyToken);
+app.use(verifyFirebaseToken);
+app.use(verifyMongoUser);
 const commentsRoutes = require("./routes/comments");
 app.use(BACKEND_ENDPOINTS.ROOT_COMMENTS, commentsRoutes);
 const tasksRoutes = require("./routes/tasks");

@@ -1,6 +1,6 @@
 import { AnyAction, ThunkDispatch } from "@reduxjs/toolkit";
 
-import { logout, renderError } from "./userSlice";
+import { renderError } from "./userSlice";
 
 export default function handleError(
   error: any, //esto lo copié directamente del dispatch en userSlice
@@ -21,10 +21,6 @@ export default function handleError(
   /* ABORT CONTROLLLER, no es tecnicamente un error, asi q simplemente devolvemos */
   if (error?.message === "canceled") return;
 
-  if (error?.config?.sent && error?.response?.status === 403) {
-    console.log("aca es un error pos-refresh-token api call", error.config);
-    return dispatch(logout());
-  }
   dispatch(
     renderError(
       error?.response?.data?.message ||
