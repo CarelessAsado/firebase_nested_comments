@@ -18,8 +18,15 @@ export default function handleError(
   ) {
     return dispatch(renderError("No internet. "));
   }
-  /* ABORT CONTROLLLER, no es tecnicamente un error, asi q simplemente devolvemos */
-  if (error?.message === "canceled") return;
+
+  /* ESTO EXISTE ESPECIALMENTE POR FIREBASE */
+  if (error?.name === "FirebaseError") {
+    return dispatch(renderError(error.code));
+  }
+
+  if (error?.message === "canceled")
+    /* ABORT CONTROLLLER, no es tecnicamente un error, asi q simplemente devolvemos */
+    return;
 
   dispatch(
     renderError(

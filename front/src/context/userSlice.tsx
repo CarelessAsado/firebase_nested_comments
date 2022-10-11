@@ -49,8 +49,9 @@ export const register = createAsyncThunk(
       console.log(data);
       return data;
     } catch (error: any) {
+      //Mongo failed, so we delete firebase user
       if (saved) {
-        alert("aca tendria q borrar el user xq fallo mongo");
+        await authAPI.deleteProfile();
       }
       //ANTIGUAMENTE mz parecía q si ponías 'return' en vez de 'throw' salía x EL builder.FULFILLED, pero ahora testeé y el catch lo agarra perfecto en el component
       //FLOW DEL ERROR => arranca aca
@@ -58,7 +59,47 @@ export const register = createAsyncThunk(
       //              => dsp p el builder.match
       //              => x ultimo pasa x el .catch (ahi en ese ultimo paso, es donde tiene sentido poner acá el rejectWithValue, p/poder tener acceso al custom error COMPLETOOOO. En el builder podés tener acceso al error string, lo cual es una japa, xq dependiendo del tipo de error, yo accedo de manera diferente al string, x ej, si no hay internet, uso error.message, pero si uso error.message con axios, me salta el error x default q implica el statusCode)
       /* IMPORTANT, rejectWithValue si queres catcharlo dentro del builder, SI O SI, tenés q mandar un string, si mandas el entire object te salta error, ver : https://stackoverflow.com/questions/73259876/a-non-serializable-value-was-detected-in-an-action  */
-      await errorHandler(error, dispatch);
+      errorHandler(error, dispatch);
+      //este error lo tiro xq si hago el unwrap en el front voy directo al .then()
+      throw error;
+    }
+  }
+);
+
+export const updatePwd = createAsyncThunk(
+  "users/updatepwd",
+  async function (newpwd: string, { dispatch }) {
+    try {
+      //vuelve undefined la respuesta
+      await authAPI.updatePwd(newpwd);
+    } catch (error: any) {
+      //ANTIGUAMENTE mz parecía q si ponías 'return' en vez de 'throw' salía x EL builder.FULFILLED, pero ahora testeé y el catch lo agarra perfecto en el component
+      //FLOW DEL ERROR => arranca aca
+      //                => se va para el builder.add
+      //              => dsp p el builder.match
+      //              => x ultimo pasa x el .catch (ahi en ese ultimo paso, es donde tiene sentido poner acá el rejectWithValue, p/poder tener acceso al custom error COMPLETOOOO. En el builder podés tener acceso al error string, lo cual es una japa, xq dependiendo del tipo de error, yo accedo de manera diferente al string, x ej, si no hay internet, uso error.message, pero si uso error.message con axios, me salta el error x default q implica el statusCode)
+      /* IMPORTANT, rejectWithValue si queres catcharlo dentro del builder, SI O SI, tenés q mandar un string, si mandas el entire object te salta error, ver : https://stackoverflow.com/questions/73259876/a-non-serializable-value-was-detected-in-an-action  */
+      errorHandler(error, dispatch);
+      //este error lo tiro xq si hago el unwrap en el front voy directo al .then()
+      throw error;
+    }
+  }
+);
+
+export const forgotPwd = createAsyncThunk(
+  "users/updatepwd",
+  async function (email: string, { dispatch }) {
+    try {
+      //it returns undefined
+      await authAPI.forgotPwd(email);
+    } catch (error: any) {
+      //ANTIGUAMENTE mz parecía q si ponías 'return' en vez de 'throw' salía x EL builder.FULFILLED, pero ahora testeé y el catch lo agarra perfecto en el component
+      //FLOW DEL ERROR => arranca aca
+      //                => se va para el builder.add
+      //              => dsp p el builder.match
+      //              => x ultimo pasa x el .catch (ahi en ese ultimo paso, es donde tiene sentido poner acá el rejectWithValue, p/poder tener acceso al custom error COMPLETOOOO. En el builder podés tener acceso al error string, lo cual es una japa, xq dependiendo del tipo de error, yo accedo de manera diferente al string, x ej, si no hay internet, uso error.message, pero si uso error.message con axios, me salta el error x default q implica el statusCode)
+      /* IMPORTANT, rejectWithValue si queres catcharlo dentro del builder, SI O SI, tenés q mandar un string, si mandas el entire object te salta error, ver : https://stackoverflow.com/questions/73259876/a-non-serializable-value-was-detected-in-an-action  */
+      errorHandler(error, dispatch);
       //este error lo tiro xq si hago el unwrap en el front voy directo al .then()
       throw error;
     }
@@ -216,6 +257,11 @@ export const userSlice = createSlice({
   extraReducers: (builder) => {
     builder.addCase(login.fulfilled, (state, action) => {
       state.user = action.payload;
+      state.loading = false;
+    });
+
+    builder.addCase(updatePwd.fulfilled, (state, action) => {
+      state.error = false;
       state.loading = false;
     });
 

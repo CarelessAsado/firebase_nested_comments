@@ -1,6 +1,7 @@
 class URL_FRONT_ENDPOINTS {
   LOGIN = "/login";
   REGISTER = "/register";
+  FORGOT = "/forgot";
   HOME = "/";
   PROFILE = "/profile/user/:id";
   PROFILEdyn = (id: string) => {

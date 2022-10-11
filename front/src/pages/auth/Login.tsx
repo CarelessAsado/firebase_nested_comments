@@ -6,8 +6,8 @@ import {
   Form,
   Input,
   Error,
-  Bottom,
   Header,
+  Bottom,
 } from "components/styled-components/styled";
 
 import { FRONTEND_ENDPOINTS } from "config/constants";
@@ -18,6 +18,7 @@ const SuccessRegister = styled(Error)`
   color: green;
 `;
 const Label = styled.label``;
+
 const RegisterLink = styled(Link)`
   color: inherit;
   padding: 0 0 0 5px;
@@ -27,7 +28,11 @@ const RegisterLink = styled(Link)`
     color: #0a1722;
   }
 `;
-
+const FlexIt = styled(Bottom)`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+`;
 export const Login = () => {
   const { error, successRegister, loading } = useAppSelector(
     (state) => state.user
@@ -78,12 +83,17 @@ export const Login = () => {
           id="password"
         ></Input>
         <Input type="submit" value={loading ? "Loading..." : "Submit"}></Input>
-        <Bottom>
-          No account yet?
-          <RegisterLink to={FRONTEND_ENDPOINTS.REGISTER}>
-            Register here.
-          </RegisterLink>{" "}
-        </Bottom>
+        <FlexIt>
+          <div>
+            No account yet?
+            <RegisterLink to={FRONTEND_ENDPOINTS.REGISTER}>
+              Register here.
+            </RegisterLink>{" "}
+          </div>
+          <RegisterLink to={FRONTEND_ENDPOINTS.FORGOT + "#"}>
+            Forgot your password?
+          </RegisterLink>
+        </FlexIt>
       </Form>
     </Container>
   );

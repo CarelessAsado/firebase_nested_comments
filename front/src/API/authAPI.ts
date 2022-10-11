@@ -4,8 +4,11 @@ import axiosInstanceJWT from "./axiosInstanceJWT";
 
 import {
   createUserWithEmailAndPassword,
+  deleteUser,
+  sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signOut,
+  updatePassword,
 } from "firebase/auth";
 import { fireBaseAuth } from "services/firebaseConfig";
 
@@ -35,4 +38,19 @@ export const registerFireBase = function (registerInput: IRegisterInput) {
 
 export const logout = function () {
   return signOut(fireBaseAuth);
+};
+export const forgotPwd = function (email: string) {
+  fireBaseAuth.useDeviceLanguage();
+  return sendPasswordResetEmail(fireBaseAuth, email);
+};
+export const updatePwd = function (newpwd: string) {
+  if (fireBaseAuth.currentUser) {
+    return updatePassword(fireBaseAuth.currentUser, newpwd);
+  }
+};
+
+//este lo uso cuando falla mongo y ya cree firebase user
+export const deleteProfile = function () {
+  const user = fireBaseAuth.currentUser;
+  if (user) return deleteUser(user);
 };

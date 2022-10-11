@@ -2,7 +2,6 @@ import { Routes, Route } from "react-router-dom";
 import { Login, Register, Main } from "pages/Index";
 import { ProtectedByAuth } from "components/middle/ProtectedByAuth";
 import { Nav } from "components/Nav/Nav";
-import { UserProfile } from "pages/UserProfile";
 
 import { FRONTEND_ENDPOINTS } from "config/constants";
 import { useResetErrors } from "hooks/useResetErrors";
@@ -11,6 +10,8 @@ import { fireBaseAuth } from "services/firebaseConfig";
 import { useEffect } from "react";
 import { refresh } from "context/userSlice";
 import { useAppDispatch } from "hooks/reduxDispatchAndSelector";
+import { ForgotPwd } from "pages/auth/ForgotPwd";
+import { UserProfile } from "pages/UserProfile/UserProfile";
 
 function App() {
   useResetErrors();
@@ -19,7 +20,7 @@ function App() {
     fireBaseAuth.onAuthStateChanged(async (userData) => {
       console.log(userData);
       if (userData) {
-        //esto no salta en el login
+        //esto no salta en el login, pero sí salta en el register
         alert("cambiazo");
         dispatch(refresh());
       } else {
@@ -34,6 +35,7 @@ function App() {
       <Routes>
         <Route element={<ExpelLoggedUser />}>
           <Route path={FRONTEND_ENDPOINTS.LOGIN} element={<Login />} />
+          <Route path={FRONTEND_ENDPOINTS.FORGOT} element={<ForgotPwd />} />
 
           <Route path={FRONTEND_ENDPOINTS.REGISTER} element={<Register />} />
         </Route>
