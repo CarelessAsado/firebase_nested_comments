@@ -13,6 +13,7 @@ import {
 import { FRONTEND_ENDPOINTS } from "config/constants";
 import { forgotPwd } from "context/userSlice";
 import { useAppDispatch, useAppSelector } from "hooks/reduxDispatchAndSelector";
+import { dispatchNotification } from "config/utils/dispatchNotification";
 
 const Label = styled.label``;
 
@@ -31,9 +32,15 @@ export const ForgotPwd = () => {
   const dispatch = useAppDispatch();
   const [email, setEmail] = useState("");
 
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    dispatch(forgotPwd(email));
+    try {
+      await dispatch(forgotPwd(email)).unwrap();
+      dispatchNotification(
+        dispatch,
+        "Check your inbox to finish the password change."
+      );
+    } catch (error) {}
   }
 
   return (

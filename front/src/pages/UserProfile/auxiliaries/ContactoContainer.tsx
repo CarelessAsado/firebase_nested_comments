@@ -8,7 +8,14 @@ import {
 
 import { dataPasswords } from "./data";
 import { useAppDispatch } from "hooks/reduxDispatchAndSelector";
-import { updatePwd } from "context/userSlice";
+import {
+  updateEmail,
+  updatePwd,
+  updateUsername,
+  uploadImg,
+} from "context/userSlice";
+import { dispatchNotification } from "config/utils/dispatchNotification";
+
 export const FlexIt = styled.div`
   display: flex;
   justify-content: space-between;
@@ -94,12 +101,22 @@ export const Button = styled.button`
   font-size: inherit;
 `;
 
-export function Contacto({ user }: { user: IUser }) {
+const pwdInitialState = {
+  oldPwd: "",
+  newPwd: "",
+  confirmaPwd: "",
+};
+export type PasswordsInputType = typeof pwdInitialState;
+
+export function Contacto({ user }: { user: UserNotNull }) {
   const [editName, setEditName] = useState(false);
   const [nombre, setNombre] = useState(user?.username);
+  const [editEmail, setEditEmail] = useState(false);
+  const [email, setEmail] = useState(user?.email || "");
   const [Indloading, setLoading] = useState(false);
   const [editPwd, setEditPwd] = useState(false);
   const dispatch = useAppDispatch();
+  const [file, setFile] = useState<File>();
   async function submitChangeName(
     e:
       | React.FormEvent<HTMLFormElement>
@@ -111,23 +128,41 @@ export function Contacto({ user }: { user: IUser }) {
     }
     try {
       setLoading(true);
-      /*  await profileAPI.editName({ ...user, nombre });
-      dispatch(successLogin({ ...user, nombre })); */
+
+      await dispatch(updateUsername({ ...user, username: nombre })).unwrap();
       //SHOW SUCCESS MESSAGE
-      /*  dispatchNotification(dispatch, "Se actualizó exitosamente el nombre."); */
+      dispatchNotification(dispatch, "Username updated successfully.");
     } catch (error) {
-      /*  errorHandler(error, dispatch, "UPDATE USER NAME"); */
     } finally {
       setEditName(false);
       setLoading(false);
     }
   }
+
+  async function submitChangeEmail(
+    e:
+      | React.FormEvent<HTMLFormElement>
+      | React.MouseEvent<SVGElement, MouseEvent>
+  ) {
+    e.preventDefault();
+    if (email === user?.email) {
+      return setEditEmail(false);
+    }
+    try {
+      setLoading(true);
+
+      await dispatch(updateEmail({ ...user, email })).unwrap();
+
+      //SHOW SUCCESS MESSAGE
+      dispatchNotification(dispatch, "Email updated successfully.");
+    } catch (error) {
+    } finally {
+      setEditEmail(false);
+      setLoading(false);
+    }
+  }
   /* ----------------CHANGE PASSWORD SECTION-------------------- */
-  const pwdInitialState = {
-    oldPwd: "",
-    newPwd: "",
-    confirmaPwd: "",
-  };
+
   const [passwords, setPasswords] = useState(pwdInitialState);
   async function handlePwdEditSubmit(
     e:
@@ -138,14 +173,14 @@ export function Contacto({ user }: { user: IUser }) {
     try {
       setLoading(true);
       /*  VALIDATION CHECK ???*/
-      await dispatch(updatePwd(passwords.newPwd));
+      await dispatch(updatePwd(passwords)).unwrap();
+
       //SHOW SUCCESS MESSAGE
-      /*  dispatchNotification(dispatch, "Operación exitosa."); */
+      dispatchNotification(dispatch, "Password updated successfully.");
       /* clean inputs + go back to original UI */
       setPasswords(pwdInitialState);
       setEditPwd((v) => !v);
     } catch (error) {
-      /* errorHandler(error, dispatch, "UPDATE USER PASSWORD"); */
     } finally {
       setLoading(false);
     }
@@ -193,15 +228,39 @@ export function Contacto({ user }: { user: IUser }) {
               user?.username
             )}
           </Nombre>
+
+          {/* -----------------EMAIL------------------- */}
           <Email>
             <FlexIt>
               <h2>Email</h2>
-              <ReactIcon>
-                <AiFillEdit />
-              </ReactIcon>
+              {editEmail ? (
+                <FlexIt>
+                  <ReactIcon className="cancel">
+                    <AiOutlineCloseCircle
+                      onClick={() => setEditEmail((v) => !v)}
+                    />
+                  </ReactIcon>
+                  <ReactIcon className="check">
+                    <AiOutlineCheck onClick={submitChangeEmail} />
+                  </ReactIcon>
+                </FlexIt>
+              ) : (
+                <ReactIcon onClick={() => setEditEmail((v) => !v)}>
+                  <AiFillEdit />
+                </ReactIcon>
+              )}
             </FlexIt>
 
-            {user?.email}
+            {editEmail ? (
+              <Input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                autoFocus
+              />
+            ) : (
+              user?.email
+            )}
           </Email>
           <ChangePwd onClick={() => setEditPwd((v) => !v)}>
             Change password
@@ -241,6 +300,20 @@ export function Contacto({ user }: { user: IUser }) {
           </Nombre>
         </Section>
       </ContactInfo>
+      {/* ----------------------------------- */}
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          console.log(file, 6668);
+          const dataImg = new FormData();
+          dataImg.append("profile", file as Blob);
+          dispatch(uploadImg({ user, img: dataImg }));
+        }}
+        encType="multipart/form-data"
+      >
+        <input type="file" onChange={(e) => setFile(e.target.files?.[0])} />
+        <input type="submit" value="enviar" />
+      </form>
     </ContactoContainer>
   );
 }

@@ -8,6 +8,7 @@ import {
   sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signOut,
+  updateEmail,
   updatePassword,
 } from "firebase/auth";
 import { fireBaseAuth } from "services/firebaseConfig";
@@ -43,10 +44,18 @@ export const forgotPwd = function (email: string) {
   fireBaseAuth.useDeviceLanguage();
   return sendPasswordResetEmail(fireBaseAuth, email);
 };
-export const updatePwd = function (newpwd: string) {
+export const updatePwdFirebase = function (newpwd: string) {
   if (fireBaseAuth.currentUser) {
     return updatePassword(fireBaseAuth.currentUser, newpwd);
   }
+};
+export const updateEmailFirebase = function (newEmail: string) {
+  if (fireBaseAuth.currentUser) {
+    return updateEmail(fireBaseAuth.currentUser, newEmail);
+  }
+};
+export const updateUserNode = function (user: UserNotNull) {
+  return axiosInstanceJWT.put<IUser>(BACKEND_URL.USERdyn(user?._id), user);
 };
 
 //este lo uso cuando falla mongo y ya cree firebase user

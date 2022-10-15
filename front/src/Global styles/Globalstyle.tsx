@@ -10,8 +10,8 @@ border: 0;
 scroll-behavior:smooth;
 }
 :root {
-  --mainBlue:#335ef0;
-  --mainBlueHover:#1a49ee;
+  --mainBlue:#2775a8;
+  --mainBlueHover:#226491;
   /* --mainGreen:#1f9c; */
    --mainGreen:#1f9c35; 
   --mlGreen:#00a650;

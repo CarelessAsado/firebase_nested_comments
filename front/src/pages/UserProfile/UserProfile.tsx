@@ -91,7 +91,7 @@ export const UserProfile = () => {
         </Error>
         <ColumnFlex>
           <TopPart style={{ flex: 1 }} className="flex1 topPart">
-            <Contacto user={user} />
+            {!!user && <Contacto user={user} />}
           </TopPart>
           <BtnLogout onClick={() => dispatch(logout())}>Logout</BtnLogout>
         </ColumnFlex>

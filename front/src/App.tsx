@@ -12,6 +12,7 @@ import { refresh } from "context/userSlice";
 import { useAppDispatch } from "hooks/reduxDispatchAndSelector";
 import { ForgotPwd } from "pages/auth/ForgotPwd";
 import { UserProfile } from "pages/UserProfile/UserProfile";
+import { Notification } from "components/Notification";
 
 function App() {
   useResetErrors();
@@ -31,7 +32,8 @@ function App() {
 
   return (
     <>
-      <Nav></Nav>
+      <Nav />
+      <Notification />
       <Routes>
         <Route element={<ExpelLoggedUser />}>
           <Route path={FRONTEND_ENDPOINTS.LOGIN} element={<Login />} />

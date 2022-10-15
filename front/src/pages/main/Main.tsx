@@ -1,18 +1,9 @@
-import NewTaskForm from "pages/main/auxiliaries/CreateTaskForm";
-import TaskItem from "pages/main/auxiliaries/TaskItem";
 import styled from "styled-components";
 import { useAppDispatch, useAppSelector } from "hooks/reduxDispatchAndSelector";
 import { useEffect, useState } from "react";
-import { dataPuppy } from "./data";
 import { deleteComment, getComments, postNewComment } from "context/userSlice";
-import { Bottom } from "components/styled-components/styled";
+import Spinner from "components/loaders/loader";
 
-const Notasks = styled.div`
-  color: #385f92;
-  padding: 10px;
-  margin: 10px;
-  font-size: 1.5rem;
-`;
 const Container = styled.div`
   background-color: white;
   min-height: 100vh;
@@ -35,6 +26,8 @@ const Input = styled.input`
 
   border: 1px solid black;
   border-radius: 5px;
+  font-size: inherit;
+  width: 100%;
 `;
 const Button = styled.button`
   padding: 10px;
@@ -68,12 +61,53 @@ interface IProps {
   /*   setData: (value: React.SetStateAction<IComment[]>) => void; */
   data: IComment[];
 }
+/* ---------------------------------REEMPLAZAR OLD FORM */
+const Form = styled.form`
+  margin: 0 auto;
+  max-width: 1000px;
+  width: 100%;
+  background-color: #d4d2c7;
+`;
+const Decoration = styled.div`
+  border: 1px solid black;
+  display: flex;
+  width: 80%;
+  margin: 50px auto;
+  font-size: 1.5rem;
+`;
+
+const SubmitBtn = styled.button`
+  font-size: inherit;
+  background-color: #2775a8;
+  color: white;
+  padding: 20px;
+  transition: 0.3s;
+  cursor: pointer;
+  &:hover {
+    background-color: #2d4d95;
+  }
+  &:active {
+    transform: scale(0.8);
+  }
+`;
+const LoadingRelative = styled.div`
+  padding: 30px 10px;
+  position: relative;
+`;
+const Loading = styled.h2`
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  left: 50%;
+  color: #6e6a7a;
+`;
 
 export const Main = () => {
-  const { tareas, loading, comments } = useAppSelector((state) => state.user);
+  const { loading, comments } = useAppSelector((state) => state.user);
   const [comment, setComment] = useState("");
   const dispatch = useAppDispatch();
-  const handleSubmit = () => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
     dispatch(postNewComment({ value: comment, id: "", path: "" }))
       .unwrap()
       .then(() => setComment(""));
@@ -84,20 +118,25 @@ export const Main = () => {
 
   return (
     <Container>
-      <NewTaskForm></NewTaskForm>
+      <Form onSubmit={handleSubmit}>
+        <Decoration>
+          <Input
+            placeholder="Add new post"
+            value={comment}
+            onChange={(e) => setComment(e.target.value)}
+          ></Input>
+          <SubmitBtn>Submit</SubmitBtn>
+        </Decoration>
+        <LoadingRelative>
+          {loading && (
+            <Loading>
+              <Spinner fz="3rem" h="100%" />
+            </Loading>
+          )}
+        </LoadingRelative>
+      </Form>
 
       <Center>
-        {tareas.length > 0
-          ? tareas.map((i) => {
-              return <TaskItem key={i._id} tarea={i} />;
-            })
-          : !loading && <Notasks>No tasks saved yet.</Notasks>}
-        <Input
-          placeholder="comment"
-          value={comment}
-          onChange={(e) => setComment(e.target.value)}
-        ></Input>
-        <Input type="submit" value={"POSTEAR"} onClick={handleSubmit}></Input>
         <ContainerComments>
           {comments
             .filter((it) => !it.path)
@@ -120,6 +159,7 @@ function CommentComp({ comment, /* setData, */ data }: IProps) {
   const dispatch = useAppDispatch();
   const expression = comment.path + "," + comment._id;
   const [children, setChildren] = useState<IComment[]>([]);
+
   const handleSubmit = () => {
     dispatch(
       //armar esto dsp en el backend
@@ -132,18 +172,9 @@ function CommentComp({ comment, /* setData, */ data }: IProps) {
       .unwrap()
       .then(() => setNewChildComment(""));
   };
+
   const handleDelete = () => {
     dispatch(deleteComment(comment));
-    /*     setData((v) =>
-      v.filter(
-        (
-          i //si estan al mismo level dos folders, el path va a coincidir pero no la tengo q borrar, x eso agrego doble check
-        ) =>
-          (!i.path.includes(comment.path) && i.path === comment.path) ||
-          //con este borro el item q clickeo, e incluyo todos (x ende tengo q filtrar +)
-          i.id !== comment.id
-      )
-    ); */
   };
 
   useEffect(() => {
@@ -152,7 +183,7 @@ function CommentComp({ comment, /* setData, */ data }: IProps) {
     console.log(results);
     console.log(expression);
     setChildren(results);
-  }, [data]);
+  }, [data, expression]);
 
   return (
     <div>

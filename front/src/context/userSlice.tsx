@@ -1,10 +1,13 @@
 import { createSlice, createAsyncThunk, isPending } from "@reduxjs/toolkit";
 import * as authAPI from "API/authAPI";
+import * as userAPI from "API/user";
 import * as commentsAPI from "API/commentsAPI";
 import { setHeaders } from "API/axiosInstanceJWT";
-import { tasksAPI } from "API/tasksAPI";
 import errorHandler from "./errorHandler";
 import { fireBaseAuth } from "services/firebaseConfig";
+import reauthenticateSpecialOps from "services/reauthenticateEspecialOps";
+import { PasswordsInputType } from "pages/UserProfile/auxiliaries/ContactoContainer";
+
 const initialState: State = {
   user: null,
   loading: false,
@@ -51,6 +54,7 @@ export const register = createAsyncThunk(
     } catch (error: any) {
       //Mongo failed, so we delete firebase user
       if (saved) {
+        await reauthenticateSpecialOps();
         await authAPI.deleteProfile();
       }
       //ANTIGUAMENTE mz parecía q si ponías 'return' en vez de 'throw' salía x EL builder.FULFILLED, pero ahora testeé y el catch lo agarra perfecto en el component
@@ -68,10 +72,85 @@ export const register = createAsyncThunk(
 
 export const updatePwd = createAsyncThunk(
   "users/updatepwd",
-  async function (newpwd: string, { dispatch }) {
+  async function (passwords: PasswordsInputType, { dispatch }) {
     try {
+      await reauthenticateSpecialOps(passwords.oldPwd);
+
       //vuelve undefined la respuesta
-      await authAPI.updatePwd(newpwd);
+      await authAPI.updatePwdFirebase(passwords.newPwd);
+    } catch (error: any) {
+      //ANTIGUAMENTE mz parecía q si ponías 'return' en vez de 'throw' salía x EL builder.FULFILLED, pero ahora testeé y el catch lo agarra perfecto en el component
+      //FLOW DEL ERROR => arranca aca
+      //                => se va para el builder.add
+      //              => dsp p el builder.match
+      //              => x ultimo pasa x el .catch (ahi en ese ultimo paso, es donde tiene sentido poner acá el rejectWithValue, p/poder tener acceso al custom error COMPLETOOOO. En el builder podés tener acceso al error string, lo cual es una japa, xq dependiendo del tipo de error, yo accedo de manera diferente al string, x ej, si no hay internet, uso error.message, pero si uso error.message con axios, me salta el error x default q implica el statusCode)
+      /* IMPORTANT, rejectWithValue si queres catcharlo dentro del builder, SI O SI, tenés q mandar un string, si mandas el entire object te salta error, ver : https://stackoverflow.com/questions/73259876/a-non-serializable-value-was-detected-in-an-action  */
+      errorHandler(error, dispatch);
+      //este error lo tiro xq si hago el unwrap en el front voy directo al .then()
+      throw error;
+    }
+  }
+);
+
+export const updateEmail = createAsyncThunk(
+  //cambiar dsp a emmail y returnear data asi actualizo state con nuevo email
+  //poner el require recent login
+  "users/login",
+  async function (user: UserNotNull, { dispatch }) {
+    try {
+      await reauthenticateSpecialOps();
+
+      //vuelve undefined la respuesta, = q updatepwd
+      await authAPI.updateEmailFirebase(user.email);
+
+      //MONGO
+      const { data } = await authAPI.updateUserNode(user);
+      return data;
+    } catch (error: any) {
+      //ANTIGUAMENTE mz parecía q si ponías 'return' en vez de 'throw' salía x EL builder.FULFILLED, pero ahora testeé y el catch lo agarra perfecto en el component
+      //FLOW DEL ERROR => arranca aca
+      //                => se va para el builder.add
+      //              => dsp p el builder.match
+      //              => x ultimo pasa x el .catch (ahi en ese ultimo paso, es donde tiene sentido poner acá el rejectWithValue, p/poder tener acceso al custom error COMPLETOOOO. En el builder podés tener acceso al error string, lo cual es una japa, xq dependiendo del tipo de error, yo accedo de manera diferente al string, x ej, si no hay internet, uso error.message, pero si uso error.message con axios, me salta el error x default q implica el statusCode)
+      /* IMPORTANT, rejectWithValue si queres catcharlo dentro del builder, SI O SI, tenés q mandar un string, si mandas el entire object te salta error, ver : https://stackoverflow.com/questions/73259876/a-non-serializable-value-was-detected-in-an-action  */
+      errorHandler(error, dispatch);
+      //este error lo tiro xq si hago el unwrap en el front voy directo al .then()
+      throw error;
+    }
+  }
+);
+
+export const updateUsername = createAsyncThunk(
+  //cambiar dsp a emmail y returnear data asi actualizo state con nuevo email
+  //poner el require recent login
+  "users/login",
+  async function (user: UserNotNull, { dispatch }) {
+    try {
+      //MONGO
+      const { data } = await authAPI.updateUserNode(user);
+      return data;
+    } catch (error: any) {
+      //ANTIGUAMENTE mz parecía q si ponías 'return' en vez de 'throw' salía x EL builder.FULFILLED, pero ahora testeé y el catch lo agarra perfecto en el component
+      //FLOW DEL ERROR => arranca aca
+      //                => se va para el builder.add
+      //              => dsp p el builder.match
+      //              => x ultimo pasa x el .catch (ahi en ese ultimo paso, es donde tiene sentido poner acá el rejectWithValue, p/poder tener acceso al custom error COMPLETOOOO. En el builder podés tener acceso al error string, lo cual es una japa, xq dependiendo del tipo de error, yo accedo de manera diferente al string, x ej, si no hay internet, uso error.message, pero si uso error.message con axios, me salta el error x default q implica el statusCode)
+      /* IMPORTANT, rejectWithValue si queres catcharlo dentro del builder, SI O SI, tenés q mandar un string, si mandas el entire object te salta error, ver : https://stackoverflow.com/questions/73259876/a-non-serializable-value-was-detected-in-an-action  */
+      errorHandler(error, dispatch);
+      //este error lo tiro xq si hago el unwrap en el front voy directo al .then()
+      throw error;
+    }
+  }
+);
+export const uploadImg = createAsyncThunk(
+  //cambiar dsp a emmail y returnear data asi actualizo state con nuevo email
+  //poner el require recent login
+  "users/uploadimg",
+  async function (obj: { user: UserNotNull; img: FormData }, { dispatch }) {
+    try {
+      console.log(obj.img, 6668);
+      const { data } = await userAPI.uploadImage(obj.img, obj.user);
+      return data;
     } catch (error: any) {
       //ANTIGUAMENTE mz parecía q si ponías 'return' en vez de 'throw' salía x EL builder.FULFILLED, pero ahora testeé y el catch lo agarra perfecto en el component
       //FLOW DEL ERROR => arranca aca
@@ -138,20 +217,6 @@ export const logout = createAsyncThunk(
   }
 );
 
-export const getTasks = createAsyncThunk(
-  "users/getTasks",
-  async function (_, { dispatch }) {
-    try {
-      const { data } = await tasksAPI.getTasks();
-      console.log("volvio la data, vamos a despachar success fetch all");
-      return data;
-    } catch (error) {
-      errorHandler(error, dispatch);
-      //este error lo tiro xq si hago el unwrap en el front voy directo al .then()
-      throw error;
-    }
-  }
-);
 /* ------------------------COMMENTS SUCCESS ACTIONS--------------------- */
 export const getComments = createAsyncThunk(
   "users/getComments",
@@ -195,49 +260,6 @@ export const deleteComment = createAsyncThunk(
     }
   }
 );
-/* ------------------------COMMENTS SUCCESS ACTIONS--------------------- */
-export const postNewTasks = createAsyncThunk(
-  "users/postNewTasks",
-  async function (nameNewTask: string, { dispatch }) {
-    try {
-      const { data } = await tasksAPI.postNewTask(nameNewTask);
-      console.log("volvio la data, vamos a despachar success fetch all");
-      return data;
-    } catch (error) {
-      await errorHandler(error, dispatch);
-      //este error lo tiro xq si hago el unwrap en el front voy directo al .then()
-      throw error;
-    }
-  }
-);
-
-export const deleteTasks = createAsyncThunk(
-  "users/deleteTasks",
-  async function (obj: { id: string; userID: string }, { dispatch }) {
-    try {
-      await tasksAPI.deleteTask(obj.id, obj.userID);
-      return obj.id;
-    } catch (error) {
-      await errorHandler(error, dispatch);
-      //este error lo tiro xq si hago el unwrap en el front voy directo al .then()
-      throw error;
-    }
-  }
-);
-
-export const updateTasks = createAsyncThunk(
-  "users/updateTasks",
-  async function (obj: { task: ITarea; userID: string }, { dispatch }) {
-    try {
-      const { data } = await tasksAPI.updateTask(obj.task, obj.userID);
-      return data;
-    } catch (error) {
-      await errorHandler(error, dispatch);
-      //este error lo tiro xq si hago el unwrap en el front voy directo al .then()
-      throw error;
-    }
-  }
-);
 
 export const userSlice = createSlice({
   name: "user",
@@ -265,10 +287,6 @@ export const userSlice = createSlice({
       state.loading = false;
     });
 
-    builder.addCase(getTasks.fulfilled, (state, action) => {
-      state.tareas = action.payload;
-      state.loading = false;
-    });
     /* ------------------------------------------------------------------- */
     builder.addCase(getComments.fulfilled, (state, action) => {
       state.comments = action.payload;
@@ -287,21 +305,6 @@ export const userSlice = createSlice({
           (!i.path.includes(path) && i.path === path) ||
           //con este borro el item q clickeo, e incluyo todos (x ende tengo q filtrar +)
           i._id !== _id
-      );
-      state.loading = false;
-    });
-    /* ------------------------------------------------------------------- */
-    builder.addCase(postNewTasks.fulfilled, (state, action) => {
-      state.tareas = [...state.tareas, action.payload];
-      state.loading = false;
-    });
-    builder.addCase(deleteTasks.fulfilled, (state, action) => {
-      state.tareas = state.tareas.filter((i) => i._id !== action.payload);
-      state.loading = false;
-    });
-    builder.addCase(updateTasks.fulfilled, (state, action) => {
-      state.tareas = state.tareas.map((i) =>
-        i._id === action.payload._id ? action.payload : i
       );
       state.loading = false;
     });

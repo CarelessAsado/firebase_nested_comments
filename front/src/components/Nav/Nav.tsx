@@ -1,4 +1,5 @@
 import styled from "styled-components";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import {
   BiLogOut,
@@ -10,11 +11,14 @@ import {
 import { FRONTEND_ENDPOINTS } from "config/constants";
 import { useAppDispatch, useAppSelector } from "hooks/reduxDispatchAndSelector";
 import { logout } from "context/userSlice";
+
+const navHeight = "60px";
+const showBurgerButton = "550px";
 const BlockBehindNavBar = styled.div`
-  height: 60px;
+  height: ${navHeight};
 `;
 const NavBar = styled.nav`
-  height: 60px;
+  height: ${navHeight};
   background-color: white;
   padding: 0 150px;
   display: flex;
@@ -35,7 +39,7 @@ const NavBar = styled.nav`
   }
 `;
 const Logo = styled.div`
-  color: #2775a8;
+  color: var(--mainBlue);
   font-size: 3rem;
   transition: 0.3s;
   &:hover {
@@ -45,31 +49,64 @@ const Logo = styled.div`
     font-size: 2.3rem;
   }
 `;
+interface PropsShowNav {
+  show: boolean;
+}
+
+export const Overlay = styled.div<PropsShowNav>`
+  height: 100%;
+  @media (max-width: ${showBurgerButton}) {
+    transition: 0.3s;
+    position: fixed;
+    top: ${navHeight};
+    left: 0;
+    bottom: 0;
+
+    background-color: rgba(0, 0, 0, 0.2);
+    color: white;
+    width: 100%;
+    transform: ${(props) =>
+      props.show ? "translateX(0)" : "translateX(-3000%)"};
+  }
+`;
 const Links = styled.ul`
   height: 100%;
   display: flex;
   justify-content: space-between;
   align-items: center;
+
+  @media (max-width: ${showBurgerButton}) {
+    justify-content: center;
+    flex-direction: column;
+    background-color: var(--mainBlue);
+    color: white;
+    width: calc(100% - 20px);
+  }
 `;
-const LinkItem = styled.li`
+
+interface IPadding {
+  padding?: boolean;
+}
+const LinkItem = styled.li<IPadding>`
   height: inherit;
   display: flex;
   gap: 5px;
   align-items: center;
-  padding: 10px;
+  justify-content: center;
+  width: 100%;
+  padding: ${(props) => props.padding && "10px"};
   font-size: 1.5rem;
   cursor: pointer;
   transition: 0.3s;
   &:hover {
     background-color: #b2e7f0;
   }
-  @media (max-width: 500px) {
-    font-size: 1.25rem;
-    padding: 5px;
-  }
-  @media (max-width: 400px) {
+  @media (max-width: ${showBurgerButton}) {
     font-size: 1.2rem;
-    padding: 2px;
+    height: max-content;
+    &:hover {
+      background-color: var(--mainBlueHover);
+    }
   }
 `;
 const NavLink = styled(Link)`
@@ -78,16 +115,56 @@ const NavLink = styled(Link)`
   height: inherit;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 5px;
+  width: 100%;
+  padding: 10px;
 `;
 const Span = styled.span`
   @media (max-width: 400px) {
     display: none;
   }
 `;
+export const BurgerButton = styled.div<PropsShowNav>`
+  border: 3px solid var(--mainBlue);
+  height: calc(100% - 5px);
+  width: 50px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+  flex-direction: column;
+  cursor: pointer;
+
+  & div {
+    transition: 0.3s;
+    width: calc(100% - 5px);
+    height: 3px;
+    border-radius: 5px;
+    background-color: var(--mainBlue);
+  }
+  /* ----------------------ANIMATION------------------------------ */
+  & div:nth-child(1) {
+    transform: ${(props) =>
+      props.show && "rotate(45deg) translate(10px, 10px)"};
+  }
+  & div:nth-child(2) {
+    transform: ${(props) => props.show && "translateX( 30px)"};
+    background: ${(props) => props.show && "transparent"};
+  }
+  & div:nth-child(3) {
+    transform: ${(props) =>
+      props.show && "rotate(-45deg) translate(8px, -10px)"};
+  }
+  /*------------------------------------------------------------- */
+  @media (min-width: ${showBurgerButton}) {
+    display: none;
+  }
+`;
 export const Nav = () => {
   const { user } = useAppSelector((state) => state.user);
   const dispatch = useAppDispatch();
+  const [showNav, setShowNav] = useState<boolean>(false);
   return (
     <>
       <BlockBehindNavBar />
@@ -95,45 +172,52 @@ export const Nav = () => {
         <Link to={FRONTEND_ENDPOINTS.HOME}>
           <Logo>ROD</Logo>
         </Link>
-        <Links>
-          {user ? (
-            <>
-              <LinkItem>
-                <NavLink to={FRONTEND_ENDPOINTS.HOME}>
-                  <BiHomeHeart />
-                  <Span>Home</Span>
-                </NavLink>
-              </LinkItem>
-              <LinkItem>
-                <NavLink to={FRONTEND_ENDPOINTS.PROFILEdyn(user._id)}>
-                  <BiUser />
-                  {user.username.split(" ")[0].length > 10
-                    ? "user"
-                    : user.username.split(" ")[0]}
-                </NavLink>
-              </LinkItem>
-              <LinkItem onClick={() => dispatch(logout())}>
-                <BiLogOut />
-                <Span>Logout</Span>
-              </LinkItem>
-            </>
-          ) : (
-            <>
-              <LinkItem>
-                <NavLink to={FRONTEND_ENDPOINTS.REGISTER}>
-                  <BiUserPlus />
-                  Register
-                </NavLink>
-              </LinkItem>
-              <LinkItem>
-                <NavLink to={FRONTEND_ENDPOINTS.LOGIN}>
-                  <BiLogIn></BiLogIn>
-                  Login
-                </NavLink>
-              </LinkItem>
-            </>
-          )}
-        </Links>
+        <BurgerButton show={showNav} onClick={() => setShowNav((v) => !v)}>
+          <div></div>
+          <div></div>
+          <div></div>
+        </BurgerButton>
+        <Overlay show={showNav} onClick={() => setShowNav((v) => !v)}>
+          <Links>
+            {user ? (
+              <>
+                <LinkItem>
+                  <NavLink to={FRONTEND_ENDPOINTS.HOME}>
+                    <BiHomeHeart />
+                    <Span>Home</Span>
+                  </NavLink>
+                </LinkItem>
+                <LinkItem>
+                  <NavLink to={FRONTEND_ENDPOINTS.PROFILEdyn(user._id)}>
+                    <BiUser />
+                    {user.username.split(" ")[0].length > 10
+                      ? "user"
+                      : user.username.split(" ")[0]}
+                  </NavLink>
+                </LinkItem>
+                <LinkItem onClick={() => dispatch(logout())} padding>
+                  <BiLogOut />
+                  <Span>Logout</Span>
+                </LinkItem>
+              </>
+            ) : (
+              <>
+                <LinkItem>
+                  <NavLink to={FRONTEND_ENDPOINTS.REGISTER}>
+                    <BiUserPlus />
+                    Register
+                  </NavLink>
+                </LinkItem>
+                <LinkItem>
+                  <NavLink to={FRONTEND_ENDPOINTS.LOGIN}>
+                    <BiLogIn></BiLogIn>
+                    Login
+                  </NavLink>
+                </LinkItem>
+              </>
+            )}
+          </Links>
+        </Overlay>
       </NavBar>
     </>
   );

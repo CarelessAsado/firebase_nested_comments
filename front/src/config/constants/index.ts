@@ -17,6 +17,10 @@ class URL_BACK_ENDPOINTS {
   REGISTER = `${this.ROOT_AUTH}/register`;
   REFRESH = `${this.ROOT_AUTH}/refresh`;
   LOGOUT = `${this.ROOT_AUTH}/logout`;
+  USERdyn = (user_id: string) => {
+    return "users/" + user_id;
+  };
+  UPLOADIMGdyn = (user_id: string) => `/users/profilepic/${user_id}`;
   TASKS = `/tasks`;
   COMMENTS = `/comments`;
 }
