@@ -15,6 +15,7 @@ import {
   uploadImg,
 } from "context/userSlice";
 import { dispatchNotification } from "config/utils/dispatchNotification";
+import { ChangePicOverlay } from "./ChangePicOverlay";
 
 export const FlexIt = styled.div`
   display: flex;
@@ -53,6 +54,10 @@ export const Section = styled.form<StyledProps>`
   flex-direction: column;
   gap: 7px;
   justify-content: space-between;
+`;
+export const EditPic = styled(Header)`
+  cursor: pointer;
+  border-top: 1px solid ${(props) => props.theme.border};
 `;
 export const Nombre = styled.div`
   display: flex;
@@ -188,11 +193,14 @@ export function Contacto({ user }: { user: UserNotNull }) {
   function handlePwdsChange({ target }: React.ChangeEvent<HTMLInputElement>) {
     setPasswords({ ...passwords, [target.name]: target.value });
   }
+
+  const [show, setShow] = useState(false);
   return (
     <ContactoContainer>
       <Header>
         <FlexIt>Personal info {Indloading && "Loading"}</FlexIt>
       </Header>
+
       <ContactInfo>
         {/* -------------TEMPLATE P/NOMBRE Y A FUTURO MAIL--------------------- */}
         {/* me di cta q si apretaba ENTER luego de tipear el form enviaba la info, asi q le puse onSubmit event aca tmb */}
@@ -300,20 +308,13 @@ export function Contacto({ user }: { user: UserNotNull }) {
           </Nombre>
         </Section>
       </ContactInfo>
-      {/* ----------------------------------- */}
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          console.log(file, 6668);
-          const dataImg = new FormData();
-          dataImg.append("profile", file as Blob);
-          dispatch(uploadImg({ user, img: dataImg }));
-        }}
-        encType="multipart/form-data"
-      >
-        <input type="file" onChange={(e) => setFile(e.target.files?.[0])} />
-        <input type="submit" value="enviar" />
-      </form>
+      {/* --------------EDIT PROFILE PICTURE--------------------- */}
+
+      <EditPic onClick={() => setShow((v) => !v)}>
+        Edit your profile picture
+      </EditPic>
+
+      <ChangePicOverlay show={show} close={() => setShow((v) => !v)} />
     </ContactoContainer>
   );
 }

@@ -145,10 +145,9 @@ export const updateUsername = createAsyncThunk(
 export const uploadImg = createAsyncThunk(
   //cambiar dsp a emmail y returnear data asi actualizo state con nuevo email
   //poner el require recent login
-  "users/uploadimg",
+  "users/login",
   async function (obj: { user: UserNotNull; img: FormData }, { dispatch }) {
     try {
-      console.log(obj.img, 6668);
       const { data } = await userAPI.uploadImage(obj.img, obj.user);
       return data;
     } catch (error: any) {

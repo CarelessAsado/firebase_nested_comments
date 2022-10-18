@@ -4,9 +4,6 @@ import { CustomError } from "../ERRORS/customErrors";
 
 const storage = multer.diskStorage({
   //Creo q Cloudinary se encarga del renaming
-  /*  destination: function (req, file, cb) {
-    cb(null, "/images");
-  }, */
 });
 
 const extAccepted = [".jpg", ".jpeg", ".png", ".webp"];

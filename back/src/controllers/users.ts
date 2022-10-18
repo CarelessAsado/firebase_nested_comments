@@ -3,7 +3,7 @@ import { Request, Response } from "express";
 import errorWrapper from "../ERRORS/asyncErrorWrapper";
 import getCleanUser from "../utils/getCleanUser";
 import cloudVersion from "cloudinary";
-const cloundinary = cloudVersion.v2;
+const cloudinary = cloudVersion.v2;
 export const createUser = errorWrapper(async (req, res) => {
   const { username, password, email } = req.body;
   const newUser = new User({ username, password, email });
@@ -36,11 +36,28 @@ export const updateUser = errorWrapper(async (req, res, next) => {
   res.json(getCleanUser(savedUser));
 });
 
-export const uploadImg = async (req: Request, res: Response): Promise<void> => {
+export const uploadImg = errorWrapper(async (req, res) => {
   const { username, password, email } = req.body;
   //req.file no existe en body
   console.log(req.file, 666, "req.file");
   console.log(req.body.profilepic);
   console.log("upload img controller");
-  res.json();
-};
+  if (req.user.public_id) {
+    await cloudinary.uploader.destroy(req.user.public_id);
+    req.user.img = "";
+    req.user.public_id = "";
+  }
+  //puede q el user simplemente quiera borrar la foto, en cuyo caso no cargamos imagen nueva
+  if (req.file) {
+    const result = await cloudinary.uploader.upload(req.file.path, {
+      folder: "TS_FIREBASE",
+    });
+    console.log(result);
+    req.user.img = result.secure_url;
+    req.user.public_id = result.public_id;
+  }
+
+  const userSaved = await req.user.save();
+
+  res.json(userSaved);
+});

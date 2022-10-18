@@ -7,3 +7,8 @@ interface IComment {
 }
 
 type INewCommentInput = Pick<IComment, "value" | "id" | "path">;
+
+interface OpenCloseOv {
+  close: () => void;
+  show: boolean;
+}

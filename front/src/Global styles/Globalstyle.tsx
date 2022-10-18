@@ -10,6 +10,7 @@ border: 0;
 scroll-behavior:smooth;
 }
 :root {
+  --mainBody:white;
   --mainBlue:#2775a8;
   --mainBlueHover:#226491;
   /* --mainGreen:#1f9c; */
@@ -62,17 +63,17 @@ export const ScrollStyles = css`
 
   &::-webkit-scrollbar-track {
     border-radius: 10px;
-    background-color: ${(props) => props.theme.border};
+    background-color: grey;
   }
   &::-webkit-scrollbar {
     /* la width es p/scroll on the Y axis */
     width: 5px;
     /* la height es para horizontal scroll */
     height: 5px;
-    background-color: ${(props) => props.theme.border};
+    background-color: grey;
   }
   &::-webkit-scrollbar-thumb {
     border-radius: 10px;
-    background-color: ${(props) => props.theme.blue};
+    background-color: white;
   }
 `;

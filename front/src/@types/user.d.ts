@@ -9,6 +9,8 @@ type IUser = {
   username: string;
   _id: string;
   email: string;
+  img: string | null;
+  public_id: string | null;
 } | null;
 type UserNotNull = NonNullable<IUser>;
 

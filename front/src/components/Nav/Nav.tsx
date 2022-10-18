@@ -161,6 +161,11 @@ export const BurgerButton = styled.div<PropsShowNav>`
     display: none;
   }
 `;
+const ProfilePic = styled.img`
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+`;
 export const Nav = () => {
   const { user } = useAppSelector((state) => state.user);
   const dispatch = useAppDispatch();
@@ -189,7 +194,12 @@ export const Nav = () => {
                 </LinkItem>
                 <LinkItem>
                   <NavLink to={FRONTEND_ENDPOINTS.PROFILEdyn(user._id)}>
-                    <BiUser />
+                    {user?.img ? (
+                      <ProfilePic src={user.img}></ProfilePic>
+                    ) : (
+                      <BiUser />
+                    )}
+
                     {user.username.split(" ")[0].length > 10
                       ? "user"
                       : user.username.split(" ")[0]}

@@ -1,4 +1,6 @@
 import styled from "styled-components";
+import { AiOutlineClose } from "react-icons/ai";
+
 export const Container = styled.div`
   background-color: #f1f5ff;
   min-height: 100vh;
@@ -60,3 +62,37 @@ export const Bottom = styled.div`
   margin: 50px 0 0;
   letter-spacing: 1px;
 `;
+
+type CloseBtnProps = {
+  move?: boolean;
+  f: (e: any) => void;
+};
+
+const ReactIconClose = styled.button<Pick<CloseBtnProps, "move">>`
+  position: absolute;
+  top: 20px;
+  right: ${(props) => (props.move ? "20px" : "none")};
+  left: ${(props) => (props.move ? "none" : "20px")};
+
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: var(--fontMed);
+  padding: 10px;
+  transition: 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  &:hover {
+    background-color: #d7d7d7;
+  }
+`;
+
+export const CloseButton = ({ f, move }: CloseBtnProps) => {
+  return (
+    <>
+      <ReactIconClose onClick={f} move={move}>
+        <AiOutlineClose />
+      </ReactIconClose>
+    </>
+  );
+};
