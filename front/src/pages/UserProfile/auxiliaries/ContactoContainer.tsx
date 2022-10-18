@@ -8,12 +8,7 @@ import {
 
 import { dataPasswords } from "./data";
 import { useAppDispatch } from "hooks/reduxDispatchAndSelector";
-import {
-  updateEmail,
-  updatePwd,
-  updateUsername,
-  uploadImg,
-} from "context/userSlice";
+import { updateEmail, updatePwd, updateUsername } from "context/userSlice";
 import { dispatchNotification } from "config/utils/dispatchNotification";
 import { ChangePicOverlay } from "./ChangePicOverlay";
 
@@ -121,7 +116,7 @@ export function Contacto({ user }: { user: UserNotNull }) {
   const [Indloading, setLoading] = useState(false);
   const [editPwd, setEditPwd] = useState(false);
   const dispatch = useAppDispatch();
-  const [file, setFile] = useState<File>();
+
   async function submitChangeName(
     e:
       | React.FormEvent<HTMLFormElement>
