@@ -1,8 +1,12 @@
 import styled from "styled-components";
 import { useAppDispatch, useAppSelector } from "hooks/reduxDispatchAndSelector";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { deleteComment, getComments, postNewComment } from "context/userSlice";
 import Spinner from "components/loaders/loader";
+import io from "socket.io-client";
+import { BACKEND_ROOT } from "config/constants";
+import { getHeadersChatAuth } from "API/axiosInstanceJWT";
+import UsersOnline from "components/UsersOnline/UsersOnline";
 
 const Container = styled.div`
   background-color: white;
@@ -103,8 +107,13 @@ const Loading = styled.h2`
 `;
 
 export const Main = () => {
-  const { loading, comments } = useAppSelector((state) => state.user);
+  const { loading, comments, user } = useAppSelector((state) => state.user);
   const [comment, setComment] = useState("");
+  //VER Q CAPAZ EL LOCAL HOST
+  const socketRef = useRef(io(BACKEND_ROOT));
+  const socket = socketRef.current;
+  const [isConnected, setIsConnected] = useState(socket.connected);
+  const [usersOnline, setUsersOnline] = useState<UserNotNull[]>([]);
   const dispatch = useAppDispatch();
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -115,6 +124,28 @@ export const Main = () => {
   useEffect(() => {
     dispatch(getComments());
   }, [dispatch]);
+
+  useEffect(() => {
+    socket.on("connect", () => {
+      setIsConnected(true);
+      //send token for auth on first connection
+      socket.emit("first", getHeadersChatAuth());
+    });
+
+    socket.on("newUserConnected", (data: UserNotNull[]) => {
+      setUsersOnline(data.filter((i) => i._id !== user?._id));
+    });
+
+    socket.on("disconnect", () => {
+      setIsConnected(false);
+    });
+
+    return () => {
+      socket.off("connect");
+      socket.off("disconnect");
+      socket.off("newUserConnected");
+    };
+  }, []);
 
   return (
     <Container>
@@ -137,6 +168,7 @@ export const Main = () => {
       </Form>
 
       <Center>
+        <UsersOnline users={usersOnline} />
         <ContainerComments>
           {comments
             .filter((it) => !it.path)
@@ -200,6 +232,7 @@ function CommentComp({ comment, /* setData, */ data }: IProps) {
         </Button>
         {/* <Button>Likear</Button> */}
       </div>
+      {}
       {children.length > 0 && (
         <ContainerComments>
           {children.map((c) => (

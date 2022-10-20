@@ -4,6 +4,9 @@ export const FRONTEND_URL = process.env.NODE_ENV
   : "http://localhost:3000";
 
 export const JWT_SECRET = process.env.JWT_SECRET as string;
+export const MONGO = process.env.NODE_ENV
+  ? (process.env.MONGODB_URI as string)
+  : "mongodb://localhost:27017";
 export const HEADER_ACCESS_TOKEN = "auth-token";
 export const COOKIE_RT_KEY = "jwtRefreshToken";
 export const COOKIE_OPTIONS: CookieOptions = {
