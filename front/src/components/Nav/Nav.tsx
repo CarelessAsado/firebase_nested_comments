@@ -12,7 +12,7 @@ import { FRONTEND_ENDPOINTS } from "config/constants";
 import { useAppDispatch, useAppSelector } from "hooks/reduxDispatchAndSelector";
 import { logout } from "context/userSlice";
 
-const navHeight = "60px";
+export const navHeight = "60px";
 const showBurgerButton = "550px";
 const BlockBehindNavBar = styled.div`
   height: ${navHeight};

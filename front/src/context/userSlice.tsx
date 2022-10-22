@@ -7,11 +7,13 @@ import errorHandler from "./errorHandler";
 import { fireBaseAuth } from "services/firebaseConfig";
 import reauthenticateSpecialOps from "services/reauthenticateEspecialOps";
 import { PasswordsInputType } from "pages/UserProfile/auxiliaries/ContactoContainer";
+import { AppDispatch, RootState } from "./store";
+import { BACKEND_ROOT } from "config/constants";
 
+import { socket } from "pages/main/Main";
 const initialState: State = {
   user: null,
   loading: false,
-  successRegister: "",
   tareas: [],
   error: false,
   comments: [],
@@ -27,7 +29,7 @@ export const login = createAsyncThunk(
       const idtoken = await fireBaseAuth.currentUser?.getIdToken(true);
       setHeaders(idtoken);
       const { data } = await authAPI.loginNode();
-      console.log(data, "user returned from Node");
+
       return data.user;
     } catch (error: any) {
       await errorHandler(error, dispatch);
@@ -50,6 +52,7 @@ export const register = createAsyncThunk(
       setHeaders(idtoken);
       const { data } = await authAPI.registerNode(input);
       console.log(data);
+
       return data;
     } catch (error: any) {
       //Mongo failed, so we delete firebase user
@@ -204,9 +207,10 @@ export const refresh = createAsyncThunk(
 
 export const logout = createAsyncThunk(
   "users/logout",
-  async function (_, { dispatch }) {
+  async function (_, { dispatch, getState }) {
     try {
       await authAPI.logout();
+      socket?.disconnect();
       setHeaders();
     } catch (error) {
       errorHandler(error, dispatch);
@@ -280,6 +284,20 @@ export const userSlice = createSlice({
       state.user = action.payload;
       state.loading = false;
     });
+    //el register setea user directamente, ver si hice los headers tmb
+    builder.addCase(register.fulfilled, (state, action) => {
+      state.loading = false;
+      state.user = action.payload;
+    });
+
+    //logout
+
+    builder.addCase(logout.fulfilled, (state, action) => {
+      state.loading = initialState.loading;
+      state.user = initialState.user;
+      state.tareas = initialState.tareas;
+      state.comments = initialState.comments;
+    });
 
     builder.addCase(updatePwd.fulfilled, (state, action) => {
       state.error = false;
@@ -308,20 +326,7 @@ export const userSlice = createSlice({
       state.loading = false;
     });
 
-    //el register setea user directamente, ver si hice los headers tmb
-    builder.addCase(register.fulfilled, (state, action) => {
-      state.loading = false;
-      state.user = action.payload;
-    });
-
-    builder.addCase(logout.fulfilled, (state, action) => {
-      state.loading = initialState.loading;
-      state.user = initialState.user;
-      state.tareas = initialState.tareas;
-      state.comments = initialState.comments;
-      state.successRegister = initialState.successRegister;
-    });
-
+    /* -----------------------------------ADDMATCHER PENDING----------------------------------- */
     // .addMatcher tiene q ir DSP de los addCase, si lo ponés antes no ANDA
     //Lo uso como default case p/loading
     //https://redux-toolkit.js.org/api/createReducer#builderaddmatcher
@@ -332,7 +337,6 @@ export const userSlice = createSlice({
 
       state.loading = true;
       state.error = false;
-      state.successRegister = "";
     });
   },
 });

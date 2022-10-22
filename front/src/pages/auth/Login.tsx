@@ -34,9 +34,7 @@ const FlexIt = styled(Bottom)`
   align-items: center;
 `;
 export const Login = () => {
-  const { error, successRegister, loading } = useAppSelector(
-    (state) => state.user
-  );
+  const { error, loading } = useAppSelector((state) => state.user);
   const [loginInput, setLoginInput] = useState<ILoginInput>({
     email: "",
     password: "",
@@ -62,9 +60,6 @@ export const Login = () => {
         <Error error={error} aria-live="assertive">
           {error}
         </Error>
-        <SuccessRegister error={successRegister}>
-          {successRegister}
-        </SuccessRegister>
         <Label htmlFor="email"></Label>
         <Input
           autoFocus

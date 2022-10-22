@@ -9,14 +9,16 @@ import { ExpelLoggedUser } from "components/middle/ExpelLoggedUser";
 import { fireBaseAuth } from "services/firebaseConfig";
 import { useEffect } from "react";
 import { refresh } from "context/userSlice";
-import { useAppDispatch } from "hooks/reduxDispatchAndSelector";
+import { useAppDispatch, useAppSelector } from "hooks/reduxDispatchAndSelector";
 import { ForgotPwd } from "pages/auth/ForgotPwd";
 import { UserProfile } from "pages/UserProfile/UserProfile";
 import { Notification } from "components/Notification";
 
 function App() {
   useResetErrors();
+
   const dispatch = useAppDispatch();
+
   useEffect(() => {
     fireBaseAuth.onAuthStateChanged(async (userData) => {
       console.log(userData);

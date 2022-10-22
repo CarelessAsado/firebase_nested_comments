@@ -2,27 +2,54 @@ import React from "react";
 import { BiUser } from "react-icons/bi";
 import styled from "styled-components";
 
+export const disappearUserName = "730px";
+export const HoverInfo = styled.div`
+  display: none;
+  position: absolute;
+  top: 0;
+  left: 100%;
+  bottom: 0;
+  align-items: center;
+  gap: 5px;
+  padding: 5px;
+  &:hover {
+    display: flex;
+  }
+`;
+
 const ContainerItem = styled.div`
   display: flex;
 
   align-items: center;
-  gap: 5px;
+  gap: 10px;
+  font-size: var(--fontMed);
   &:hover {
     background-color: rgba(0, 0, 0, 0.1);
   }
   padding: 10px;
   cursor: pointer;
+  position: relative;
+  width: 100%;
+  @media (max-width: ${disappearUserName}) {
+    justify-content: center;
+    &:hover ${HoverInfo} {
+      display: flex;
+    }
+  }
 `;
-const picHeight = "70px";
+
+export const picHeight = "40px";
 const ProfilePic = styled.img`
-  width: ${picHeight};
+  min-width: ${picHeight};
+  min-height: ${picHeight};
   height: ${picHeight};
+  width: ${picHeight};
   border-radius: 50%;
   object-fit: cover;
 `;
 const NoProfilePic = styled.div`
-  width: ${picHeight};
-  height: ${picHeight};
+  min-width: ${picHeight};
+  min-height: ${picHeight};
   border-radius: 50%;
   background-color: #cfc9c9;
   & svg {
@@ -30,18 +57,28 @@ const NoProfilePic = styled.div`
     width: 100%;
   }
 `;
+const UserNameText = styled.span`
+  @media (max-width: ${disappearUserName}) {
+    display: none;
+  }
+`;
 const UserOnlineItem = ({ userOnline }: { userOnline: UserNotNull }) => {
   return (
-    <ContainerItem>
-      {userOnline.img ? (
-        <ProfilePic src={userOnline.img}></ProfilePic>
-      ) : (
-        <NoProfilePic>
-          <BiUser />
-        </NoProfilePic>
-      )}
-      {userOnline.username}
-    </ContainerItem>
+    <>
+      <ContainerItem>
+        {userOnline.img ? (
+          <ProfilePic src={userOnline.img}></ProfilePic>
+        ) : (
+          <NoProfilePic>
+            <BiUser />
+          </NoProfilePic>
+        )}
+        <UserNameText>{userOnline.username}</UserNameText>
+        <HoverInfo>
+          <span>{userOnline.username}</span>
+        </HoverInfo>
+      </ContainerItem>
+    </>
   );
 };
 

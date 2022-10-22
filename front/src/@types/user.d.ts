@@ -27,7 +27,6 @@ type State = {
   user: IUser;
   error: boolean | string;
   loading: boolean;
-  successRegister: string;
 };
 
 type ILoginInput = Pick<UserNotNull, "email"> & {
