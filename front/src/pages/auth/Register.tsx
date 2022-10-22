@@ -54,9 +54,7 @@ export const Register = () => {
     <Container>
       <Form onSubmit={handleRegister}>
         <Header>Create new account.</Header>
-        <Error error={error} aria-live="assertive">
-          {error}
-        </Error>
+        <Error aria-live="assertive">{error}</Error>
         <Label htmlFor="username"></Label>
         <Input
           autoFocus

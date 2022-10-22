@@ -57,9 +57,7 @@ export const Login = () => {
     <Container>
       <Form onSubmit={handleLogin}>
         <Header>Login to your account.</Header>
-        <Error error={error} aria-live="assertive">
-          {error}
-        </Error>
+        <Error aria-live="assertive">{error}</Error>
         <Label htmlFor="email"></Label>
         <Input
           autoFocus

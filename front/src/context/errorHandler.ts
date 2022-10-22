@@ -2,11 +2,10 @@ import { AnyAction, ThunkDispatch } from "@reduxjs/toolkit";
 
 import { renderError } from "./userSlice";
 
-export default function handleError(
+export default async function handleError(
   error: any, //esto lo copié directamente del dispatch en userSlice
   dispatch: ThunkDispatch<unknown, unknown, AnyAction>
 ) {
-  console.log(error?.config?.sent, "VER EL CONFIG");
   console.log(error?.response);
   console.log(JSON.stringify(error));
 

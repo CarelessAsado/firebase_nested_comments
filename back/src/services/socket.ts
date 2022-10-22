@@ -10,6 +10,7 @@ interface IUserChat extends IUser {
 }
 export function startSocket(io: IOType) {
   let connectedUsers: IUserChat[] = [];
+
   io.use((socket, next) => {
     const token = socket.handshake.auth.token;
 
@@ -57,6 +58,20 @@ export function startSocket(io: IOType) {
         console.log(error, 666, "AUTH IN IO");
       }
     });
+
+    socket.on("commentPosted", async (data) => {
+      try {
+        //aca tendria q hacer un POST EN EL COMMENT MMMM NO, creo q lo mejor es mandar el comment guardado en el payload, o no?
+        //tengo q buscar el user en una fn, si no aparece, tendria q mandar un error (o no?
+        //TENGO Q VER COMO LIDIO CON LOS ERRORES
+
+        socket.broadcast.emit("commentPosted", data);
+        //TENGO Q EVITAR Q EL USER ESTE DOS VECES EN LA MISMA DATABASE??? si el user ya esta conectado quizas le puedo agregar un array de links/id de socket?
+      } catch (error) {
+        /* console.log(error, 666, "AUTH IN IO"); */
+      }
+    });
+
     //a string that lists the reason of the disconnection
     socket.on("disconnect", (reason) => {
       console.log(999999999999999999999, "disconnected");

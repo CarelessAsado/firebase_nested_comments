@@ -1,7 +1,12 @@
 import styled from "styled-components";
 import { useAppDispatch, useAppSelector } from "hooks/reduxDispatchAndSelector";
 import { useEffect, useRef, useState } from "react";
-import { deleteComment, getComments, postNewComment } from "context/userSlice";
+import {
+  deleteComment,
+  getComments,
+  newCommentPostedAdded,
+  postNewComment,
+} from "context/userSlice";
 import Spinner from "components/loaders/loader";
 import io, { Socket } from "socket.io-client";
 import { BACKEND_ROOT } from "config/constants";
@@ -11,6 +16,8 @@ import {
   disappearUserName,
   picHeight,
 } from "components/UsersOnline/auxiliaries/UserOnlineItem";
+import { dispatchNotification } from "config/utils/dispatchNotification";
+import { Error } from "components/styled-components/styled";
 
 const Container = styled.div`
   margin-left: ${widthSideChat};
@@ -122,7 +129,9 @@ export let socket: Socket | undefined;
 //puedo hacer un useRef en app, y q si no hay user, directamente logueé out, y hacer los users connected desde el STORE
 
 export const Main = () => {
-  const { loading, comments, user } = useAppSelector((state) => state.user);
+  const { loading, comments, user, error } = useAppSelector(
+    (state) => state.user
+  );
   /*   const { socket } = useAppSelector((state) => state.user); */
   const [comment, setComment] = useState("");
   //VER Q CAPAZ EL LOCAL HOST
@@ -171,6 +180,11 @@ export const Main = () => {
     socket.on("userLeft", (data: UserNotNull[]) => {
       setUsersOnline(data.filter((i) => i._id !== user?._id));
     });
+    //cuando envié al user conectado doble
+    socket.on("commentPosted", (data: IComment) => {
+      dispatch(newCommentPostedAdded(data));
+      dispatchNotification(dispatch, "Alguien posteó un comentario.");
+    });
 
     return () => {
       socket?.off("connect");
@@ -201,6 +215,7 @@ export const Main = () => {
               <Spinner fz="3rem" h="100%" />
             </Loading>
           )}
+          {error && <Error>{error}</Error>}
         </LoadingRelative>
       </Form>
 

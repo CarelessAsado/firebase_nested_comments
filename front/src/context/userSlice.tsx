@@ -241,6 +241,7 @@ export const postNewComment = createAsyncThunk(
     try {
       const { data } = await commentsAPI.postNewComment(obj);
       console.log("volvio la data, vamos a despachar success fetch all");
+      socket?.emit("commentPosted", data);
       return data;
     } catch (error) {
       await errorHandler(error, dispatch);
@@ -278,6 +279,11 @@ export const userSlice = createSlice({
       state.loading = false;
       state.error = false;
     },
+    newCommentPostedAdded: (state, action) => {
+      state.loading = false;
+      state.error = false;
+      state.comments = addComment(state.comments, action.payload);
+    },
   },
   extraReducers: (builder) => {
     builder.addCase(login.fulfilled, (state, action) => {
@@ -310,7 +316,7 @@ export const userSlice = createSlice({
       state.loading = false;
     });
     builder.addCase(postNewComment.fulfilled, (state, action) => {
-      state.comments = [...state.comments, action.payload];
+      state.comments = addComment(state.comments, action.payload);
       state.loading = false;
     });
     builder.addCase(deleteComment.fulfilled, (state, action) => {
@@ -341,6 +347,11 @@ export const userSlice = createSlice({
   },
 });
 
-export const { renderError, resetError } = userSlice.actions;
+export const { renderError, resetError, newCommentPostedAdded } =
+  userSlice.actions;
 
 export default userSlice.reducer;
+
+function addComment(comments: IComment[], newC: IComment): IComment[] {
+  return [...comments, newC];
+}

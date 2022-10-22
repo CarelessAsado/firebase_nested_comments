@@ -86,9 +86,7 @@ export const UserProfile = () => {
         Back to home
       </TopLink>
       <ProfileSection>
-        <Error error={error} aria-live="assertive">
-          {error}
-        </Error>
+        <Error aria-live="assertive">{error}</Error>
         <ColumnFlex>
           <TopPart style={{ flex: 1 }} className="flex1 topPart">
             {!!user && <Contacto user={user} />}

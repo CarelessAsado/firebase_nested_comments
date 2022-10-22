@@ -47,9 +47,7 @@ export const ForgotPwd = () => {
     <Container>
       <Form onSubmit={handleSubmit}>
         <Header>¿Te olvidaste tu contraseña?</Header>
-        <Error error={error} aria-live="assertive">
-          {error}
-        </Error>
+        <Error aria-live="assertive">{error}</Error>
         <Label htmlFor="email"></Label>
         <Input
           autoFocus

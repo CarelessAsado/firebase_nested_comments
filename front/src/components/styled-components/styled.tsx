@@ -45,14 +45,11 @@ export const Form = styled.form`
   gap: 15px;
   border-radius: 5px;
 `;
-interface StyledProps {
-  error: string | boolean;
-}
-export const Error = styled.div<StyledProps>`
+
+export const Error = styled.div`
   color: crimson;
-  font-size: 1.5rem;
+  font-size: var(--fontMed);
   padding: 10px;
-  background-color: ${(props) => (props.error ? "#b2e7f0" : "inherit")};
 `;
 export const Bottom = styled.div`
   background-color: #f0efc1;
