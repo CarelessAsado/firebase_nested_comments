@@ -39,7 +39,7 @@ const ContainerItem = styled.div`
 `;
 
 export const picHeight = "40px";
-const ProfilePic = styled.img`
+export const ProfilePic = styled.img`
   min-width: ${picHeight};
   min-height: ${picHeight};
   height: ${picHeight};

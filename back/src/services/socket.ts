@@ -71,6 +71,9 @@ export function startSocket(io: IOType) {
         /* console.log(error, 666, "AUTH IN IO"); */
       }
     });
+    socket.on("commentDeleted", async (data) => {
+      socket.broadcast.emit("commentDeleted", data);
+    });
 
     //a string that lists the reason of the disconnection
     socket.on("disconnect", (reason) => {

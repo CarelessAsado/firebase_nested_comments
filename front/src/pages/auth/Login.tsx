@@ -14,9 +14,6 @@ import { FRONTEND_ENDPOINTS } from "config/constants";
 import { login } from "context/userSlice";
 import { useAppDispatch, useAppSelector } from "hooks/reduxDispatchAndSelector";
 
-const SuccessRegister = styled(Error)`
-  color: green;
-`;
 const Label = styled.label``;
 
 const RegisterLink = styled(Link)`

@@ -19,7 +19,9 @@ export const getComments = function (controller?: AbortController) {
 };
 export const deleteComment = async function (obj: IComment) {
   return axios.delete<void>(
-    `${BACKEND_URL.COMMENTS}/${obj.userID}/${obj._id}`,
+    `${BACKEND_URL.COMMENTS}/${
+      typeof obj.userID === "string" ? obj.userID : obj.userID._id
+    }/${obj._id}`,
     { data: obj }
   );
 };

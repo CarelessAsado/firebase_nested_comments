@@ -24,7 +24,7 @@ function App() {
       console.log(userData);
       if (userData) {
         //esto no salta en el login, pero sí salta en el register
-        alert("cambiazo");
+        /*  alert("cambiazo"); */
         dispatch(refresh());
       } else {
         /*        setUser(null); */

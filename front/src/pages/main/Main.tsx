@@ -1,23 +1,27 @@
 import styled from "styled-components";
 import { useAppDispatch, useAppSelector } from "hooks/reduxDispatchAndSelector";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   deleteComment,
   getComments,
+  newCommentDeleted,
   newCommentPostedAdded,
   postNewComment,
 } from "context/userSlice";
 import Spinner from "components/loaders/loader";
 import io, { Socket } from "socket.io-client";
-import { BACKEND_ROOT } from "config/constants";
+import { BACKEND_ROOT, FRONTEND_ENDPOINTS } from "config/constants";
 import { getHeadersChatAuth } from "API/axiosInstanceJWT";
 import UsersOnline, { widthSideChat } from "components/UsersOnline/UsersOnline";
 import {
   disappearUserName,
   picHeight,
+  ProfilePic,
 } from "components/UsersOnline/auxiliaries/UserOnlineItem";
 import { dispatchNotification } from "config/utils/dispatchNotification";
 import { Error } from "components/styled-components/styled";
+import TimeAgo from "timeago-react";
+import { Link } from "react-router-dom";
 
 const Container = styled.div`
   margin-left: ${widthSideChat};
@@ -63,11 +67,12 @@ export const Value = styled.div`
   padding: 5px 0;
 `;
 export const ContainerComments = styled.div`
+  //the 10px-margin provides the nesting effect
   margin: 20px 0 0 10px;
   display: flex;
   flex-direction: column;
   gap: 10px;
-  border: 1px solid red;
+
   & > * {
     background-color: grey;
     padding: 10px;
@@ -80,6 +85,7 @@ interface IProps {
   children?: JSX.Element | JSX.Element[];
   /*   setData: (value: React.SetStateAction<IComment[]>) => void; */
   data: IComment[];
+  user: IUser;
 }
 /* ---------------------------------REEMPLAZAR OLD FORM */
 const Form = styled.form`
@@ -121,6 +127,17 @@ const Loading = styled.h2`
   left: 50%;
   color: #6e6a7a;
 `;
+const Top = styled.div`
+  display: flex;
+  align-items: center;
+`;
+
+export const GrowFlex1 = styled(Link)`
+  flex: 1;
+  display: flex;
+  gap: 7px;
+  align-items: center;
+`;
 
 export let socket: Socket | undefined;
 
@@ -134,10 +151,7 @@ export const Main = () => {
   );
   /*   const { socket } = useAppSelector((state) => state.user); */
   const [comment, setComment] = useState("");
-  //VER Q CAPAZ EL LOCAL HOST
-  /*   const socketRef = useRef(io(BACKEND_ROOT));
-  const socket = socketRef.current; */
-  const [isConnected, setIsConnected] = useState(false);
+
   const [usersOnline, setUsersOnline] = useState<UserNotNull[]>([]);
   const dispatch = useAppDispatch();
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -160,7 +174,6 @@ export const Main = () => {
     if (!socket) return;
 
     socket.on("connect", () => {
-      alert("buscame users paaa");
       /* setIsConnected(true); */
       //send token for auth on first connection
       socket?.emit("first", getHeadersChatAuth());
@@ -173,17 +186,22 @@ export const Main = () => {
     //estp es p/cuando me desconecta el server, podria usarlo en caso de error
     //tmb se dispara cuando hago un disconnect yo mismo en el logout, ver si saco el disconnect del logout si se dispara tmb
     socket.on("disconnect", () => {
-      alert("disconnected by the server");
+      /*   alert("disconnected by the server"); */
       /*  setIsConnected(false); */
     });
 
     socket.on("userLeft", (data: UserNotNull[]) => {
       setUsersOnline(data.filter((i) => i._id !== user?._id));
     });
+
     //cuando envié al user conectado doble
     socket.on("commentPosted", (data: IComment) => {
       dispatch(newCommentPostedAdded(data));
       dispatchNotification(dispatch, "Alguien posteó un comentario.");
+    });
+    socket.on("commentDeleted", (data: IComment) => {
+      dispatch(newCommentDeleted(data));
+      dispatchNotification(dispatch, "Alguien borró un comentario.");
     });
 
     return () => {
@@ -191,12 +209,14 @@ export const Main = () => {
       socket?.off("disconnect");
       socket?.off("newUserConnected");
       socket?.off("userLeft");
+      socket?.off("commentPosted");
+      socket?.off("commentDeleted");
       /*   alert("about to disconnect"); */
       //no sirve poner un clean-up disconnect con useRef xq el socket no se vuelve a conectar automaticamente
 
       /* socket.disconnect(); */
     };
-  }, [user?._id]);
+  }, [user?._id, dispatch]);
 
   return (
     <Container>
@@ -230,6 +250,7 @@ export const Main = () => {
                 /* setData={setData} */
                 data={comments}
                 key={c._id}
+                user={user}
               />
             ))}
         </ContainerComments>
@@ -238,7 +259,7 @@ export const Main = () => {
   );
 };
 
-function CommentComp({ comment, /* setData, */ data }: IProps) {
+function CommentComp({ comment, /* setData, */ data, user }: IProps) {
   const [newChildComment, setNewChildComment] = useState("");
   const dispatch = useAppDispatch();
   const expression = comment.path + "," + comment._id;
@@ -269,8 +290,22 @@ function CommentComp({ comment, /* setData, */ data }: IProps) {
     setChildren(results);
   }, [data, expression]);
 
+  const deleteBtn = (
+    <Button style={{ backgroundColor: "crimson" }} onClick={handleDelete}>
+      Eliminar
+    </Button>
+  );
   return (
     <div>
+      {typeof comment.userID !== "string" && (
+        <Top>
+          <GrowFlex1 to={FRONTEND_ENDPOINTS.PROFILEdyn(comment.userID._id)}>
+            <ProfilePic src={comment.userID.img || ""}></ProfilePic>
+            <span>{comment.userID.username}</span>
+          </GrowFlex1>
+          <TimeAgo datetime={comment.createdAt} />;
+        </Top>
+      )}
       <Value>{comment.value}</Value>{" "}
       <div>
         <Input
@@ -279,9 +314,10 @@ function CommentComp({ comment, /* setData, */ data }: IProps) {
           onChange={(e) => setNewChildComment(e.target.value)}
         ></Input>{" "}
         <Button onClick={handleSubmit}>Comentar</Button>
-        <Button style={{ backgroundColor: "crimson" }} onClick={handleDelete}>
-          Eliminar
-        </Button>
+        {typeof comment.userID !== "string" &&
+          comment.userID._id === user?._id &&
+          deleteBtn}
+        {comment.userID === user?._id && deleteBtn}
         {/* <Button>Likear</Button> */}
       </div>
       {}
@@ -292,6 +328,7 @@ function CommentComp({ comment, /* setData, */ data }: IProps) {
               comment={c}
               /* setData={setData} */ data={data}
               key={c._id}
+              user={user}
             />
           ))}
         </ContainerComments>

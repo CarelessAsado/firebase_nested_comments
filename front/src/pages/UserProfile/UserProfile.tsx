@@ -1,14 +1,14 @@
-import React, { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 import styled from "styled-components";
-
-import * as authAPI from "API/authAPI";
 import { FRONTEND_ENDPOINTS } from "config/constants";
-import { Error } from "components/styled-components/styled";
 import { useAppDispatch, useAppSelector } from "hooks/reduxDispatchAndSelector";
-import { logout, refresh } from "context/userSlice";
-import { Link } from "react-router-dom";
+import { logout } from "context/userSlice";
+import { Link, useParams } from "react-router-dom";
 import { Contacto } from "./auxiliaries/ContactoContainer";
+import * as userAPI from "API/user";
+import errorHandler from "context/errorHandler";
+import { Error } from "components/styled-components/styled";
 
 export const Container = styled.div`
   max-width: 500px;
@@ -73,13 +73,28 @@ const TopLink = styled(Link)`
   margin-bottom: 8px;
 `;
 export const UserProfile = () => {
-  const { user, error, loading } = useAppSelector((state) => state.user);
+  const { user, error } = useAppSelector((state) => state.user);
   const dispatch = useAppDispatch();
+  const [userProfile, setUserProfile] = useState<IUser>(null);
+
+  //agregar al nav link profile btn
+  const { id: paramsUserid } = useParams();
 
   useEffect(() => {
-    dispatch(refresh());
-  }, [dispatch]);
+    //get USER PROFILE
 
+    if (!paramsUserid) {
+      //setError
+      return;
+    }
+
+    userAPI
+      .getSingleUserProfile(paramsUserid)
+      .then(({ data }) => setUserProfile(data))
+      .catch((er) => errorHandler(er, dispatch));
+  }, [dispatch, paramsUserid]);
+
+  console.log(userProfile);
   return (
     <Container>
       <TopLink to={`${FRONTEND_ENDPOINTS.HOME}`} style={{ padding: "20px 0" }}>
@@ -89,7 +104,7 @@ export const UserProfile = () => {
         <Error aria-live="assertive">{error}</Error>
         <ColumnFlex>
           <TopPart style={{ flex: 1 }} className="flex1 topPart">
-            {!!user && <Contacto user={user} />}
+            {!!userProfile && <Contacto user={userProfile} />}
           </TopPart>
           <BtnLogout onClick={() => dispatch(logout())}>Logout</BtnLogout>
         </ColumnFlex>

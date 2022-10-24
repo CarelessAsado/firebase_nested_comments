@@ -26,8 +26,14 @@ export const createComment = errorWrapper(async (req, res, next) => {
 export const getAllTasks = errorWrapper(async (req, res, next) => {
   const { _id: userID } = req.user;
 
-  const allComments = await Comment.find<IDirectory>({ userID });
-
+  const allComments = await Comment.find<IDirectory>(/* { userID } */).populate(
+    { path: "userID", select: "img username _id" }
+  );
+  console.log(
+    allComments,
+    99999999999,
+    "holaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  );
   res.status(200).json(allComments);
 });
 

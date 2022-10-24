@@ -3,6 +3,7 @@ import { Request, Response } from "express";
 import errorWrapper from "../ERRORS/asyncErrorWrapper";
 import getCleanUser from "../utils/getCleanUser";
 import cloudVersion from "cloudinary";
+import { CustomError } from "../ERRORS/customErrors";
 const cloudinary = cloudVersion.v2;
 export const createUser = errorWrapper(async (req, res) => {
   const { username, password, email } = req.body;
@@ -18,11 +19,13 @@ export const getAllUsers = errorWrapper(async (req, res) => {
   res.json(allUsers);
 });
 
-export const getSingleUser = errorWrapper(async (req, res) => {
-  const { id } = req.params;
+export const getSingleUser = errorWrapper(async (req, res, next) => {
+  const { userid } = req.params;
 
-  const userFound = await User.findById<IUser>(id);
-  res.json(userFound);
+  const userFound = await User.findById<IUser>(userid);
+  if (!userFound) return next(new CustomError(404, "Mongo user not found."));
+  const cleanUser = getCleanUser(userFound);
+  res.json(cleanUser);
 });
 
 export const updateUser = errorWrapper(async (req, res, next) => {
