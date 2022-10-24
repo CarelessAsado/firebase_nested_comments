@@ -294,10 +294,10 @@ export function Contacto({ user }: { user: UserNotNull }) {
                 onClick={() => setEditPwd((v) => !v)}
                 disabled={Indloading}
               >
-                Volver
+                Go back
               </Button>
               <Button onClick={handlePwdEditSubmit} disabled={Indloading}>
-                Confirmar
+                Confirm
               </Button>
             </FlexIt>
           </Nombre>

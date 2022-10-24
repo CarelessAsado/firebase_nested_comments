@@ -16,6 +16,7 @@ export const Container = styled.div`
   display: flex;
   flex-direction: column;
   gap: 10px;
+  padding: 10px;
 `;
 export const ProfileSection = styled.section`
   display: flex;
@@ -72,6 +73,11 @@ const TopLink = styled(Link)`
   margin-top: -10px;
   margin-bottom: 8px;
 `;
+export const ProfileImg = styled.img`
+  width: 100%;
+  height: 30vh;
+  object-fit: contain;
+`;
 export const UserProfile = () => {
   const { user, error } = useAppSelector((state) => state.user);
   const dispatch = useAppDispatch();
@@ -97,6 +103,7 @@ export const UserProfile = () => {
   console.log(userProfile);
   return (
     <Container>
+      <ProfileImg src={userProfile?.img || ""}></ProfileImg>
       <TopLink to={`${FRONTEND_ENDPOINTS.HOME}`} style={{ padding: "20px 0" }}>
         Back to home
       </TopLink>
