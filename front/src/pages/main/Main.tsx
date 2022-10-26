@@ -303,7 +303,7 @@ function CommentComp({ comment, /* setData, */ data, user }: IProps) {
             <ProfilePic src={comment.userID.img || ""}></ProfilePic>
             <span>{comment.userID.username}</span>
           </GrowFlex1>
-          <TimeAgo datetime={comment.createdAt} />;
+          <TimeAgo datetime={comment.createdAt} />
         </Top>
       )}
       <Value>{comment.value}</Value>{" "}

@@ -8,6 +8,8 @@ import getCleanUser from "../utils/getCleanUser";
 /*VER XQ NO ME SALEN LOS METODOS DE MONGOOSE*/
 import Task, { ITask } from "../models/Task";
 import Comment, { IDirectory } from "../models/Comment";
+import { _FilterQuery } from "mongoose";
+import { Request } from "express";
 
 export const createComment = errorWrapper(async (req, res, next) => {
   const { value, id, path } = req.body;
@@ -23,18 +25,70 @@ export const createComment = errorWrapper(async (req, res, next) => {
   return res.json(addedComment);
 });
 
+interface IParams {
+  page: number;
+  limit: number;
+}
+
 export const getAllTasks = errorWrapper(async (req, res, next) => {
   const { _id: userID } = req.user;
+  let { page = 1, limit = 30 } = req.query;
 
-  const allComments = await Comment.find<IDirectory>(/* { userID } */).populate(
+  limit = Number(limit);
+  page = Number(page);
+  if (limit > 50) {
+    limit = 30;
+  }
+  /* const allComments = await Comment.find<IDirectory>(/* { userID } ).populate(
     { path: "userID", select: "img username _id" }
-  );
+  ); */
+  type IFacet = { commentsData: IDirectory[] };
+  const facet = await Comment.aggregate<IFacet>([
+    {
+      //hacer un userID dinamico
+      //ver si se puede hacer $lookup adentro de $facet
+      //$lookup requires either 'pipeline' or both 'localField' and 'foreignField' to be specified
+      $lookup: {
+        from: "users", //usé mongosh p/ver los nombres de las collections
+        as: "userID", //le podés poner el nombre q quieras
+        localField: "userID",
+        foreignField: "_id",
+      },
+    },
+    //x alguna razón $lookup devuelve un array, entonces lo vuelvo a transformar en object con $unwind
+    //otras posibles alternativas: https://stackoverflow.com/questions/41602831/convert-a-lookup-result-to-an-object-instead-of-array
+    { $unwind: "$userID" },
+    //hacer un project p/ seleccionar solo _id,username,email,img
+    /*    { $project: { "userID.username": 1, "userID.email": 1, "userID.img": 1 } }, */
+    //esto no sirve xq elimino todos los otros campos, creo q tengo q usar la opcion pipeline dentro de lookup, ver
+    //https://www.mongodb.com/docs/manual/reference/operator/aggregation/lookup/#perform-an-uncorrelated-subquery-with--lookup
+    {
+      $facet: {
+        commentsData: [{ $skip: (page - 1) * limit }, { $limit: limit }],
+        count: [{ $count: "totalComments" }],
+      },
+    },
+    //count viene como un single Object adentro de un array
+    //hay q hacerlo fuera de $facet y count, xq ese array se le agrega una vez finalizado $facet creo, aunq no estoy seguro
+    //cotejar tmb si puedo deestructurar el array completo de $facet
+    {
+      $unwind: "$count",
+    },
+    //ahora pasa a ser un obj adentro de otro obj, así count:{totalComments:3}, asi q destructuro con $project
+    {
+      $project: {
+        commentsData: "$commentsData",
+        count: "$count.totalComments",
+      },
+    },
+  ]);
+
   console.log(
-    allComments,
+    facet,
     99999999999,
     "holaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
   );
-  res.status(200).json(allComments);
+  res.status(200).json(facet[0].commentsData);
 });
 
 export const getSingleTask = errorWrapper(async (req, res, next) => {

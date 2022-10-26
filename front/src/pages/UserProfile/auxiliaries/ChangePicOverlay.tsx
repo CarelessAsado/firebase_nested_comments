@@ -69,6 +69,7 @@ export const ChangePicOverlay = ({ show, close }: OpenCloseOv) => {
   const { loading, user } = useAppSelector((state) => state.user);
   const dispatch = useAppDispatch();
   const [img, setImg] = useState<File | string>(user?.img as string);
+
   async function handleSubmit(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
     e.stopPropagation();
     const dataImg = new FormData();

@@ -52,15 +52,19 @@ export const Table = styled.table`
 
 const BtnLogout = styled.button`
   background-color: inherit;
-  color: ${(props) => props.theme.text};
+  color: var(--mainRed);
+  padding: 10px;
+  border-radius: 5px;
+  transition: 0.3s;
+  cursor: pointer;
   &:hover {
     color: white;
-    background-color: ${(props) => props.theme.red};
+    background-color: var(--mainRed);
   }
   font-size: inherit;
   letter-spacing: 2px;
   margin: 10px auto;
-  border: 1px solid ${(props) => props.theme.red};
+  border: 1px solid var(--mainRed);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -74,16 +78,18 @@ const TopLink = styled(Link)`
   margin-bottom: 8px;
 `;
 export const ProfileImg = styled.img`
-  width: 100%;
-  height: 30vh;
-  object-fit: contain;
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin: auto;
+  border: 2px solid var(--mainGray);
 `;
 export const UserProfile = () => {
   const { user, error } = useAppSelector((state) => state.user);
   const dispatch = useAppDispatch();
   const [userProfile, setUserProfile] = useState<IUser>(null);
 
-  //agregar al nav link profile btn
   const { id: paramsUserid } = useParams();
 
   useEffect(() => {
@@ -98,7 +104,8 @@ export const UserProfile = () => {
       .getSingleUserProfile(paramsUserid)
       .then(({ data }) => setUserProfile(data))
       .catch((er) => errorHandler(er, dispatch));
-  }, [dispatch, paramsUserid]);
+    //added the user because if I edit my name, I havent changed the params, so the change wont reflect
+  }, [dispatch, paramsUserid, user]);
 
   console.log(userProfile);
   return (
@@ -111,7 +118,12 @@ export const UserProfile = () => {
         <Error aria-live="assertive">{error}</Error>
         <ColumnFlex>
           <TopPart style={{ flex: 1 }} className="flex1 topPart">
-            {!!userProfile && <Contacto user={userProfile} />}
+            {!!userProfile && (
+              <Contacto
+                user={userProfile}
+                isOwner={userProfile._id === user?._id}
+              />
+            )}
           </TopPart>
           <BtnLogout onClick={() => dispatch(logout())}>Logout</BtnLogout>
         </ColumnFlex>

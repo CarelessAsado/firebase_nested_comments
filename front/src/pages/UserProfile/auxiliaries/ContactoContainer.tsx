@@ -108,7 +108,13 @@ const pwdInitialState = {
 };
 export type PasswordsInputType = typeof pwdInitialState;
 
-export function Contacto({ user }: { user: UserNotNull }) {
+export function Contacto({
+  user,
+  isOwner,
+}: {
+  user: UserNotNull;
+  isOwner: boolean;
+}) {
   const [editName, setEditName] = useState(false);
   const [nombre, setNombre] = useState(user?.username);
   const [editEmail, setEditEmail] = useState(false);
@@ -203,7 +209,9 @@ export function Contacto({ user }: { user: UserNotNull }) {
           <Nombre>
             <FlexIt>
               <h2>Name</h2>
-              {editName ? (
+              {!isOwner ? (
+                false
+              ) : editName ? (
                 <FlexIt>
                   <ReactIcon className="cancel">
                     <AiOutlineCloseCircle
@@ -236,7 +244,9 @@ export function Contacto({ user }: { user: UserNotNull }) {
           <Email>
             <FlexIt>
               <h2>Email</h2>
-              {editEmail ? (
+              {!isOwner ? (
+                false
+              ) : editEmail ? (
                 <FlexIt>
                   <ReactIcon className="cancel">
                     <AiOutlineCloseCircle
@@ -265,51 +275,58 @@ export function Contacto({ user }: { user: UserNotNull }) {
               user?.email
             )}
           </Email>
-          <ChangePwd onClick={() => setEditPwd((v) => !v)}>
-            Change password
-          </ChangePwd>
+          {isOwner && (
+            <ChangePwd onClick={() => setEditPwd((v) => !v)}>
+              Change password
+            </ChangePwd>
+          )}
         </Section>
         {/* -------------TEMPLATE P/EDITAR CONTRASEñA--------------------- */}
-        <Section editPwd={editPwd} onSubmit={handlePwdEditSubmit}>
-          <Nombre>
-            <div>Write down your old and new password.</div>
-            {dataPasswords.map((i) => {
-              const { id, placeholder } = i;
-              return (
-                <Input
-                  key={id}
-                  type="password"
-                  value={passwords[id]}
-                  name={id}
-                  onChange={handlePwdsChange}
-                  placeholder={placeholder}
-                  autoComplete="off"
-                />
-              );
-            })}
+        {isOwner && (
+          <Section editPwd={editPwd} onSubmit={handlePwdEditSubmit}>
+            <Nombre>
+              <div>Write down your old and new password.</div>
+              {dataPasswords.map((i) => {
+                const { id, placeholder } = i;
+                return (
+                  <Input
+                    key={id}
+                    type="password"
+                    value={passwords[id]}
+                    name={id}
+                    onChange={handlePwdsChange}
+                    placeholder={placeholder}
+                    autoComplete="off"
+                  />
+                );
+              })}
 
-            <FlexIt>
-              <Button
-                type="button"
-                onClick={() => setEditPwd((v) => !v)}
-                disabled={Indloading}
-              >
-                Go back
-              </Button>
-              <Button onClick={handlePwdEditSubmit} disabled={Indloading}>
-                Confirm
-              </Button>
-            </FlexIt>
-          </Nombre>
-        </Section>
+              <FlexIt>
+                <Button
+                  type="button"
+                  onClick={() => setEditPwd((v) => !v)}
+                  disabled={Indloading}
+                >
+                  Go back
+                </Button>
+                <Button onClick={handlePwdEditSubmit} disabled={Indloading}>
+                  Confirm
+                </Button>
+              </FlexIt>
+            </Nombre>
+          </Section>
+        )}
       </ContactInfo>
       {/* --------------EDIT PROFILE PICTURE--------------------- */}
+      {isOwner && (
+        <EditPic onClick={() => setShow((v) => !v)}>
+          Edit your profile picture
+        </EditPic>
+      )}
 
-      <EditPic onClick={() => setShow((v) => !v)}>
-        Edit your profile picture
-      </EditPic>
-
-      <ChangePicOverlay show={show} close={() => setShow((v) => !v)} />
+      {show && (
+        <ChangePicOverlay show={show} close={() => setShow((v) => !v)} />
+      )}
     </ContactoContainer>
   );
 }

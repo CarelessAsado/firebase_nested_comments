@@ -15,10 +15,16 @@ scroll-behavior:smooth;
   --mainBlueHover:#226491;
   /* --mainGreen:#1f9c; */
    --mainGreen:#1f9c35; 
+
   --mlGreen:#00a650;
   --mainGreenHover:#187829;
   --mainPink:#ff8000;
 /*    --mainPink:#ffa2a2;  */
+
+   --mainGray:grey;
+   --mainRed:crimson;
+
+
 --fontSmall:1rem;
   --fontMed:1.2rem;
   --fontBig:1.4rem;

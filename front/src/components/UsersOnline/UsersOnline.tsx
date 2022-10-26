@@ -8,19 +8,17 @@ import UserOnlineItem, {
 import styled from "styled-components";
 import { navHeight } from "components/Nav/Nav";
 import { ScrollStyles } from "Global styles/Globalstyle";
-import { AiFillWechat } from "react-icons/ai";
+import { AiFillWechat, AiOutlineCloseCircle } from "react-icons/ai";
 export const widthSideChat = "300px";
 //2 width, una p/
 interface SideContProps {
   openChat: boolean;
 }
 export const SideContainer = styled.div<SideContProps>`
-  background-color: pink;
   position: fixed;
   top: ${navHeight};
   left: 0;
   height: calc(100vh - ${navHeight});
-  border: 1px solid yellow;
   transform: ${(props) => !props.openChat && "translateX(-100%)"};
   width: ${widthSideChat};
   transition: 0.3s;
@@ -28,7 +26,7 @@ export const SideContainer = styled.div<SideContProps>`
     width: calc(${picHeight} + 20px);
   }
 `;
-export const SolapaChat = styled.div`
+export const SolapaChat = styled.div<SideContProps>`
   position: absolute;
   left: 100%;
   top: 0;
@@ -36,12 +34,36 @@ export const SolapaChat = styled.div`
   background-color: white;
   border: 1px solid grey;
   cursor: pointer;
+  display: ${(props) => props.openChat && "none"};
 `;
 
+export const CloseTab = styled.span`
+  padding: 10px;
+  display: inline-flexbox;
+  cursor: pointer;
+  transition: 0.3s;
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+  }
+  float: right;
+  & > * {
+    font-size: var(--fontMed);
+  }
+  @media (max-width: ${disappearUserName}) {
+    width: 100%;
+    display: grid;
+    place-items: center;
+  }
+`;
 const UsersOnline = ({ users }: { users: UserNotNull[] }) => {
-  const [openChat, setOpenChat] = useState(false);
+  const [openChat, setOpenChat] = useState(true);
   return (
     <SideContainer className="CONTAINER SIDE CHAT" openChat={openChat}>
+      <div>
+        <CloseTab onClick={() => setOpenChat((v) => !v)}>
+          <AiOutlineCloseCircle />
+        </CloseTab>
+      </div>
       {users.length === 0 ? (
         <>"NO USERS ONLINE AT THE MOMENT"</>
       ) : (
@@ -49,7 +71,7 @@ const UsersOnline = ({ users }: { users: UserNotNull[] }) => {
           return <UserOnlineItem userOnline={i} />;
         })
       )}
-      <SolapaChat onClick={() => setOpenChat((v) => !v)}>
+      <SolapaChat openChat={openChat} onClick={() => setOpenChat((v) => !v)}>
         <AiFillWechat />
       </SolapaChat>
       {users.length === 0 && "blabla"}
