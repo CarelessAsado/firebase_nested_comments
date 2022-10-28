@@ -52,26 +52,11 @@ export const getAllTasks = errorWrapper(async (req, res, next) => {
     {
       $facet: {
         commentsData: [
-          //por c/object vuelve
-          /*    {
-            $addFields: {
-              nested: {
-                $match: {
-                  path: { $in: ["6355d1207f88f3934f46bf62"] },
-                },
-                    $regexMatch: {
-                  input: "$path",
-                  regex: "6355d1207f88f3934f46bf62",
-                }, 
-              },
-            },
-          }, */
-
           { $skip: (page - 1) * limit },
           { $limit: limit },
 
           //una vez q limité el nro de PARENT CONV, hago el populate del user id y la subquery
-
+          //POPULATE USERID
           {
             $lookup: {
               from: "users", //usé mongosh p/ver los nombres de las collections
@@ -114,6 +99,8 @@ export const getAllTasks = errorWrapper(async (req, res, next) => {
                     },
                   },
                 },
+                //aca queria agregar un empty object si nested esta vacio, pero no es el momento indicado (ya q esto es x c/parent conversation mat)
+                /* { $project: {} }, */
                 { $count: "totalSubquery" },
               ],
             },
@@ -121,13 +108,31 @@ export const getAllTasks = errorWrapper(async (req, res, next) => {
           //el problema en realidad es q count si no hay docs, devuelve nada, y cuando hago unwind es como q desaparece "nested" key. Se me ocurre cotejar si el array esta vacio o no, y en base a eso agregar count:0. O podria hacer dsp, si nested no existe, agregar nested:0
           //https://www.google.com/search?q=%24count+returns+nothing+if+query+is+empty+mongodb&sxsrf=ALiCzsYUKI4VVmRcmnFf8U-TFAbxRFV4KA%3A1666914742492&ei=thlbY-7RHdLu1sQPnM6zcA&ved=0ahUKEwjuhOOozYH7AhVSt5UCHRznDA4Q4dUDCA8&uact=5&oq=%24count+returns+nothing+if+query+is+empty+mongodb&gs_lcp=Cgdnd3Mtd2l6EAMyBQghEKABMgUIIRCgAToKCAAQRxDWBBCwAzoICCEQFhAeEB06BAghEBU6BwghEKABEApKBAhNGAFKBAhBGABKBAhGGABQywZYhRRg0xVoAXABeACAAZUBiAHUB5IBAzAuOJgBAKABAcgBCMABAQ&sclient=gws-wiz
           //https://stackoverflow.com/questions/68891421/mongo-count-return-no-docoument-found-instead-of-0
-          /* {
+          {
             $unwind: {
               path: "$nested",
-              //a veces no hay children, si no pongo esto, al hacer unwind al empty array es como q no lo envia dsp al front
+              //a veces no hay children, si no pongo esto, al hacer unwind al empty array es como q no lo envia dsp al front el document. Por otro lado, al hacer unwind a un empty array, genera q nested desaparezca como key
               preserveNullAndEmptyArrays: true,
             },
-          }, */
+          },
+          //OPCION A. hago el unwind
+          //podria usar un $set en donde cotejo is $nested existent? subComments:0 : subcomments: "$nested.totalSubquery"
+          {
+            $set: {
+              moreSubComments: {
+                $cond: [
+                  { $ifNull: ["$nested", false] },
+                  /* { nested: { $exists: true } }, */
+                  "$nested.totalSubquery",
+                  0,
+                ],
+              },
+            },
+          },
+          //projection p/borrar $nested
+          { $project: { nested: 0 } },
+          //OPCION B. sin unwind
+          //podria usar un $set en donde cotejo is $nested.length ===0? subComments:0 : subcomments: "$nested.[0]totalSubquery"
         ],
         count: [{ $count: "totalComments" }],
       },
@@ -148,7 +153,9 @@ export const getAllTasks = errorWrapper(async (req, res, next) => {
   ]);
 
   console.log(
-    facet,
+    facet[0].commentsData[0],
+    "holaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    facet[0].commentsData[1],
     99999999999,
     "holaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
   );
