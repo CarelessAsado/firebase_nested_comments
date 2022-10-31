@@ -100,7 +100,7 @@ const ParentComment = ({ comment, user }: IProps) => {
   };
 
   //ESTO PUEDE GENERAR PROBLEMAS DSP, VER SI LO TENGO Q JUNTAR CON EL CHILD CONTROLLER
-  const { immediateChildren, remainder } = getImmediateChildren(
+  let { immediateChildren, remainder } = getImmediateChildren(
     comment,
     children
   );
@@ -151,22 +151,28 @@ const ParentComment = ({ comment, user }: IProps) => {
       {immediateChildren.length > 0 && (
         <ContainerComments>
           {/* TIENE Q LOOPEAR SOLO LOS 1EROS COMMENTS, creo q ahi juega lo de expression */}
-          {immediateChildren.map((c) => (
-            <ChildrenControllerTopLevel
-              comment={c}
-              data={remainder}
-              key={c._id}
-              user={user}
-            />
-          ))}
+          {immediateChildren.map((c) => {
+            return (
+              <ChildrenControllerTopLevel
+                comment={c}
+                data={remainder}
+                key={c._id}
+                user={user}
+              />
+            );
+          })}
         </ContainerComments>
       )}
     </>
   );
 };
 
-const ChildrenControllerTopLevel = ({ comment, user, data }: IProps) => {
-  const [topLevel, setTopLevel] = useState(comment._id);
+const ChildrenControllerTopLevel = ({
+  comment: secondLevelDeepComment,
+  user,
+  data,
+}: IProps) => {
+  const [topLevel, setTopLevel] = useState(secondLevelDeepComment._id);
 
   function changeTopLevel(commID: string) {
     setTopLevel(commID);
@@ -176,36 +182,39 @@ const ChildrenControllerTopLevel = ({ comment, user, data }: IProps) => {
 
   //AGREGAR DSP EN EL CHILDREN COMP EL RETURN CUANDO ALCANCE EL NESTED LEVEL 5
   const { immediateChildren, remainder } = getImmediateChildren(
-    comment,
+    secondLevelDeepComment,
     data,
     topLevel
   );
 
-  console.log("immediateChildren: ", immediateChildren);
-  console.log("remainder: ", remainder);
+  //getPreviousChildren as well
+  let found = data.find((i) => i._id === topLevel);
+  //nunca vas a encontrar en children al topLevel A LA PRIMERA VUELTA, ya q lo filtré previamente
 
-  useEffect(() => {}, [topLevel]);
+  //todavia no entiendo bien xq pero cuando recien arranco nunca hay found, asi q puedo usar eso a mi favor p/solo buscar prevChildren cuando hay un found (?)
+  const currentComment = found ? found : secondLevelDeepComment;
 
+  //data cuando hago modificaciones, es mas grande de lo q necesito
   return (
     <>
-      {topLevel !== comment._id && (
+      {topLevel !== secondLevelDeepComment._id && (
         //hacer esto de manera dinamica eventualmente
-        <button onClick={() => setTopLevel(comment._id)}>Volver atras</button>
+        <button onClick={() => setTopLevel(secondLevelDeepComment._id)}>
+          Volver atras
+        </button>
       )}
-      {immediateChildren.length > 0 && (
-        <ContainerComments>
-          {immediateChildren.map((c) => (
-            <CommentComp
-              comment={c}
-              data={remainder}
-              topLevel={topLevel}
-              setTopLevel={changeTopLevel}
-              key={c._id}
-              user={user}
-            />
-          ))}
-        </ContainerComments>
-      )}
+
+      <ContainerComments>
+        {/* antes loopeaba aca, pero dsp me di cuenta q no es necesario xq el parent ya me manda los comments individuales */}
+        <CommentComp
+          comment={currentComment}
+          data={data}
+          topLevel={topLevel}
+          setTopLevel={changeTopLevel}
+          key={currentComment._id}
+          user={user}
+        />
+      </ContainerComments>
     </>
   );
 };

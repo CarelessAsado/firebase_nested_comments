@@ -3,19 +3,7 @@ export default function getImmediateChildren(
   children: IComment[],
   topLevel?: string
 ) {
-  //getPreviousChildren as well
-  let found;
-  if (topLevel) {
-    found = children.find((i) => i._id === topLevel);
-    //nunca vas a encontrar en children al topLevel A LA PRIMERA VUELTA, ya q lo filtré previamente
-    console.log(children);
-    console.log(topLevel, 666);
-    console.log(found, 666, "FOUND");
-  }
-  //todavia no entiendo bien xq pero cuando recien arranco nunca hay found, asi q puedo usar eso a mi favor p/solo buscar prevChildren cuando hay un found (?)
-  const currentComment = found ? found : comment;
-
-  const expression = currentComment.path + "," + currentComment._id;
+  const expression = comment.path + "," + comment._id;
   const remainder: IComment[] = [];
   const immediateChildren: IComment[] = [];
 
@@ -67,5 +55,6 @@ _id: "635d6d940a1f4df00369a509"}
     //8
     //{id:9, path:"5,6,7,8"}
   );
+
   return { immediateChildren, remainder };
 }
