@@ -16,6 +16,7 @@ const initialState: State = {
   tareas: [],
   error: false,
   comments: [],
+  totalComments: 0,
 };
 
 export const login = createAsyncThunk(
@@ -233,6 +234,20 @@ export const getComments = createAsyncThunk(
     }
   }
 );
+export const getSubComments = createAsyncThunk(
+  "users/getSubComments",
+  async function (parentID: string, { dispatch }) {
+    try {
+      const { data } = await commentsAPI.getSubComments(parentID);
+
+      return { subComments: data, parentID };
+    } catch (error) {
+      errorHandler(error, dispatch);
+      //este error lo tiro xq si hago el unwrap en el front voy directo al .then()
+      throw error;
+    }
+  }
+);
 
 export const postNewComment = createAsyncThunk<
   IComment,
@@ -321,7 +336,19 @@ export const userSlice = createSlice({
 
     /* ------------------------------------------------------------------- */
     builder.addCase(getComments.fulfilled, (state, action) => {
-      state.comments = action.payload;
+      //add pagination
+      state.totalComments = action.payload.count;
+      state.comments = action.payload.commentsData;
+      state.loading = false;
+    });
+
+    builder.addCase(getSubComments.fulfilled, (state, action) => {
+      const modified = state.comments.map((comm) =>
+        comm._id === action.payload.parentID
+          ? { ...comm, subComments: 0 }
+          : comm
+      );
+      state.comments = [...modified, ...action.payload.subComments];
       state.loading = false;
     });
     builder.addCase(postNewComment.fulfilled, (state, action) => {
@@ -340,8 +367,6 @@ export const userSlice = createSlice({
     //calculo q si queres overridear el matcher tenés q agregar otro dsp no?
     // matcher can be defined outside as a type predicate function
     builder.addMatcher(isPending, (state, action) => {
-      console.log(action, 666);
-
       state.loading = true;
       state.error = false;
     });

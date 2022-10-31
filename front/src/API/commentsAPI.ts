@@ -13,9 +13,16 @@ export const postNewComment = (newTaskInput: INewCommentInput) => {
   );
 }; */
 export const getComments = function (controller?: AbortController) {
-  return axios.get<IComment[]>(BACKEND_URL.COMMENTS, {
-    signal: controller?.signal,
-  });
+  return axios.get<{ commentsData: IComment[]; count: number }>(
+    BACKEND_URL.COMMENTS,
+    {
+      signal: controller?.signal,
+    }
+  );
+};
+
+export const getSubComments = function (parentID: string) {
+  return axios.get<IComment[]>(BACKEND_URL.SUBCOMMENTSdyn(parentID));
 };
 export const deleteComment = async function (obj: IComment) {
   return axios.delete<void>(

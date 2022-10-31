@@ -54,5 +54,8 @@ const tasksRoutes = require("./routes/tasks");
 app.use(BACKEND_ENDPOINTS.ROOT_TASKS, tasksRoutes);
 const usersRoutes = require("./routes/users");
 app.use(BACKEND_ENDPOINTS.ROOT, usersRoutes);
+app.use("*", (req, res) => {
+  res.status(404).json("The resource you are looking for cannot be found.");
+});
 
 app.use(finalErrorHandler);

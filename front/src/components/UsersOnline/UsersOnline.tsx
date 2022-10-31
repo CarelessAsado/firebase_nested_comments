@@ -55,12 +55,19 @@ export const CloseTab = styled.span`
     place-items: center;
   }
 `;
-const UsersOnline = ({ users }: { users: UserNotNull[] }) => {
-  const [openChat, setOpenChat] = useState(true);
+const UsersOnline = ({
+  users,
+  setOpenChat,
+  openChat,
+}: {
+  users: UserNotNull[];
+  setOpenChat: () => void;
+  openChat: boolean;
+}) => {
   return (
     <SideContainer className="CONTAINER SIDE CHAT" openChat={openChat}>
       <div>
-        <CloseTab onClick={() => setOpenChat((v) => !v)}>
+        <CloseTab onClick={() => setOpenChat()}>
           <AiOutlineCloseCircle />
         </CloseTab>
       </div>
@@ -71,7 +78,7 @@ const UsersOnline = ({ users }: { users: UserNotNull[] }) => {
           return <UserOnlineItem userOnline={i} />;
         })
       )}
-      <SolapaChat openChat={openChat} onClick={() => setOpenChat((v) => !v)}>
+      <SolapaChat openChat={openChat} onClick={() => setOpenChat()}>
         <AiFillWechat />
       </SolapaChat>
       {users.length === 0 && "blabla"}

@@ -9,6 +9,7 @@ router.param("userID", checkOwnership);
 
 router.post("/", commentsController.createComment);
 router.get("/", commentsController.getAllTasks);
+router.get("/subcomments/:parentCommentID", commentsController.getSubComments);
 /* OWNERSHIP CHECK MIDDLEWARE */
 router.delete("/:userID/:id", commentsController.deleteTask);
 router.put("/:userID/:id", commentsController.updateTask);

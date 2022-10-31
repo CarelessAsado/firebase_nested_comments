@@ -46,6 +46,7 @@ export const ProfilePic = styled.img`
   width: ${picHeight};
   border-radius: 50%;
   object-fit: cover;
+  border: 1px solid white;
 `;
 const NoProfilePic = styled.div`
   min-width: ${picHeight};

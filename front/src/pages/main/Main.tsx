@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import {
   deleteComment,
   getComments,
+  getSubComments,
   newCommentDeleted,
   newCommentPostedAdded,
   postNewComment,
@@ -22,9 +23,13 @@ import { dispatchNotification } from "config/utils/dispatchNotification";
 import { Error } from "components/styled-components/styled";
 import TimeAgo from "timeago-react";
 import { Link } from "react-router-dom";
+import ParentComment from "./auxiliaries/ParentComments";
+import getImmediateChildren from "config/utils/getImmediateChildren";
 
-const Container = styled.div`
-  margin-left: ${widthSideChat};
+const Container = styled.div<{ isChatOpen: boolean }>`
+  //is chatClose, then margin-left:none
+  margin-left: ${(props) => (props.isChatOpen ? widthSideChat : "none")};
+  /* width: calc(100% - ${widthSideChat}); */
   border: 2px solid green;
   min-height: 100vh;
   height: 100%;
@@ -33,8 +38,10 @@ const Container = styled.div`
   justify-content: center;
   padding: 0 10px;
   transition: 0.3s;
+  border: 1px solid green;
   @media (max-width: ${disappearUserName}) {
-    margin-left: calc(${picHeight} + 20px);
+    margin-left: ${(props) =>
+      props.isChatOpen ? `calc(${picHeight} + 20px)` : "none"};
   }
 `;
 const Center = styled.div`
@@ -86,6 +93,8 @@ interface IProps {
   /*   setData: (value: React.SetStateAction<IComment[]>) => void; */
   data: IComment[];
   user: IUser;
+  topLevel: string;
+  setTopLevel: (commID: string) => void;
 }
 /* ---------------------------------REEMPLAZAR OLD FORM */
 const Form = styled.form`
@@ -151,7 +160,11 @@ export const Main = () => {
   );
   /*   const { socket } = useAppSelector((state) => state.user); */
   const [comment, setComment] = useState("");
-
+  //antes openChat estaba en UsersOnline component, lo terminé guardando aca, ya q el container de Main varia en su margin-left (es decir la width), cuando cierro o abro el chat
+  const [openChat, setOpenChat] = useState(true);
+  const openAndCloseChat = () => {
+    setOpenChat((v) => !v);
+  };
   const [usersOnline, setUsersOnline] = useState<UserNotNull[]>([]);
   const dispatch = useAppDispatch();
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -219,7 +232,7 @@ export const Main = () => {
   }, [user?._id, dispatch]);
 
   return (
-    <Container>
+    <Container isChatOpen={openChat}>
       <Form onSubmit={handleSubmit}>
         <Decoration>
           <Input
@@ -240,14 +253,18 @@ export const Main = () => {
       </Form>
 
       <Center>
-        <UsersOnline users={usersOnline} />
+        <UsersOnline
+          users={usersOnline}
+          setOpenChat={openAndCloseChat}
+          openChat={openChat}
+        />
         <ContainerComments>
           {comments
             .filter((it) => !it.path)
             .map((c) => (
-              <CommentComp
+              <ParentComment
                 comment={c}
-                /* setData={setData} */
+                //fijarse dsp de borrar
                 data={comments}
                 key={c._id}
                 user={user}
@@ -259,11 +276,23 @@ export const Main = () => {
   );
 };
 
-function CommentComp({ comment, /* setData, */ data, user }: IProps) {
+export function CommentComp({
+  comment,
+  topLevel,
+  setTopLevel,
+  data,
+  user,
+}: IProps) {
   const [newChildComment, setNewChildComment] = useState("");
+
   const dispatch = useAppDispatch();
-  const expression = comment.path + "," + comment._id;
-  const [children, setChildren] = useState<IComment[]>([]);
+
+  //LIMITE 5 LEVEL DEEP
+  //CON ESTO DECIDO SI LOOPEAR O NO
+  const startedAt = comment.path.split(",").findIndex((i) => i === topLevel);
+  const nowAt = comment.path.split(",").length;
+
+  const { immediateChildren, remainder } = getImmediateChildren(comment, data);
 
   const handleSubmit = () => {
     dispatch(
@@ -282,19 +311,31 @@ function CommentComp({ comment, /* setData, */ data, user }: IProps) {
     dispatch(deleteComment(comment));
   };
 
-  useEffect(() => {
-    const results = data.filter((it) => it.path && it.path === expression);
-    console.log(data, "FULL DATA", 666);
-    console.log(results);
-    console.log(expression);
-    setChildren(results);
-  }, [data, expression]);
-
   const deleteBtn = (
     <Button style={{ backgroundColor: "crimson" }} onClick={handleDelete}>
       Eliminar
     </Button>
   );
+  //si estamos en el limite de 4 pero no hay additionalChildren no tiene sentido mostrar el btn
+  if (nowAt - startedAt === 4 && immediateChildren.length > 0) {
+    console.log(comment.path, 666);
+    console.log(comment._id, 666);
+    console.log(topLevel, 666);
+    return (
+      <>
+        {comment._id + " " + comment.value}
+        {/* como evaluo si el comment tiene o no comentarios nested adicionales???
+        en ppio dejar p/el final, primero fetchear todo y hacer esa tarea en el front con la data q ya tenemos, es decir q si no hay remaining children no mostramos este boton */}
+        <button onClick={() => setTopLevel(comment._id)}>
+          LOOPEAR A PARTIR DE OTRO PUNTO
+        </button>
+      </>
+    );
+    //add a btn to maybe fetch more, if there are more comments
+    //update useState with the new topLevel when btnPressed
+    //how can I deal with go back to previous comment
+    //stop recursion
+  }
   return (
     <div>
       {typeof comment.userID !== "string" && (
@@ -318,15 +359,25 @@ function CommentComp({ comment, /* setData, */ data, user }: IProps) {
           comment.userID._id === user?._id &&
           deleteBtn}
         {comment.userID === user?._id && deleteBtn}
+        {!!comment.subComments && comment.subComments > 0 && (
+          //esto setea los children en PARENTCOMPONENT AHORA
+          <Button onClick={() => dispatch(getSubComments(comment._id))}>
+            {comment.subComments > 1
+              ? `See all ${comment.subComments} answers`
+              : "See response"}
+          </Button>
+        )}
         {/* <Button>Likear</Button> */}
       </div>
       {}
-      {children.length > 0 && (
+      {immediateChildren.length > 0 && (
         <ContainerComments>
-          {children.map((c) => (
+          {immediateChildren.map((c) => (
             <CommentComp
               comment={c}
-              /* setData={setData} */ data={data}
+              data={remainder}
+              topLevel={topLevel}
+              setTopLevel={setTopLevel}
               key={c._id}
               user={user}
             />

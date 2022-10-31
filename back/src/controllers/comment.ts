@@ -119,9 +119,10 @@ export const getAllTasks = errorWrapper(async (req, res, next) => {
           //podria usar un $set en donde cotejo is $nested existent? subComments:0 : subcomments: "$nested.totalSubquery"
           {
             $set: {
-              moreSubComments: {
+              subComments: {
                 $cond: [
                   { $ifNull: ["$nested", false] },
+                  //exists no se puede adentro de aggregation: https://stackoverflow.com/questions/41542746/mongoose-aggregate-using-exists-in-cond
                   /* { nested: { $exists: true } }, */
                   "$nested.totalSubquery",
                   0,
@@ -152,14 +153,31 @@ export const getAllTasks = errorWrapper(async (req, res, next) => {
     },
   ]);
 
-  console.log(
-    facet[0].commentsData[0],
-    "holaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-    facet[0].commentsData[1],
-    99999999999,
-    "holaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-  );
-  res.status(200).json(facet[0].commentsData);
+  console.log(facet[0]);
+  res.status(200).json(facet[0]);
+});
+
+export const getSubComments = errorWrapper(async (req, res, next) => {
+  console.log("fooo fddsfsd");
+  const { _id: userID } = req.user;
+  let { page = 1, limit = 30 } = req.query;
+  const { parentCommentID } = req.params;
+  console.log(parentCommentID);
+  limit = Number(limit);
+  page = Number(page);
+  if (limit > 50) {
+    limit = 30;
+  }
+
+  //agregar pagination eventualmente
+  const subComments = await Comment.find<IDirectory>({
+    path: {
+      $regex: parentCommentID,
+    },
+  }).populate({ path: "userID", select: "img username _id" });
+
+  console.log("subComments result: ", subComments);
+  res.status(200).json(subComments);
 });
 
 export const getSingleTask = errorWrapper(async (req, res, next) => {

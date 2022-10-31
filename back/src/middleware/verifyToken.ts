@@ -41,9 +41,8 @@ export default async function verifyMongoUser(
     if (!found) {
       return next(new CustomError(404, "Mongo user not found."));
     }
-
+    console.log("CHECKING USER MIDDLEWARE COMPLETED");
     req.user = found;
-
     return next();
   } catch (error) {
     return next(error);

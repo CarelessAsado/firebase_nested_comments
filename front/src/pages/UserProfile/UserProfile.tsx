@@ -108,6 +108,7 @@ export const UserProfile = () => {
   }, [dispatch, paramsUserid, user]);
 
   console.log(userProfile);
+  const isOwner = paramsUserid === user?._id;
   return (
     <Container>
       <ProfileImg src={userProfile?.img || ""}></ProfileImg>
@@ -118,14 +119,11 @@ export const UserProfile = () => {
         <Error aria-live="assertive">{error}</Error>
         <ColumnFlex>
           <TopPart style={{ flex: 1 }} className="flex1 topPart">
-            {!!userProfile && (
-              <Contacto
-                user={userProfile}
-                isOwner={userProfile._id === user?._id}
-              />
-            )}
+            {userProfile && <Contacto user={userProfile} isOwner={isOwner} />}
           </TopPart>
-          <BtnLogout onClick={() => dispatch(logout())}>Logout</BtnLogout>
+          {isOwner && (
+            <BtnLogout onClick={() => dispatch(logout())}>Logout</BtnLogout>
+          )}
         </ColumnFlex>
       </ProfileSection>
     </Container>
