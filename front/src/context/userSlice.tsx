@@ -286,7 +286,7 @@ export const deleteComment = createAsyncThunk(
 
 export const userSlice = createSlice({
   name: "user",
-  initialState: initialState,
+  initialState,
   reducers: {
     /* ----------ERROR------------------------ */
     renderError: (state, action) => {

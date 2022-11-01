@@ -2,13 +2,22 @@ import { FRONTEND_ENDPOINTS } from "config/constants";
 import { deleteComment, postNewComment } from "context/userSlice";
 import * as commentAPI from "API/commentsAPI";
 import { useAppDispatch } from "hooks/reduxDispatchAndSelector";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
 import TimeAgo from "timeago-react";
 import { ProfilePic } from "components/UsersOnline/auxiliaries/UserOnlineItem";
-import { CommentComp } from "../Main";
-import getImmediateChildren from "config/utils/getImmediateChildren";
+import getImmediateChildren, {
+  goBackToPreviousNestedLevel,
+} from "config/utils/nestedLevelUIFunctions";
+import { SingleSubComment } from "./SingleSubComment";
+
+const ParentCommentContainer = styled.div`
+  padding: 10px;
+  border-radius: 5px;
+  background-color: black;
+  color: white;
+`;
 
 const Button = styled.button`
   padding: 10px;
@@ -23,17 +32,18 @@ export const Value = styled.div`
   font-size: 1.2rem;
   padding: 5px 0;
 `;
-export const ContainerComments = styled.div`
+export const ContainerAllSubComments = styled.div`
   //the 10px-margin provides the nesting effect
-  margin: 20px 0 0 10px;
-  display: flex;
+  /*   margin: 20px 0 0 10px; */
+  /* display: flex;
   flex-direction: column;
-  gap: 10px;
-
+  gap: 10px; */
+  //ESTO APLICA A C/SUBCOMMENT y al CHILD CONTROLLER COMPONENT
   & > * {
     background-color: grey;
     padding: 10px;
     border-radius: 5px;
+    border: 1px yellow solid;
   }
 `;
 
@@ -64,10 +74,6 @@ export const GrowFlex1 = styled(Link)`
   display: flex;
   gap: 7px;
   align-items: center;
-`;
-const ParentCommentContainer = styled.div`
-  background-color: black;
-  color: white;
 `;
 
 const ParentComment = ({ comment, user }: IProps) => {
@@ -149,7 +155,7 @@ const ParentComment = ({ comment, user }: IProps) => {
       </ParentCommentContainer>
 
       {immediateChildren.length > 0 && (
-        <ContainerComments>
+        <ContainerAllSubComments>
           {/* TIENE Q LOOPEAR SOLO LOS 1EROS COMMENTS, creo q ahi juega lo de expression */}
           {immediateChildren.map((c) => {
             return (
@@ -161,7 +167,7 @@ const ParentComment = ({ comment, user }: IProps) => {
               />
             );
           })}
-        </ContainerComments>
+        </ContainerAllSubComments>
       )}
     </>
   );
@@ -189,24 +195,34 @@ const ChildrenControllerTopLevel = ({
 
   //getPreviousChildren as well
   let found = data.find((i) => i._id === topLevel);
-  //nunca vas a encontrar en children al topLevel A LA PRIMERA VUELTA, ya q lo filtré previamente
 
-  //todavia no entiendo bien xq pero cuando recien arranco nunca hay found, asi q puedo usar eso a mi favor p/solo buscar prevChildren cuando hay un found (?)
+  //nunca vas a encontrar en children al topLevel A LA PRIMERA VUELTA, ya q lo filtré previamente. No obstante, si cambio el topLevel a un _id nested deeper in the Comment tree, then you will find sth
+
+  //ESTO ES VIEJO: todavia no entiendo bien xq pero cuando recien arranco nunca hay found, asi q puedo usar eso a mi favor p/solo buscar prevChildren cuando hay un found (?)
   const currentComment = found ? found : secondLevelDeepComment;
+  console.log(
+    "FOUND TOP LEVEL COMMENT: ",
+    currentComment,
+    "check path and _id"
+  );
+  //data cuando hago modificaciones al topLevel, es mas grande de lo q necesito
 
-  //data cuando hago modificaciones, es mas grande de lo q necesito
   return (
     <>
+      <div>CONTROLLER</div>
+      {/* BOTON P/ VOLVER A ATRAS CUANDO ESTOY DEEP IN THE SUBCOMMENT TREE */}
       {topLevel !== secondLevelDeepComment._id && (
-        //hacer esto de manera dinamica eventualmente
-        <button onClick={() => setTopLevel(secondLevelDeepComment._id)}>
+        <button
+          onClick={() =>
+            setTopLevel(goBackToPreviousNestedLevel(currentComment))
+          }
+        >
           Volver atras
         </button>
       )}
-
-      <ContainerComments>
+      <div>
         {/* antes loopeaba aca, pero dsp me di cuenta q no es necesario xq el parent ya me manda los comments individuales */}
-        <CommentComp
+        <SingleSubComment
           comment={currentComment}
           data={data}
           topLevel={topLevel}
@@ -214,7 +230,7 @@ const ChildrenControllerTopLevel = ({
           key={currentComment._id}
           user={user}
         />
-      </ContainerComments>
+      </div>
     </>
   );
 };

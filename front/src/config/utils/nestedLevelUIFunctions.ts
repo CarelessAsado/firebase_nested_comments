@@ -1,3 +1,5 @@
+const NESTING_LIMIT_UI = 4;
+
 export default function getImmediateChildren(
   comment: IComment,
   children: IComment[],
@@ -57,4 +59,15 @@ _id: "635d6d940a1f4df00369a509"}
   );
 
   return { immediateChildren, remainder };
+}
+
+export function goBackToPreviousNestedLevel(currentComment: IComment) {
+  const indexPrior = currentComment.path.split(",").length - NESTING_LIMIT_UI;
+  return currentComment.path.split(",")[indexPrior];
+}
+
+export function limitNestingUI(comment: IComment, topLevel: string) {
+  const startedAt = comment.path.split(",").findIndex((i) => i === topLevel);
+  const nowAt = comment.path.split(",").length;
+  return nowAt - startedAt === NESTING_LIMIT_UI;
 }
