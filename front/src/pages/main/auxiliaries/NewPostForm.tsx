@@ -23,13 +23,13 @@ const Decoration = styled.div`
 
 const SubmitBtn = styled.button`
   font-size: inherit;
-  background-color: #2775a8;
+  background-color: var(--mainBlue);
   color: white;
   padding: 20px;
   transition: 0.3s;
   cursor: pointer;
   &:hover {
-    background-color: #2d4d95;
+    background-color: var(--mainBlueHover);
   }
   &:active {
     transform: scale(0.8);

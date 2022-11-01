@@ -11,40 +11,30 @@ import getImmediateChildren, {
   goBackToPreviousNestedLevel,
 } from "config/utils/nestedLevelUIFunctions";
 import { SingleSubComment } from "./SingleSubComment";
+import {
+  Button,
+  ButtonContainer,
+  commentContainerBaseStyles,
+  GrowFlex1,
+  Input,
+  Top,
+  Value,
+} from "./styles";
 
 const ParentCommentContainer = styled.div`
-  padding: 10px;
-  border-radius: 5px;
-  background-color: black;
-  color: white;
+  ${commentContainerBaseStyles}
 `;
 
-const Button = styled.button`
-  padding: 10px;
-  color: white;
-  background-color: blue;
-  border: 1px solid black;
-  border-radius: 5px;
-  margin-left: 5px;
-`;
-export const Value = styled.div`
-  color: white;
-  font-size: 1.2rem;
-  padding: 5px 0;
-`;
 export const ContainerAllSubComments = styled.div`
-  //the 10px-margin provides the nesting effect
-  /*   margin: 20px 0 0 10px; */
-  /* display: flex;
+  display: flex;
   flex-direction: column;
-  gap: 10px; */
+  background-color: #f1c6c6;
+  gap: 5px;
   //ESTO APLICA A C/SUBCOMMENT y al CHILD CONTROLLER COMPONENT
-  & > * {
-    background-color: grey;
-    padding: 10px;
+  /*   & > * {
     border-radius: 5px;
     border: 1px yellow solid;
-  }
+  } */
 `;
 
 interface IProps {
@@ -54,33 +44,13 @@ interface IProps {
   data: IComment[];
   user: IUser;
 }
-/* ---------------------------------REEMPLAZAR OLD FORM */
-
-const Top = styled.div`
-  display: flex;
-  align-items: center;
-`;
-
-const Input = styled.input`
-  padding: 10px;
-
-  border: 1px solid black;
-  border-radius: 5px;
-  font-size: inherit;
-  width: 100%;
-`;
-export const GrowFlex1 = styled(Link)`
-  flex: 1;
-  display: flex;
-  gap: 7px;
-  align-items: center;
-`;
 
 const ParentComment = ({ comment, user }: IProps) => {
   const dispatch = useAppDispatch();
 
   const [children, setChildren] = useState<IComment[]>([]);
   const [newChildComment, setNewChildComment] = useState("");
+
   async function getSubComments() {
     try {
       const { data } = await commentAPI.getSubComments(comment._id);
@@ -132,12 +102,12 @@ const ParentComment = ({ comment, user }: IProps) => {
           </Top>
         )}
         <Value>{comment.value}</Value>{" "}
-        <div>
-          <Input
-            placeholder="Agregar comentario/child"
-            value={newChildComment}
-            onChange={(e) => setNewChildComment(e.target.value)}
-          ></Input>{" "}
+        <Input
+          placeholder="Agregar comentario/child"
+          value={newChildComment}
+          onChange={(e) => setNewChildComment(e.target.value)}
+        ></Input>{" "}
+        <ButtonContainer>
           <Button onClick={handleSubmit}>Comentar</Button>
           {typeof comment.userID !== "string" &&
             comment.userID._id === user?._id &&
@@ -151,7 +121,7 @@ const ParentComment = ({ comment, user }: IProps) => {
                 : "See response"}
             </Button>
           )}
-        </div>
+        </ButtonContainer>
       </ParentCommentContainer>
 
       {immediateChildren.length > 0 && (
@@ -220,17 +190,16 @@ const ChildrenControllerTopLevel = ({
           Volver atras
         </button>
       )}
-      <div>
-        {/* antes loopeaba aca, pero dsp me di cuenta q no es necesario xq el parent ya me manda los comments individuales */}
-        <SingleSubComment
-          comment={currentComment}
-          data={data}
-          topLevel={topLevel}
-          setTopLevel={changeTopLevel}
-          key={currentComment._id}
-          user={user}
-        />
-      </div>
+
+      {/* antes loopeaba aca, pero dsp me di cuenta q no es necesario xq el parent ya me manda los comments individuales */}
+      <SingleSubComment
+        comment={currentComment}
+        data={data}
+        topLevel={topLevel}
+        setTopLevel={changeTopLevel}
+        key={currentComment._id}
+        user={user}
+      />
     </>
   );
 };

@@ -62,31 +62,18 @@ if (nowAt - startedAt === 4) {
 }
 console.log(nowAt - startedAt);
 
-state.items = state.items.map((i) =>
-  i.id === action.payload.id ? { ...i, ...action.payload.data } : i
-);
-
 const firstTopLevel = {
   path: ",6355d1207f88f3934f46bf62",
-  updatedAt: "2022-10-31T20:51:15.757Z",
-  userID: {
-    _id: "63507b997616f4109296833c",
-    username: "Developer",
-    img: "https://res.cloudinary.com/dxzaig6ek/image/upload/v1666219654/TS_FIREBASE/m6jfziddwpg7oyq1cfki.png",
-  },
   value: "Hola Mani",
-  __v: 0,
   _id: "63603543a85360f02127dab1",
 };
+//este se ve en la primer tanda, y en la 2da
 const changeTopLevel = {
   path: ",6355d1207f88f3934f46bf62,63603543a85360f02127dab1,63603b54a85360f02127db44,63603db2a85360f02127db66,63603dcfa85360f02127db76",
-  updatedAt: "2022-10-31T21:28:23.967Z",
-  userID: {
-    _id: "63507b997616f4109296833c",
-    username: "Developer",
-    img: "https://res.cloudinary.com/dxzaig6ek/image/upload/v1666219654/TS_FIREBASE/m6jfziddwpg7oyq1cfki.png",
-  },
   value: "are you down",
-  __v: 0,
   _id: "63603df7a85360f02127db8a",
 };
+//el primer level ya esta cubierto
+//tenemos q arrancar en no 2 y terminar en no 2
+const indexPrior = changeTopLevel.path.split(",").length - 4;
+console.log(changeTopLevel.path.split(",")[indexPrior]);
