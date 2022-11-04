@@ -15,8 +15,6 @@ const initialState: State = {
   loading: false,
   tareas: [],
   error: false,
-  comments: [],
-  totalComments: 0,
 };
 
 export const login = createAsyncThunk(
@@ -221,68 +219,6 @@ export const logout = createAsyncThunk(
 );
 
 /* ------------------------COMMENTS SUCCESS ACTIONS--------------------- */
-export const getComments = createAsyncThunk(
-  "users/getComments",
-  async function (_, { dispatch }) {
-    try {
-      const { data } = await commentsAPI.getComments();
-      return data;
-    } catch (error) {
-      errorHandler(error, dispatch);
-      //este error lo tiro xq si hago el unwrap en el front voy directo al .then()
-      throw error;
-    }
-  }
-);
-export const getSubComments = createAsyncThunk(
-  "users/getSubComments",
-  async function (parentID: string, { dispatch }) {
-    try {
-      const { data } = await commentsAPI.getSubComments(parentID);
-
-      return { subComments: data, parentID };
-    } catch (error) {
-      errorHandler(error, dispatch);
-      //este error lo tiro xq si hago el unwrap en el front voy directo al .then()
-      throw error;
-    }
-  }
-);
-
-export const postNewComment = createAsyncThunk<
-  IComment,
-  INewCommentInput,
-  { dispatch: AppDispatch; state: RootState }
->("users/postNewComments", async function (obj, { dispatch, getState }) {
-  try {
-    const { data } = await commentsAPI.postNewComment(obj);
-    const {
-      user: { user },
-    } = getState();
-    const populateUser = { ...data, userID: { ...user } } as IComment;
-    socket?.emit("commentPosted", { ...data, userID: { ...user } });
-    return populateUser;
-  } catch (error) {
-    await errorHandler(error, dispatch);
-    //este error lo tiro xq si hago el unwrap en el front voy directo al .then()
-    throw error;
-  }
-});
-
-export const deleteComment = createAsyncThunk(
-  "users/deleteComment",
-  async function (obj: IComment, { dispatch }) {
-    try {
-      await commentsAPI.deleteComment(obj);
-      socket?.emit("commentDeleted", obj);
-      return obj;
-    } catch (error) {
-      await errorHandler(error, dispatch);
-      //este error lo tiro xq si hago el unwrap en el front voy directo al .then()
-      throw error;
-    }
-  }
-);
 
 export const userSlice = createSlice({
   name: "user",
@@ -297,16 +233,6 @@ export const userSlice = createSlice({
     resetError: (state) => {
       state.loading = false;
       state.error = false;
-    },
-    newCommentPostedAdded: (state, action) => {
-      state.loading = false;
-      state.error = false;
-      state.comments = addCommentState(state.comments, action.payload);
-    },
-    newCommentDeleted: (state, action) => {
-      state.loading = false;
-      state.error = false;
-      state.comments = deleteCommentState(state.comments, action.payload);
     },
   },
   extraReducers: (builder) => {
@@ -326,37 +252,10 @@ export const userSlice = createSlice({
       state.loading = initialState.loading;
       state.user = initialState.user;
       state.tareas = initialState.tareas;
-      state.comments = initialState.comments;
     });
 
     builder.addCase(updatePwd.fulfilled, (state, action) => {
       state.error = false;
-      state.loading = false;
-    });
-
-    /* ------------------------------------------------------------------- */
-    builder.addCase(getComments.fulfilled, (state, action) => {
-      //add pagination
-      state.totalComments = action.payload.count;
-      state.comments = action.payload.commentsData;
-      state.loading = false;
-    });
-
-    builder.addCase(getSubComments.fulfilled, (state, action) => {
-      const modified = state.comments.map((comm) =>
-        comm._id === action.payload.parentID
-          ? { ...comm, subComments: 0 }
-          : comm
-      );
-      state.comments = [...modified, ...action.payload.subComments];
-      state.loading = false;
-    });
-    builder.addCase(postNewComment.fulfilled, (state, action) => {
-      state.comments = addCommentState(state.comments, action.payload);
-      state.loading = false;
-    });
-    builder.addCase(deleteComment.fulfilled, (state, action) => {
-      state.comments = deleteCommentState(state.comments, action.payload);
       state.loading = false;
     });
 
@@ -373,30 +272,6 @@ export const userSlice = createSlice({
   },
 });
 
-export const {
-  renderError,
-  resetError,
-  newCommentPostedAdded,
-  newCommentDeleted,
-} = userSlice.actions;
+export const { renderError, resetError } = userSlice.actions;
 
 export default userSlice.reducer;
-
-function addCommentState(comments: IComment[], newC: IComment): IComment[] {
-  return [...comments, newC];
-}
-
-function deleteCommentState(
-  comments: IComment[],
-  commentToBeDeleted: IComment
-) {
-  const { path, _id } = commentToBeDeleted;
-  return comments.filter(
-    (
-      i //si estan al mismo level dos folders, el path va a coincidir pero no la tengo q borrar, x eso agrego doble check
-    ) =>
-      (!i.path.includes(path) && i.path === path) ||
-      //con este borro el item q clickeo, e incluyo todos (x ende tengo q filtrar +)
-      i._id !== _id
-  );
-}

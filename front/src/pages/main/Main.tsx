@@ -2,10 +2,10 @@ import styled from "styled-components";
 import { useAppDispatch, useAppSelector } from "hooks/reduxDispatchAndSelector";
 import { useEffect, useState } from "react";
 import {
-  getComments,
+  /*   getComments, */
   newCommentDeleted,
   newCommentPostedAdded,
-} from "context/userSlice";
+} from "context/generalSlice";
 import io, { Socket } from "socket.io-client";
 import { BACKEND_ROOT } from "config/constants";
 import { getHeadersChatAuth } from "API/axiosInstanceJWT";
@@ -18,6 +18,7 @@ import { dispatchNotification } from "config/utils/dispatchNotification";
 
 import ParentComment from "./auxiliaries/ParentComments";
 import NewPostForm from "./auxiliaries/NewPostForm";
+import { getComments } from "context/generalSlice";
 
 const Container = styled.div<{ isChatOpen: boolean }>`
   //is chatClose, then margin-left:none
@@ -59,7 +60,9 @@ export let socket: Socket | undefined;
 //puedo hacer un useRef en app, y q si no hay user, directamente logueé out, y hacer los users connected desde el STORE
 
 export const Main = () => {
-  const { comments, user } = useAppSelector((state) => state.user);
+  const { user } = useAppSelector((state) => state.user);
+  const { comments } = useAppSelector((state) => state.general);
+  /*   const { comments } = useAppSelector((state) => state.general); */
   /*   const { socket } = useAppSelector((state) => state.user); */
 
   //antes openChat estaba en UsersOnline component, lo terminé guardando aca, ya q el container de Main varia en su margin-left (es decir la width), cuando cierro o abro el chat
@@ -127,7 +130,7 @@ export const Main = () => {
       /* socket.disconnect(); */
     };
   }, [user?._id, dispatch]);
-
+  console.log(comments, 777);
   return (
     <Container isChatOpen={openChat}>
       <NewPostForm />

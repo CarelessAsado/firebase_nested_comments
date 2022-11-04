@@ -5,7 +5,9 @@ interface IComment {
   likes: string[];
   _id: string;
   createdAt: Date;
-  subComments?: number;
+  totalSubcomments?: number;
+  //fijarse q esto no me complique la vida
+  children: IComment[];
 }
 
 type INewCommentInput = Pick<IComment, "value" | "id" | "path">;

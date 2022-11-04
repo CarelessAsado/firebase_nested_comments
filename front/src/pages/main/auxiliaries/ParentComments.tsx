@@ -1,9 +1,12 @@
 import { FRONTEND_ENDPOINTS } from "config/constants";
-import { deleteComment, postNewComment } from "context/userSlice";
+import {
+  deleteComment,
+  getSubComments,
+  postNewComment,
+} from "context/generalSlice";
 import * as commentAPI from "API/commentsAPI";
 import { useAppDispatch } from "hooks/reduxDispatchAndSelector";
 import { useState } from "react";
-import { Link } from "react-router-dom";
 import styled from "styled-components";
 import TimeAgo from "timeago-react";
 import { ProfilePic } from "components/UsersOnline/auxiliaries/UserOnlineItem";
@@ -44,20 +47,16 @@ interface IProps {
   data: IComment[];
   user: IUser;
 }
-
-const ParentComment = ({ comment, user }: IProps) => {
+//esto eventualmente lo puedo borrar: "data"
+const ParentComment = ({ comment, user, data }: IProps) => {
   const dispatch = useAppDispatch();
-
-  const [children, setChildren] = useState<IComment[]>([]);
+  console.log(
+    "PARENT: ssssssssssssssssssssssssssssssssssssssss",
+    comment.value
+  );
+  /*  alert(comment.value); */
   const [newChildComment, setNewChildComment] = useState("");
 
-  async function getSubComments() {
-    try {
-      const { data } = await commentAPI.getSubComments(comment._id);
-      console.log(data, 666, "TODOS LOS CHILDREN Q TIENE Q APARECER ");
-      setChildren(data);
-    } catch (error) {}
-  }
   const handleSubmit = () => {
     dispatch(
       //armar esto dsp en el backend
@@ -78,9 +77,9 @@ const ParentComment = ({ comment, user }: IProps) => {
   //ESTO PUEDE GENERAR PROBLEMAS DSP, VER SI LO TENGO Q JUNTAR CON EL CHILD CONTROLLER
   let { immediateChildren, remainder } = getImmediateChildren(
     comment,
-    children
+    comment.children
   );
-
+  /*  immediateChildren.length && alert(comment.value); */
   console.log("immediateChildren: ", immediateChildren);
   console.log("remainder: ", remainder);
 
@@ -89,6 +88,11 @@ const ParentComment = ({ comment, user }: IProps) => {
       Eliminar
     </Button>
   );
+
+  async function getSubCommentsFn() {
+    dispatch(getSubComments(comment._id));
+  }
+
   return (
     <>
       <ParentCommentContainer>
@@ -113,11 +117,11 @@ const ParentComment = ({ comment, user }: IProps) => {
             comment.userID._id === user?._id &&
             deleteBtn}
           {comment.userID === user?._id && deleteBtn}
-          {!!comment.subComments && comment.subComments > 0 && (
+          {!!comment.totalSubcomments && comment.totalSubcomments > 0 && (
             //getSubComments va a pasar a ser parte del parentComponent
-            <Button onClick={getSubComments}>
-              {comment.subComments > 1
-                ? `See all ${comment.subComments} answers`
+            <Button onClick={getSubCommentsFn}>
+              {comment.totalSubcomments > 1
+                ? `See all ${comment.totalSubcomments} answers`
                 : "See response"}
             </Button>
           )}

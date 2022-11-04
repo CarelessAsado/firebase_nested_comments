@@ -6,9 +6,18 @@ export default function getImmediateChildren(
   topLevel?: string
 ) {
   const expression = comment.path + "," + comment._id;
+  /* alert(expression); */
+  /*   alert(comment.value); */
+  console.log(
+    "PARENT: ssssssssssssssssssssssssssssssssssssssss",
+    comment.value
+  );
   const remainder: IComment[] = [];
   const immediateChildren: IComment[] = [];
-
+  if (comment._id === "6355d1207f88f3934f46bf62") {
+    console.log(expression, 777);
+    console.log(children, 777);
+  }
   //Como decido a partir de donde loopear p/mostrar comentarios
   //primero hago un stop a los 5 niveles deep
   //tengo q saber si hay + comentarios p/fetchear (esolo podria dejar p/dsp)

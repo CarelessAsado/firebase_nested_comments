@@ -1,6 +1,6 @@
 import Spinner from "components/loaders/loader";
 import { Error } from "components/styled-components/styled";
-import { postNewComment } from "context/userSlice";
+import { postNewComment } from "context/generalSlice";
 import { useAppDispatch, useAppSelector } from "hooks/reduxDispatchAndSelector";
 import { useState } from "react";
 import styled from "styled-components";
@@ -50,7 +50,7 @@ const Loading = styled.h2`
 const NewPostForm = () => {
   const [comment, setComment] = useState("");
 
-  const { loading, error } = useAppSelector((state) => state.user);
+  const { loading, error } = useAppSelector((state) => state.general);
   const dispatch = useAppDispatch();
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();

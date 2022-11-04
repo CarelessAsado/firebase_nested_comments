@@ -7,7 +7,7 @@ import {
   deleteComment,
   getSubComments,
   postNewComment,
-} from "context/userSlice";
+} from "context/generalSlice";
 import styled from "styled-components";
 import TimeAgo from "timeago-react";
 import { ProfilePic } from "components/UsersOnline/auxiliaries/UserOnlineItem";
@@ -28,9 +28,12 @@ const SingleSubCommentContainer = styled.div<{ order: number }>`
   //the 10px-margin provides the nesting effect
   /* margin: 20px 0 0 10px; */
   margin-left: ${(props) => `calc(${props.order * 20}px)`};
+
   // dejé este método de lado xq no me gustaba q el comment estuviera adentro del otro
   //c/subcommentContainer va a tomar una prop, y en base a ese indice va a multiplicar
-  ${commentContainerBaseStyles};
+  ${commentContainerBaseStyles}
+  background-color:var(--mainBlue);
+  width: 300px;
 `;
 
 interface IProps {
@@ -114,11 +117,11 @@ export function SingleSubComment({
             comment.userID._id === user?._id &&
             deleteBtn}
           {comment.userID === user?._id && deleteBtn}
-          {!!comment.subComments && comment.subComments > 0 && (
+          {!!comment.totalSubcomments && comment.totalSubcomments > 0 && (
             //esto setea los children en PARENTCOMPONENT AHORA
             <Button onClick={() => dispatch(getSubComments(comment._id))}>
-              {comment.subComments > 1
-                ? `See all ${comment.subComments} answers`
+              {comment.totalSubcomments > 1
+                ? `See all ${comment.totalSubcomments} answers`
                 : "See response"}
             </Button>
           )}
@@ -131,6 +134,14 @@ export function SingleSubComment({
             SEE MORE COMMENTS
           </Button>
         )}
+        {
+          /* immediateChildren.length > 0 */ comment.totalSubcomments &&
+            comment.totalSubcomments > 0 && (
+              <Button onClick={() => setTopLevel(comment._id)}>
+                SEE MORE COMMENTS
+              </Button>
+            )
+        }
       </SingleSubCommentContainer>
       {!limitNestingUI(comment, topLevel) &&
         immediateChildren.length > 0 &&

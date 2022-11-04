@@ -22,11 +22,16 @@ type IRegisterInput = Pick<UserNotNull, "username" | "email"> & {
 
 type State = {
   tareas: ITarea[];
-  comments: IComment[];
-  totalComments: number;
   user: IUser;
   error: boolean | string;
   loading: boolean;
+};
+type GeneralState = {
+  comments: IComment[];
+  totalComments: number;
+  error: boolean | string;
+  loading: boolean;
+  notification: string;
 };
 
 type ILoginInput = Pick<UserNotNull, "email"> & {
