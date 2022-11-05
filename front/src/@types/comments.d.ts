@@ -5,7 +5,7 @@ interface IComment {
   likes: string[];
   _id: string;
   createdAt: Date;
-  totalSubcomments?: number;
+  remainingChildren?: number;
   //fijarse q esto no me complique la vida
   children: IComment[];
 }

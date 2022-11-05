@@ -117,11 +117,11 @@ const ParentComment = ({ comment, user, data }: IProps) => {
             comment.userID._id === user?._id &&
             deleteBtn}
           {comment.userID === user?._id && deleteBtn}
-          {!!comment.totalSubcomments && comment.totalSubcomments > 0 && (
+          {!!comment.remainingChildren && comment.remainingChildren > 0 && (
             //getSubComments va a pasar a ser parte del parentComponent
             <Button onClick={getSubCommentsFn}>
-              {comment.totalSubcomments > 1
-                ? `See all ${comment.totalSubcomments} answers`
+              {comment.remainingChildren > 1
+                ? `See all ${comment.remainingChildren} answers`
                 : "See response"}
             </Button>
           )}

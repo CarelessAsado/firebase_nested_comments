@@ -117,11 +117,11 @@ export function SingleSubComment({
             comment.userID._id === user?._id &&
             deleteBtn}
           {comment.userID === user?._id && deleteBtn}
-          {!!comment.totalSubcomments && comment.totalSubcomments > 0 && (
+          {!!comment.remainingChildren && comment.remainingChildren > 0 && (
             //esto setea los children en PARENTCOMPONENT AHORA
             <Button onClick={() => dispatch(getSubComments(comment._id))}>
-              {comment.totalSubcomments > 1
-                ? `See all ${comment.totalSubcomments} answers`
+              {comment.remainingChildren > 1
+                ? `See all ${comment.remainingChildren} answers`
                 : "See response"}
             </Button>
           )}
@@ -134,14 +134,14 @@ export function SingleSubComment({
             SEE MORE COMMENTS
           </Button>
         )}
-        {
-          /* immediateChildren.length > 0 */ comment.totalSubcomments &&
-            comment.totalSubcomments > 0 && (
+        {/* {
+          /* immediateChildren.length > 0  comment.remainingChildren &&
+            comment.remainingChildren > 0 && (
               <Button onClick={() => setTopLevel(comment._id)}>
                 SEE MORE COMMENTS
               </Button>
             )
-        }
+        } */}
       </SingleSubCommentContainer>
       {!limitNestingUI(comment, topLevel) &&
         immediateChildren.length > 0 &&
