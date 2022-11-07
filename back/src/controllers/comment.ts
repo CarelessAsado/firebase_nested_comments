@@ -267,7 +267,9 @@ export const getSubComments = errorWrapper(async (req, res, next) => {
   if (limit > 50) {
     limit = 30;
   }
+  //hacer fetchear 5 max p/arrancar, asi veo como anda el sistema, dsp pasar a 20,
 
+  //es complicado, xq c/branch puede tener infinitas variaciones, entonces, puedo hacer un fetch de todo y enviar 20. Pero, como sé cual path esta truncado, y cual esta ya completo???? Esta info la necesito p/determinar si pongo o no un fetch more btn
   //agregar pagination eventualmente
   const subComments = await Comment.find<IDirectory>({
     path: {
@@ -278,6 +280,50 @@ export const getSubComments = errorWrapper(async (req, res, next) => {
   console.log("subComments result: ", subComments);
   res.status(200).json(subComments);
 });
+export const getMoreFirstLevelComments = errorWrapper(async (req, res, next) => {
+  console.log("fooo fddsfsd");
+  const { _id: userID } = req.user;
+  let { page = 1, limit = 30 } = req.query;
+  const { parentCommentID } = req.params;
+  console.log(parentCommentID);
+  limit = Number(limit);
+  page = Number(page);
+  if (limit > 50) {
+    limit = 30;
+  }
+  //hacer fetchear 5 max p/arrancar, asi veo como anda el sistema, dsp pasar a 20,
+
+  //es complicado, xq c/branch puede tener infinitas variaciones, entonces, puedo hacer un fetch de todo y enviar 20. Pero, como sé cual path esta truncado, y cual esta ya completo???? Esta info la necesito p/determinar si pongo o no un fetch more btn
+  //agregar pagination eventualmente
+  const subComments = await Comment.find<IDirectory>({
+    path: {
+      $regex: parentCommentID,
+    },
+  }).populate({ path: "userID", select: "img username _id" });
+
+  console.log("subComments result: ", subComments);
+  res.status(200).json(subComments);
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 export const getSingleTask = errorWrapper(async (req, res, next) => {
   const { id } = req.params;

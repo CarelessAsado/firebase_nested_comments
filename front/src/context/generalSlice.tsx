@@ -47,6 +47,20 @@ export const getSubComments = createAsyncThunk(
     }
   }
 );
+export const getMoreFirstLevelComments = createAsyncThunk(
+  "general/getMoreFirstLevelComments",
+  async function (comment: IComment, { dispatch }) {
+    try {
+      const { data } = await commentsAPI.getMoreFirstLevelComments(comment);
+
+      return data;
+    } catch (error) {
+      errorHandler(error, dispatch);
+      //este error lo tiro xq si hago el unwrap en el front voy directo al .then()
+      throw error;
+    }
+  }
+);
 
 export const postNewComment = createAsyncThunk<
   IComment,
@@ -105,7 +119,6 @@ export const generalSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder.addCase(getComments.fulfilled, (state, action) => {
-      console.log(action.payload.commentsData, 777);
       //add pagination
       state.totalComments = action.payload.count;
       state.comments = action.payload.commentsData;

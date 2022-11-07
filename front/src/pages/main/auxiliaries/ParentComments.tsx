@@ -3,8 +3,8 @@ import {
   deleteComment,
   getSubComments,
   postNewComment,
+  getMoreFirstLevelComments,
 } from "context/generalSlice";
-import * as commentAPI from "API/commentsAPI";
 import { useAppDispatch } from "hooks/reduxDispatchAndSelector";
 import { useState } from "react";
 import styled from "styled-components";
@@ -50,10 +50,7 @@ interface IProps {
 //esto eventualmente lo puedo borrar: "data"
 const ParentComment = ({ comment, user, data }: IProps) => {
   const dispatch = useAppDispatch();
-  console.log(
-    "PARENT: ssssssssssssssssssssssssssssssssssssssss",
-    comment.value
-  );
+  console.log("PARENT: ssssssssssssssssssssssssssssssssssssssss", comment);
   /*  alert(comment.value); */
   const [newChildComment, setNewChildComment] = useState("");
 
@@ -117,17 +114,18 @@ const ParentComment = ({ comment, user, data }: IProps) => {
             comment.userID._id === user?._id &&
             deleteBtn}
           {comment.userID === user?._id && deleteBtn}
-          {!!comment.remainingChildren && comment.remainingChildren > 0 && (
-            //getSubComments va a pasar a ser parte del parentComponent
-            <Button onClick={getSubCommentsFn}>
-              {comment.remainingChildren > 1
-                ? `See all ${comment.remainingChildren} answers`
-                : "See response"}
-            </Button>
-          )}
         </ButtonContainer>
       </ParentCommentContainer>
+      {/*    {!!comment.remainingChildren && comment.remainingChildren > 0 && (
+        //getSubComments va a pasar a ser parte del parentComponent
 
+        //ESTO ERA PARA HACER GETMOREFIRSTLEVEL COMMENTS PERO DSP ME DI X VENCIDO
+        <b onClick={getMoreFirstLevelComments}>
+          {comment.remainingChildren > 1
+            ? `See all ${comment.remainingChildren} answers`
+            : "See response"}
+        </b>
+      )} */}
       {immediateChildren.length > 0 && (
         <ContainerAllSubComments>
           {/* TIENE Q LOOPEAR SOLO LOS 1EROS COMMENTS, creo q ahi juega lo de expression */}

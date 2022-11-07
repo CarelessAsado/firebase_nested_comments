@@ -24,6 +24,11 @@ export const getComments = function (controller?: AbortController) {
 export const getSubComments = function (parentID: string) {
   return axios.get<IComment[]>(BACKEND_URL.SUBCOMMENTSdyn(parentID));
 };
+
+export const getMoreFirstLevelComments = function (comment: IComment) {
+  return axios.get<IComment[]>(BACKEND_URL.MOREFIRSTLEVELCOMMENTSSdyn(comment));
+};
+
 export const deleteComment = async function (obj: IComment) {
   return axios.delete<void>(
     `${BACKEND_URL.COMMENTS}/${
