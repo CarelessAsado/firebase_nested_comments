@@ -54,7 +54,7 @@ const NewPostForm = () => {
   const dispatch = useAppDispatch();
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    dispatch(postNewComment({ value: comment, id: "", path: "" }))
+    dispatch(postNewComment({ value: comment, parentID: null }))
       .unwrap()
       .then(() => setComment(""));
   };

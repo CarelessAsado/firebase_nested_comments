@@ -5,12 +5,14 @@ interface IComment {
   likes: string[];
   _id: string;
   createdAt: Date;
-  remainingChildren?: number;
+  parentID: string | null;
+
   //fijarse q esto no me complique la vida
-  children: IComment[];
+  remainingChildren?: number;
+  children?: IComment[];
 }
 
-type INewCommentInput = Pick<IComment, "value" | "id" | "path">;
+type INewCommentInput = Pick<IComment, "value" | "parentID">;
 
 interface OpenCloseOv {
   close: () => void;

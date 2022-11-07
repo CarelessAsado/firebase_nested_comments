@@ -3,7 +3,6 @@ import {
   deleteComment,
   getSubComments,
   postNewComment,
-  getMoreFirstLevelComments,
 } from "context/generalSlice";
 import { useAppDispatch } from "hooks/reduxDispatchAndSelector";
 import { useState } from "react";
@@ -59,8 +58,7 @@ const ParentComment = ({ comment, user, data }: IProps) => {
       //armar esto dsp en el backend
       postNewComment({
         value: newChildComment,
-        id: comment._id,
-        path: comment.path,
+        parentID: comment._id,
       })
     )
       .unwrap()
@@ -70,15 +68,6 @@ const ParentComment = ({ comment, user, data }: IProps) => {
   const handleDelete = () => {
     dispatch(deleteComment(comment));
   };
-
-  //ESTO PUEDE GENERAR PROBLEMAS DSP, VER SI LO TENGO Q JUNTAR CON EL CHILD CONTROLLER
-  let { immediateChildren, remainder } = getImmediateChildren(
-    comment,
-    comment.children
-  );
-  /*  immediateChildren.length && alert(comment.value); */
-  console.log("immediateChildren: ", immediateChildren);
-  console.log("remainder: ", remainder);
 
   const deleteBtn = (
     <Button style={{ backgroundColor: "crimson" }} onClick={handleDelete}>
@@ -116,92 +105,23 @@ const ParentComment = ({ comment, user, data }: IProps) => {
           {comment.userID === user?._id && deleteBtn}
         </ButtonContainer>
       </ParentCommentContainer>
-      {/*    {!!comment.remainingChildren && comment.remainingChildren > 0 && (
-        //getSubComments va a pasar a ser parte del parentComponent
-
-        //ESTO ERA PARA HACER GETMOREFIRSTLEVEL COMMENTS PERO DSP ME DI X VENCIDO
-        <b onClick={getMoreFirstLevelComments}>
+      {/* --------------------FETCH MORE SUBCOMMENTS--------------------- */}
+      {!!comment.remainingChildren && comment.remainingChildren > 0 && (
+        //esto setea los children en PARENTCOMPONENT AHORA
+        <Button onClick={() => dispatch(getSubComments(comment._id))}>
           {comment.remainingChildren > 1
             ? `See all ${comment.remainingChildren} answers`
             : "See response"}
-        </b>
-      )} */}
-      {immediateChildren.length > 0 && (
+        </Button>
+      )}
+
+      {!!comment.children && comment.children.length > 0 && (
         <ContainerAllSubComments>
-          {/* TIENE Q LOOPEAR SOLO LOS 1EROS COMMENTS, creo q ahi juega lo de expression */}
-          {immediateChildren.map((c) => {
-            return (
-              <ChildrenControllerTopLevel
-                comment={c}
-                data={remainder}
-                key={c._id}
-                user={user}
-              />
-            );
+          {comment.children.map((c) => {
+            return <SingleSubComment comment={c} key={c._id} user={user} />;
           })}
         </ContainerAllSubComments>
       )}
-    </>
-  );
-};
-
-const ChildrenControllerTopLevel = ({
-  comment: secondLevelDeepComment,
-  user,
-  data,
-}: IProps) => {
-  const [topLevel, setTopLevel] = useState(secondLevelDeepComment._id);
-
-  function changeTopLevel(commID: string) {
-    setTopLevel(commID);
-  }
-
-  //TOPLEVEL DEBERIA DECIDIR A PARTIR DE NIVEL RENDERIZO
-
-  //AGREGAR DSP EN EL CHILDREN COMP EL RETURN CUANDO ALCANCE EL NESTED LEVEL 5
-  const { immediateChildren, remainder } = getImmediateChildren(
-    secondLevelDeepComment,
-    data,
-    topLevel
-  );
-
-  //getPreviousChildren as well
-  let found = data.find((i) => i._id === topLevel);
-
-  //nunca vas a encontrar en children al topLevel A LA PRIMERA VUELTA, ya q lo filtré previamente. No obstante, si cambio el topLevel a un _id nested deeper in the Comment tree, then you will find sth
-
-  //ESTO ES VIEJO: todavia no entiendo bien xq pero cuando recien arranco nunca hay found, asi q puedo usar eso a mi favor p/solo buscar prevChildren cuando hay un found (?)
-  const currentComment = found ? found : secondLevelDeepComment;
-  console.log(
-    "FOUND TOP LEVEL COMMENT: ",
-    currentComment,
-    "check path and _id"
-  );
-  //data cuando hago modificaciones al topLevel, es mas grande de lo q necesito
-
-  return (
-    <>
-      <div>CONTROLLER</div>
-      {/* BOTON P/ VOLVER A ATRAS CUANDO ESTOY DEEP IN THE SUBCOMMENT TREE */}
-      {topLevel !== secondLevelDeepComment._id && (
-        <button
-          onClick={() =>
-            setTopLevel(goBackToPreviousNestedLevel(currentComment))
-          }
-        >
-          Volver atras
-        </button>
-      )}
-
-      {/* antes loopeaba aca, pero dsp me di cuenta q no es necesario xq el parent ya me manda los comments individuales */}
-      <SingleSubComment
-        comment={currentComment}
-        data={data}
-        topLevel={topLevel}
-        setTopLevel={changeTopLevel}
-        key={currentComment._id}
-        user={user}
-      />
     </>
   );
 };

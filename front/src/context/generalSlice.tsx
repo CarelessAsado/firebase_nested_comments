@@ -47,20 +47,6 @@ export const getSubComments = createAsyncThunk(
     }
   }
 );
-export const getMoreFirstLevelComments = createAsyncThunk(
-  "general/getMoreFirstLevelComments",
-  async function (comment: IComment, { dispatch }) {
-    try {
-      const { data } = await commentsAPI.getMoreFirstLevelComments(comment);
-
-      return data;
-    } catch (error) {
-      errorHandler(error, dispatch);
-      //este error lo tiro xq si hago el unwrap en el front voy directo al .then()
-      throw error;
-    }
-  }
-);
 
 export const postNewComment = createAsyncThunk<
   IComment,
@@ -165,22 +151,20 @@ function addCommentState(
 ): IComment[] {
   //AL AGREGAR NUEVO COMMENT HAY Q TENER CUIDADO DE AGREGARLO AL PPIO, p evitar el sorting
   if (Array.isArray(newC)) {
-    alert("hola tu hna");
-    const parentID = newC[0].path.split(",")[1];
     return comments.map((i) =>
-      i._id === parentID ? { ...i, children: [...newC, ...i.children] } : i
+      i._id === i.parentID
+        ? { ...i, children: [...newC, ...(i.children as IComment[])] }
+        : i
     );
   }
 
-  const parentID = newC.path.split(",")[1];
-
   //SE TRATA DE UN NEW PARENT COMPONENT
-  if (!parentID) {
+  if (!newC.parentID) {
     return [{ ...newC, children: [] }, ...comments];
   }
   const modified = comments.map((comm) =>
-    comm._id === parentID
-      ? { ...comm, children: [...comm.children, newC] }
+    comm._id === comm.parentID
+      ? { ...comm, children: [...(comm.children as IComment[]), newC] }
       : comm
   );
 
@@ -191,18 +175,13 @@ function deleteCommentState(
   comments: IComment[],
   commentToBeDeleted: IComment
 ) {
-  const { path, _id } = commentToBeDeleted;
-
-  const parentID = commentToBeDeleted.path.split(",")[1];
+  const { path, _id, parentID } = commentToBeDeleted;
 
   //EN ESTE CASO SE TRATA DE UN PARENT COMMENT
   if (!parentID) {
     return comments.filter(
-      (
-        i //si estan al mismo level dos folders, el path va a coincidir pero no la tengo q borrar, x eso agrego doble check
-      ) =>
-        (!i.path.includes(path) && i.path === path) ||
-        //con este borro el item q clickeo, e incluyo todos (x ende tengo q filtrar +)
+      (i) =>
+        //con este borro el item q clickeo, e incluyo todos los children
         i._id !== _id
     );
   }
@@ -213,12 +192,11 @@ function deleteCommentState(
       ? parentComment
       : {
           ...parentComment,
-          children: parentComment.children.filter(
+          children: (parentComment.children as IComment[]).filter(
             (
               i //si estan al mismo level dos folders, el path va a coincidir pero no la tengo q borrar, x eso agrego doble check
             ) =>
-              (!i.path.includes(path) && i.path === path) ||
-              //con este borro el item q clickeo, e incluyo todos (x ende tengo q filtrar +)
+              //con este borro el item EL CHILD dentro del PARENT COMPONENT
               i._id !== _id
           ),
         }

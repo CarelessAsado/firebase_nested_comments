@@ -1,17 +1,11 @@
 import { BACKEND_URL } from "config/constants";
 import axios from "./axiosInstanceJWT";
 
-/*-----------------POST NEW TASK------------*/
+/*-----------------POST NEW COMMENT------------*/
 export const postNewComment = (newTaskInput: INewCommentInput) => {
   return axios.post<IComment>(BACKEND_URL.COMMENTS, newTaskInput);
 };
-/* ------------------------------------------- */
-/* export const updateComment = (task: IComment, userID: string) => {
-  return axios.put<IComment>(
-    `${BACKEND_URL.COMMENTS}/${userID}/${task._id}`,
-    task
-  );
-}; */
+
 export const getComments = function (controller?: AbortController) {
   return axios.get<{ commentsData: IComment[]; count: number }>(
     BACKEND_URL.COMMENTS,
@@ -23,10 +17,6 @@ export const getComments = function (controller?: AbortController) {
 
 export const getSubComments = function (parentID: string) {
   return axios.get<IComment[]>(BACKEND_URL.SUBCOMMENTSdyn(parentID));
-};
-
-export const getMoreFirstLevelComments = function (comment: IComment) {
-  return axios.get<IComment[]>(BACKEND_URL.MOREFIRSTLEVELCOMMENTSSdyn(comment));
 };
 
 export const deleteComment = async function (obj: IComment) {

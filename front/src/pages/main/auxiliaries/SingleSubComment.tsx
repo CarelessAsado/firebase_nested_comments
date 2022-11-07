@@ -22,12 +22,8 @@ import {
 } from "./styles";
 import { FRONTEND_ENDPOINTS } from "config/constants";
 
-const SingleSubCommentContainer = styled.div<{ order: number }>`
+const SingleSubCommentContainer = styled.div`
   //copiar y pegar estilos
-
-  //the 10px-margin provides the nesting effect
-  /* margin: 20px 0 0 10px; */
-  margin-left: ${(props) => `calc(${props.order * 20}px)`};
 
   // dejé este método de lado xq no me gustaba q el comment estuviera adentro del otro
   //c/subcommentContainer va a tomar una prop, y en base a ese indice va a multiplicar
@@ -40,21 +36,13 @@ interface IProps {
   comment: IComment;
   children?: JSX.Element | JSX.Element[];
   /*   setData: (value: React.SetStateAction<IComment[]>) => void; */
-  data: IComment[];
+  data?: IComment[];
   user: IUser;
-  topLevel: string;
-  setTopLevel: (commID: string) => void;
+
   order?: number;
 }
 
-export function SingleSubComment({
-  comment,
-  topLevel,
-  setTopLevel,
-  data,
-  user,
-  order = 0,
-}: IProps) {
+export function SingleSubComment({ comment, user }: IProps) {
   const [newChildComment, setNewChildComment] = useState("");
 
   const dispatch = useAppDispatch();
@@ -62,15 +50,12 @@ export function SingleSubComment({
   //LIMITE 5 LEVEL DEEP
   //CON ESTO DECIDO SI LOOPEAR O NO
 
-  const { immediateChildren, remainder } = getImmediateChildren(comment, data);
-
   const handleSubmit = () => {
     dispatch(
       //armar esto dsp en el backend
       postNewComment({
         value: newChildComment,
-        id: comment._id,
-        path: comment.path,
+        parentID: comment.parentID,
       })
     )
       .unwrap()
@@ -95,7 +80,7 @@ export function SingleSubComment({
 
   return (
     <>
-      <SingleSubCommentContainer order={order}>
+      <SingleSubCommentContainer>
         {typeof comment.userID !== "string" && (
           <Top>
             <GrowFlex1 to={FRONTEND_ENDPOINTS.PROFILEdyn(comment.userID._id)}>
@@ -117,45 +102,10 @@ export function SingleSubComment({
             comment.userID._id === user?._id &&
             deleteBtn}
           {comment.userID === user?._id && deleteBtn}
-          {!!comment.remainingChildren && comment.remainingChildren > 0 && (
-            //esto setea los children en PARENTCOMPONENT AHORA
-            <Button onClick={() => dispatch(getSubComments(comment._id))}>
-              {comment.remainingChildren > 1
-                ? `See all ${comment.remainingChildren} answers`
-                : "See response"}
-            </Button>
-          )}
+
           {/* <Button>Likear</Button> */}
         </ButtonContainer>
-        {/* como evaluo si el comment tiene o no comentarios nested adicionales???
-        en ppio dejar p/el final, primero fetchear todo y hacer esa tarea en el front con la data q ya tenemos, es decir q si no hay remaining children no mostramos este boton */}
-        {limitNestingUI(comment, topLevel) && immediateChildren.length > 0 && (
-          <Button onClick={() => setTopLevel(comment._id)}>
-            SEE MORE COMMENTS
-          </Button>
-        )}
-        {/* {
-          /* immediateChildren.length > 0  comment.remainingChildren &&
-            comment.remainingChildren > 0 && (
-              <Button onClick={() => setTopLevel(comment._id)}>
-                SEE MORE COMMENTS
-              </Button>
-            )
-        } */}
       </SingleSubCommentContainer>
-      {!limitNestingUI(comment, topLevel) &&
-        immediateChildren.length > 0 &&
-        immediateChildren.map((c) => (
-          <SingleSubComment
-            comment={c}
-            data={remainder}
-            topLevel={topLevel}
-            setTopLevel={setTopLevel}
-            key={c._id}
-            user={user}
-            order={order + 1}
-          />
-        ))}
     </>
   );
 }
