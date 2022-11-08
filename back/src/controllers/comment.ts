@@ -4,6 +4,11 @@ import { CustomError } from "../ERRORS/customErrors";
 /*VER XQ NO ME SALEN LOS METODOS DE MONGOOSE*/
 import Task, { ITask } from "../models/Task";
 import Comment, { IDirectory } from "../models/Comment";
+import mongoose from "mongoose";
+
+type IFacet = { commentsData: IDirectory[]; count: number };
+const DEFAULT_FACET_RESPONSE: IFacet = { commentsData: [], count: 0 };
+const SUBCOMMENTS_TO_RETRIEVE_PER_PARENT = 3;
 
 export const createComment = errorWrapper(async (req, res, next) => {
   //enviar parentID
@@ -17,16 +22,9 @@ export const createComment = errorWrapper(async (req, res, next) => {
   return res.json(addedComment);
 });
 
-interface IParams {
-  page: number;
-  limit: number;
-}
-
 export const getAllParentComments = errorWrapper(async (req, res, next) => {
   const { _id: userID } = req.user;
   let { page = 1, limit = 30 } = req.query;
-
-  const SUBCOMMENTS_TO_RETRIEVE_PER_PARENT = 1;
 
   limit = Number(limit);
   page = Number(page);
@@ -36,7 +34,6 @@ export const getAllParentComments = errorWrapper(async (req, res, next) => {
   /* const allComments = await Comment.find<IDirectory>(/* { userID } ).populate(
     { path: "userID", select: "img username _id" }
   ); */
-  type IFacet = { commentsData: IDirectory[] };
 
   const facet = await Comment.aggregate<IFacet>([
     {
@@ -91,9 +88,21 @@ export const getAllParentComments = errorWrapper(async (req, res, next) => {
                 },
                 {
                   $sort: {
-                    createdAt: -1,
+                    createdAt: 1,
                   },
                 },
+
+                //hacer esto dsp de hacer el sliceeeeeeeeeeeee, p/evitar lookups innecesarios
+                {
+                  $lookup: {
+                    from: "users", //usé mongosh p/ver los nombres de las collections
+                    as: "userID", //le podés poner el nombre q quieras
+                    localField: "userID",
+                    foreignField: "_id",
+                  },
+                },
+
+                { $unwind: "$userID" },
               ],
             },
           },
@@ -111,7 +120,7 @@ export const getAllParentComments = errorWrapper(async (req, res, next) => {
                 $size: "$nested",
               },
               children: {
-                $firstN: {
+                $lastN: {
                   n: SUBCOMMENTS_TO_RETRIEVE_PER_PARENT,
                   input: "$nested",
                 },
@@ -170,60 +179,105 @@ export const getAllParentComments = errorWrapper(async (req, res, next) => {
       },
     },
   ]);
+  //si no hay comments en la collection no vuelve nada
   console.log(facet[0]);
-  res.status(200).json(facet[0]);
+  res.status(200).json(facet[0] || DEFAULT_FACET_RESPONSE);
 });
 
 export const getSubComments = errorWrapper(async (req, res, next) => {
-  console.log("fooo fddsfsd");
   const { _id: userID } = req.user;
-  let { page = 1, limit = 30 } = req.query;
-  const { parentCommentID } = req.params;
-  console.log(parentCommentID);
-  limit = Number(limit);
+  let { page = 1 } = req.query;
   page = Number(page);
-  if (limit > 50) {
-    limit = 30;
-  }
-  //hacer fetchear 5 max p/arrancar, asi veo como anda el sistema, dsp pasar a 20,
+  const { parentCommentID } = req.params;
+  const lastComment = req.body;
 
-  //es complicado, xq c/branch puede tener infinitas variaciones, entonces, puedo hacer un fetch de todo y enviar 20. Pero, como sé cual path esta truncado, y cual esta ya completo???? Esta info la necesito p/determinar si pongo o no un fetch more btn
-  //agregar pagination eventualmente
-  const subComments = await Comment.find<IDirectory>({
-    path: {
-      $regex: parentCommentID,
-    },
-  }).populate({ path: "userID", select: "img username _id" });
+  console.log(req.body);
 
-  console.log("subComments result: ", subComments);
-  res.status(200).json(subComments);
-});
-export const getMoreFirstLevelComments = errorWrapper(
-  async (req, res, next) => {
-    console.log("fooo fddsfsd");
-    const { _id: userID } = req.user;
-    let { page = 1, limit = 30 } = req.query;
-    const { parentCommentID } = req.params;
-    console.log(parentCommentID);
-    limit = Number(limit);
-    page = Number(page);
-    if (limit > 50) {
-      limit = 30;
-    }
-    //hacer fetchear 5 max p/arrancar, asi veo como anda el sistema, dsp pasar a 20,
-
-    //es complicado, xq c/branch puede tener infinitas variaciones, entonces, puedo hacer un fetch de todo y enviar 20. Pero, como sé cual path esta truncado, y cual esta ya completo???? Esta info la necesito p/determinar si pongo o no un fetch more btn
-    //agregar pagination eventualmente
-    const subComments = await Comment.find<IDirectory>({
-      path: {
-        $regex: parentCommentID,
+  const facet = await Comment.aggregate<IFacet>([
+    {
+      $match: {
+        //necesito mandar el ultimo children, me va a dar toda la info q necesito
+        parentID: new mongoose.Types.ObjectId(parentCommentID),
+        createdAt: {
+          $lte: new Date(lastComment.createdAt),
+        },
+        _id: {
+          $not: {
+            $eq: new mongoose.Types.ObjectId(lastComment._id),
+          },
+        },
       },
-    }).populate({ path: "userID", select: "img username _id" });
+    },
+    //Por c/object en al cual le hago populate, tmb puedo hacer una query adicional, y agregarle extra info
+    //https://www.mongodb.com/docs/manual/reference/operator/aggregation/lookup/#perform-an-uncorrelated-subquery-with--lookup
+    {
+      $facet: {
+        commentsData: [
+          //order latest messages first
+          {
+            $sort: {
+              createdAt: -1,
+            },
+          },
 
-    console.log("subComments result: ", subComments);
-    res.status(200).json(subComments);
-  }
-);
+          //POPULATE USERID
+          {
+            $lookup: {
+              from: "users", //usé mongosh p/ver los nombres de las collections
+              as: "userID", //le podés poner el nombre q quieras
+              localField: "userID",
+              foreignField: "_id",
+            },
+          },
+
+          { $unwind: "$userID" },
+        ],
+        count: [
+          {
+            $count: "totalComments",
+          },
+        ],
+      },
+    },
+    //count viene como un single Object adentro de un array
+    //hay q hacerlo fuera de $facet y count, xq ese array se le agrega una vez finalizado $facet creo, aunq no estoy seguro
+    //cotejar tmb si puedo deestructurar el array completo de $facet
+    {
+      $unwind: "$count",
+    },
+    //ahora pasa a ser un obj adentro de otro obj, así count:{totalComments:3}, asi q destructuro con $project
+    {
+      $project: {
+        //como no puedo usar $lastN en facet, sino q uso limit, tengo q volver a revertir el array p/q los subcomentarios + antiguos aparezcan on top, en la UI de la PARENT COMMENT
+        commentsData: { $reverseArray: "$commentsData" },
+        count: {
+          $subtract: [
+            "$count.totalComments",
+            SUBCOMMENTS_TO_RETRIEVE_PER_PARENT,
+          ],
+        },
+      },
+    },
+
+    //como el array de remainingFirstLevelComments puede estar vacío. Al restar 1 queda en negativo, asi q lo seteamos a 0
+    {
+      $set: {
+        count: {
+          $cond: [
+            {
+              $lt: ["$count", 0],
+            },
+            0,
+            "$count",
+          ],
+        },
+      },
+    },
+  ]);
+
+  console.log(facet[0]);
+  res.status(200).json(facet[0] || DEFAULT_FACET_RESPONSE);
+});
 
 export const getSingleTask = errorWrapper(async (req, res, next) => {
   const { id } = req.params;
@@ -256,21 +310,13 @@ export const updateTask = errorWrapper(async (req, res, next) => {
 export const deleteTask = errorWrapper(async (req, res, next) => {
   const { id } = req.params;
   //check ownership?
-  console.log(req.body, req.params);
-  /* (!i.path.includes(comment.path) && i.path === comment.path) ||
-          //con este borro el item q clickeo, e incluyo todos (x ende tengo q filtrar +)
-          i.id !== comment.id
-      ) */
-  const regExp = new RegExp("^" + req.body.path + "," + req.body._id, "gi");
-  const found = await Comment.deleteMany({
-    $or: [{ path: { $regex: regExp } }, { _id: req.body._id }],
-  });
-  /*   const found = await Comment.find({
-    $or: [{ path: { $regex: regExp } }, { _id: req.body._id }],
-  }); */
-  /* {$and:[{path: req.body.path },{}]} */
-  console.log(found);
-  /*   await Task.findByIdAndDelete(id);
-  await User.findByIdAndUpdate(req.user._id, { $pull: { tasks: id } }); */
-  return res.sendStatus(204);
+
+  const found = await Comment.findByIdAndDelete(id);
+
+  if (found?.parentID === null) {
+    //aca no entramos si borramos subcomment
+    await Comment.deleteMany({ parentID: id });
+  }
+
+  return res.sendStatus(200);
 });

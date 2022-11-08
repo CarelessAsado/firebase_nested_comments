@@ -5,7 +5,7 @@ import { useAppDispatch } from "hooks/reduxDispatchAndSelector";
 import { useState } from "react";
 import {
   deleteComment,
-  getSubComments,
+  getMoreSubComments,
   postNewComment,
 } from "context/generalSlice";
 import styled from "styled-components";

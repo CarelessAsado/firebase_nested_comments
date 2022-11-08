@@ -1,7 +1,7 @@
 import { FRONTEND_ENDPOINTS } from "config/constants";
 import {
   deleteComment,
-  getSubComments,
+  getMoreSubComments,
   postNewComment,
 } from "context/generalSlice";
 import { useAppDispatch } from "hooks/reduxDispatchAndSelector";
@@ -49,18 +49,11 @@ interface IProps {
 //esto eventualmente lo puedo borrar: "data"
 const ParentComment = ({ comment, user, data }: IProps) => {
   const dispatch = useAppDispatch();
-  console.log("PARENT: ssssssssssssssssssssssssssssssssssssssss", comment);
-  /*  alert(comment.value); */
+
   const [newChildComment, setNewChildComment] = useState("");
 
   const handleSubmit = () => {
-    dispatch(
-      //armar esto dsp en el backend
-      postNewComment({
-        value: newChildComment,
-        parentID: comment._id,
-      })
-    )
+    dispatch(postNewComment({ value: newChildComment, parentID: comment._id }))
       .unwrap()
       .then(() => setNewChildComment(""));
   };
@@ -76,7 +69,7 @@ const ParentComment = ({ comment, user, data }: IProps) => {
   );
 
   async function getSubCommentsFn() {
-    dispatch(getSubComments(comment._id));
+    dispatch(getMoreSubComments(comment.children[0]));
   }
 
   return (
@@ -106,15 +99,15 @@ const ParentComment = ({ comment, user, data }: IProps) => {
         </ButtonContainer>
       </ParentCommentContainer>
       {/* --------------------FETCH MORE SUBCOMMENTS--------------------- */}
+
       {!!comment.remainingChildren && comment.remainingChildren > 0 && (
         //esto setea los children en PARENTCOMPONENT AHORA
-        <Button onClick={() => dispatch(getSubComments(comment._id))}>
+        <Button onClick={getSubCommentsFn}>
           {comment.remainingChildren > 1
             ? `See all ${comment.remainingChildren} answers`
             : "See response"}
         </Button>
       )}
-
       {!!comment.children && comment.children.length > 0 && (
         <ContainerAllSubComments>
           {comment.children.map((c) => {

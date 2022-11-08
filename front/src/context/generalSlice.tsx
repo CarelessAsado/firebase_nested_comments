@@ -33,13 +33,13 @@ export const getComments = createAsyncThunk(
     }
   }
 );
-export const getSubComments = createAsyncThunk(
-  "general/getSubComments",
-  async function (parentID: string, { dispatch }) {
+export const getMoreSubComments = createAsyncThunk(
+  "general/getMoreSubComments",
+  async function (lastComment: IComment, { dispatch }) {
     try {
-      const { data } = await commentsAPI.getSubComments(parentID);
+      const { data } = await commentsAPI.getSubComments(lastComment);
 
-      return data;
+      return { data, parentID: lastComment.parentID };
     } catch (error) {
       errorHandler(error, dispatch);
       //este error lo tiro xq si hago el unwrap en el front voy directo al .then()
@@ -58,9 +58,12 @@ export const postNewComment = createAsyncThunk<
     const {
       user: { user },
     } = getState();
-    const populateUser = { ...data, userID: { ...user } } as IComment;
+    const commentWithUserPopulated = {
+      ...data,
+      userID: { ...user },
+    } as IComment;
     socket?.emit("commentPosted", { ...data, userID: { ...user } });
-    return populateUser;
+    return commentWithUserPopulated;
   } catch (error) {
     await errorHandler(error, dispatch);
     //este error lo tiro xq si hago el unwrap en el front voy directo al .then()
@@ -111,8 +114,21 @@ export const generalSlice = createSlice({
       state.loading = false;
     });
 
-    builder.addCase(getSubComments.fulfilled, (state, action) => {
-      state.comments = addCommentState(state.comments, action.payload);
+    builder.addCase(getMoreSubComments.fulfilled, (state, action) => {
+      const { data } = action.payload;
+      state.comments = state.comments.map((parentComm) =>
+        parentComm._id === action.payload.parentID
+          ? {
+              ...parentComm,
+              children: [
+                ...data.commentsData,
+                ...(parentComm.children as IComment[]),
+              ], //corregir el total del parent
+              remainingChildren: data.count,
+              //pasar los children a un ambiente gral
+            }
+          : parentComm
+      );
       state.loading = false;
     });
     builder.addCase(postNewComment.fulfilled, (state, action) => {
@@ -150,6 +166,8 @@ function addCommentState(
   newC: IComment | IComment[]
 ): IComment[] {
   //AL AGREGAR NUEVO COMMENT HAY Q TENER CUIDADO DE AGREGARLO AL PPIO, p evitar el sorting
+
+  //cuando cargo los prods la primera vez creo, q mandoo un array de objetos
   if (Array.isArray(newC)) {
     return comments.map((i) =>
       i._id === i.parentID
@@ -163,7 +181,7 @@ function addCommentState(
     return [{ ...newC, children: [] }, ...comments];
   }
   const modified = comments.map((comm) =>
-    comm._id === comm.parentID
+    comm._id === newC.parentID
       ? { ...comm, children: [...(comm.children as IComment[]), newC] }
       : comm
   );

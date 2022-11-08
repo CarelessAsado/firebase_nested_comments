@@ -24,7 +24,7 @@ class URL_BACK_ENDPOINTS {
   UPLOADIMGdyn = (user_id: string) => `/users/profilepic/${user_id}`;
   TASKS = `/tasks`;
   COMMENTS = `/comments`;
-  SUBCOMMENTSdyn = (parentID: string) =>
+  SUBCOMMENTSdyn = (parentID: IParentID) =>
     `${this.COMMENTS}/subcomments/${parentID}`;
 }
 export const BACKEND_URL = new URL_BACK_ENDPOINTS();

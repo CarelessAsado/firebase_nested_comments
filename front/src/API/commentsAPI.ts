@@ -6,17 +6,19 @@ export const postNewComment = (newTaskInput: INewCommentInput) => {
   return axios.post<IComment>(BACKEND_URL.COMMENTS, newTaskInput);
 };
 
+type FacetResponse = { commentsData: IComment[]; count: number };
+
 export const getComments = function (controller?: AbortController) {
-  return axios.get<{ commentsData: IComment[]; count: number }>(
-    BACKEND_URL.COMMENTS,
-    {
-      signal: controller?.signal,
-    }
-  );
+  return axios.get<FacetResponse>(BACKEND_URL.COMMENTS, {
+    signal: controller?.signal,
+  });
 };
 
-export const getSubComments = function (parentID: string) {
-  return axios.get<IComment[]>(BACKEND_URL.SUBCOMMENTSdyn(parentID));
+export const getSubComments = function (lastComment: IComment) {
+  return axios.post<FacetResponse>(
+    BACKEND_URL.SUBCOMMENTSdyn(lastComment.parentID),
+    lastComment
+  );
 };
 
 export const deleteComment = async function (obj: IComment) {

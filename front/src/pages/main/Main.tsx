@@ -141,9 +141,8 @@ export const Main = () => {
           openChat={openChat}
         />
         <ContainerAllComments>
-          {comments
-            .filter((it) => !it.path)
-            .map((c) => (
+          {comments.length > 0 &&
+            comments.map((c) => (
               <ParentComment
                 comment={c}
                 //fijarse dsp de borrar
