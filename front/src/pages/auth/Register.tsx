@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import { Link, useNavigate } from "react-router-dom";
 import {
-  Container,
+  ContainerNotLogin,
   Input,
   Form,
   Error,
@@ -51,7 +51,7 @@ export const Register = () => {
       .catch(() => {}); //pevitar uncaught in promise en el browser log
   }
   return (
-    <Container>
+    <ContainerNotLogin>
       <Form onSubmit={handleRegister}>
         <Header>Create new account.</Header>
         <Error aria-live="assertive">{error}</Error>
@@ -96,6 +96,6 @@ export const Register = () => {
           </RegisterLink>{" "}
         </Bottom>
       </Form>
-    </Container>
+    </ContainerNotLogin>
   );
 };

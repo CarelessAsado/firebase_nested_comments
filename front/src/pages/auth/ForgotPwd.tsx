@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
 import {
-  Container,
+  ContainerNotLogin,
   Input,
   Form,
   Error,
@@ -44,9 +44,9 @@ export const ForgotPwd = () => {
   }
 
   return (
-    <Container>
+    <ContainerNotLogin>
       <Form onSubmit={handleSubmit}>
-        <Header>¿Te olvidaste tu contraseña?</Header>
+        <Header>Forgot your password?</Header>
         <Error aria-live="assertive">{error}</Error>
         <Label htmlFor="email"></Label>
         <Input
@@ -70,6 +70,6 @@ export const ForgotPwd = () => {
           </RegisterLink>
         </Bottom>
       </Form>
-    </Container>
+    </ContainerNotLogin>
   );
 };

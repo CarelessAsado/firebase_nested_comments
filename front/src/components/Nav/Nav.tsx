@@ -65,8 +65,7 @@ export const Overlay = styled.div<PropsShowNav>`
     background-color: rgba(0, 0, 0, 0.2);
     color: white;
     width: 100%;
-    transform: ${(props) =>
-      props.show ? "translateX(0)" : "translateX(-3000%)"};
+    transform: ${(props) => !props.show && "translateX(-3000%)"};
   }
 `;
 const Links = styled.ul`

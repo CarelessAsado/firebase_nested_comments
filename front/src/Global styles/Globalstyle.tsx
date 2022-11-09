@@ -13,9 +13,8 @@ scroll-behavior:smooth;
   --mainBody:white;
   --mainBlue:#2775a8;
   --mainBlueHover:#226491;
-  /* --mainGreen:#1f9c; */
    --mainGreen:#1f9c35; 
-
+     --mainWhite: #fff;
   --mlGreen:#00a650;
   --mainGreenHover:#187829;
   --mainPink:#ff8000;
@@ -25,10 +24,27 @@ scroll-behavior:smooth;
    --mainRed:crimson;
 
 
+  --white2: rgb(248, 242, 242);
+  --fbBlue: #1877f2;
+  --fbGreen: #42b72a;
+  --overlayReg: rgba(254, 254, 254, 0.8);
+
+  --grey: rgb(133, 133, 133);
+  --greyless: rgb(180, 174, 174);
+  --light: rgb(226, 220, 220);
+  --transition: 0.6s;
+  --fbBlueOficial: #4267b2;
+
+  --fbBody: #18191a;
+  --fbMessageBody: #242526;
+  --fb3erBody: rgb(66, 66, 75);
+
 --fontSmall:1rem;
   --fontMed:1.2rem;
   --fontBig:1.4rem;
   --fontLarge:2rem;
+
+
 }
 @media (max-width:640px){
   :root{
