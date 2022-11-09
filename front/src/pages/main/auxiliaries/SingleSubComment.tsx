@@ -102,7 +102,7 @@ export function SingleSubComment({ comment, user }: IProps) {
             comment.userID._id === user?._id &&
             deleteBtn}
           {comment.userID === user?._id && deleteBtn}
-
+          <b>{comment.likes.length}</b>
           {/* <Button>Likear</Button> */}
         </ButtonContainer>
       </SingleSubCommentContainer>

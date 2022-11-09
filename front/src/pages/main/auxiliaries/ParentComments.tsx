@@ -2,6 +2,7 @@ import { FRONTEND_ENDPOINTS } from "config/constants";
 import {
   deleteComment,
   getMoreSubComments,
+  likeUnlikeComment,
   postNewComment,
 } from "context/generalSlice";
 import { useAppDispatch } from "hooks/reduxDispatchAndSelector";
@@ -96,6 +97,8 @@ const ParentComment = ({ comment, user, data }: IProps) => {
             comment.userID._id === user?._id &&
             deleteBtn}
           {comment.userID === user?._id && deleteBtn}
+          <b>{comment.likes.length}</b>
+          <div onClick={() => dispatch(likeUnlikeComment(comment))}>LIKE</div>
         </ButtonContainer>
       </ParentCommentContainer>
       {/* --------------------FETCH MORE SUBCOMMENTS--------------------- */}

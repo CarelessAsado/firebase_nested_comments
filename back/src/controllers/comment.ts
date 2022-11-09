@@ -293,18 +293,45 @@ export const updateComment = errorWrapper(async (req, res, next) => {
   const { id } = req.params;
   const { name, done } = req.body;
   console.log(req.body, "estamos en update");
-  const taskToUpdate = await Task.findById(id);
+  const commentToUpdate = await Comment.findById(id);
 
-  if (!taskToUpdate) {
+  if (!commentToUpdate) {
     return next(new CustomError(404, "Task does not exist."));
   }
 
-  taskToUpdate.name = name;
-  taskToUpdate.done = done;
+  //UPDATE STH
 
-  await taskToUpdate.save();
-  console.log(taskToUpdate, "ver q done este bien");
-  return res.json(taskToUpdate);
+  await commentToUpdate.save();
+  console.log(commentToUpdate, "ver q done este bien");
+  return res.json(commentToUpdate);
+});
+
+export const likeUnlikeComment = errorWrapper(async (req, res, next) => {
+  const { id } = req.params;
+
+  const commentToUpdate = await Comment.findById(id);
+
+  if (!commentToUpdate) {
+    return next(new CustomError(404, "Comment does not exist."));
+  }
+
+  const index = commentToUpdate.likes.findIndex((user) =>
+    user.equals(req.user._id)
+  );
+
+  if (index < 0) {
+    //USER NO ESTA INCLUIDO, asi q LIKEAMOS
+    commentToUpdate.likes.push(req.user._id);
+  } else {
+    //USER YA ESTA INCLUIDO, significa  q deslikea
+    commentToUpdate.likes = commentToUpdate.likes.filter(
+      (id) => !id.equals(req.user._id)
+    );
+  }
+
+  const saved = await commentToUpdate.save();
+
+  return res.json(saved);
 });
 
 export const deleteComment = errorWrapper(async (req, res, next) => {

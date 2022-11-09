@@ -26,6 +26,9 @@ class URL_BACK_ENDPOINTS {
   COMMENTS = `/comments`;
   SUBCOMMENTSdyn = (parentID: IParentID) =>
     `${this.COMMENTS}/subcomments/${parentID}`;
+  LIKESdyn = (user_id: string, comment_id: string) => {
+    return `${this.COMMENTS}/likes/${user_id}/${comment_id}`;
+  };
 }
 export const BACKEND_URL = new URL_BACK_ENDPOINTS();
 

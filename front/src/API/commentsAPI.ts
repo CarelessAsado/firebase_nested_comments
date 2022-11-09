@@ -29,3 +29,6 @@ export const deleteComment = async function (obj: IComment) {
     { data: obj }
   );
 };
+export const likeUnlikeComment = async function (obj: IComment, user: IUser) {
+  return axios.put<IComment>(BACKEND_URL.LIKESdyn(user?._id || "", obj._id));
+};

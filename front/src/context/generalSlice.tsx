@@ -85,6 +85,26 @@ export const deleteComment = createAsyncThunk(
     }
   }
 );
+export const likeUnlikeComment = createAsyncThunk<
+  IComment,
+  IComment,
+  { dispatch: AppDispatch; state: RootState }
+>("general/likeUnlikeComment", async function (obj, { dispatch, getState }) {
+  const {
+    user: { user },
+  } = getState();
+  try {
+    const { data } = await commentsAPI.likeUnlikeComment(obj, user);
+    console.log(data, 888);
+    //hacer logica emit like event
+    /*   socket?.emit("commentDeleted", data); */
+    return data;
+  } catch (error) {
+    await errorHandler(error, dispatch);
+    //este error lo tiro xq si hago el unwrap en el front voy directo al .then()
+    throw error;
+  }
+});
 
 export const generalSlice = createSlice({
   name: "general",
@@ -137,6 +157,30 @@ export const generalSlice = createSlice({
     });
     builder.addCase(deleteComment.fulfilled, (state, action) => {
       state.comments = deleteCommentState(state.comments, action.payload);
+      state.loading = false;
+    });
+    builder.addCase(likeUnlikeComment.fulfilled, (state, action) => {
+      const { parentID, _id, likes } = action.payload;
+      let modified: IComment[];
+      if (!parentID) {
+        modified = state.comments.map((comm) =>
+          comm._id === _id ? { ...comm, likes } : comm
+        );
+      } else {
+        modified = state.comments.map((comm) =>
+          comm._id === parentID
+            ? {
+                ...comm,
+                children: [
+                  ...(comm.children as IComment[]).filter((i) => i._id !== _id),
+                  action.payload,
+                ],
+              }
+            : comm
+        );
+      }
+
+      state.comments = modified;
       state.loading = false;
     });
 
