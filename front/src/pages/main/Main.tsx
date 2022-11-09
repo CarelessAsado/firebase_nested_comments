@@ -55,6 +55,7 @@ const ContainerAllComments = styled.div`
 
 export let socket: Socket | undefined;
 
+type ISocketResponse = { data: IComment; user: IUser };
 //el problema de hacer esto es q el primer connect event se produce, pero yo no lo registro (ver q pasa si entro directamente en esta view, pero sospecho q va a ser lo mismo).
 
 //puedo hacer un useRef en app, y q si no hay user, directamente logueé out, y hacer los users connected desde el STORE
@@ -108,13 +109,20 @@ export const Main = () => {
     });
 
     //cuando envié al user conectado doble
-    socket.on("commentPosted", (data: IComment) => {
+    socket.on("commentPosted", ({ data, user }: ISocketResponse) => {
       dispatch(newCommentPostedAdded(data));
-      dispatchNotification(dispatch, "Alguien posteó un comentario.");
+      dispatchNotification(
+        dispatch,
+        `${user?.username || "Somebody"} posted a comment`
+      );
     });
-    socket.on("commentDeleted", (data: IComment) => {
+
+    socket.on("commentDeleted", ({ data, user }: ISocketResponse) => {
       dispatch(newCommentDeleted(data));
-      dispatchNotification(dispatch, "Alguien borró un comentario.");
+      dispatchNotification(
+        dispatch,
+        `${user?.username || "Somebody"} deleted a comment`
+      );
     });
 
     return () => {

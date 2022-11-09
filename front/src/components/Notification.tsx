@@ -19,11 +19,10 @@ export const ContainerNot = styled.div<StyleProps>`
   align-items: center;
   padding: 10px;
   border-radius: 10px;
-  transform: ${(props) =>
-    props.show ? "translateX(0)" : "translateX(-1000vw)"};
-  background-color: ${(props) => props.theme.text};
-  color: ${(props) => props.theme.body};
-  border: 1px solid ${(props) => props.theme.border};
+  transform: ${(props) => !props.show && "translateX(-1000vw)"};
+  background-color: var(--fbBody);
+  color: var(--mainWhite);
+  border: 1px solid var(--fb3erBody);
   @media (max-width: 500px) {
     max-width: calc(100% - 20px);
     left: 10px;
@@ -33,6 +32,7 @@ export const ContainerNot = styled.div<StyleProps>`
 export const ReactIconClose = styled.div`
   border-radius: 50%;
   cursor: pointer;
+  border: 1px solid var(--fb3erBody);
   font-size: var(--fontSmall);
   padding: 10px;
   transition: 0.3s;

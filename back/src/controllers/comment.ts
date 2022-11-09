@@ -289,7 +289,7 @@ export const getSingleTask = errorWrapper(async (req, res, next) => {
   res.status(200).json(task);
 });
 
-export const updateTask = errorWrapper(async (req, res, next) => {
+export const updateComment = errorWrapper(async (req, res, next) => {
   const { id } = req.params;
   const { name, done } = req.body;
   console.log(req.body, "estamos en update");
@@ -307,11 +307,11 @@ export const updateTask = errorWrapper(async (req, res, next) => {
   return res.json(taskToUpdate);
 });
 
-export const deleteTask = errorWrapper(async (req, res, next) => {
+export const deleteComment = errorWrapper(async (req, res, next) => {
   const { id } = req.params;
-  //check ownership?
 
-  const found = await Comment.findByIdAndDelete(id);
+  //check ownership? eventualmente pasar a esto a un MIDDLEWARE
+  const found = await Comment.findOneAndDelete({ id, userID: req.user._id });
 
   if (found?.parentID === null) {
     //aca no entramos si borramos subcomment

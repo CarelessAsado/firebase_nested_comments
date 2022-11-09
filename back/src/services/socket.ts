@@ -8,8 +8,16 @@ import { firebaseAuth } from "./firebase";
 interface IUserChat extends IUser {
   currentChats: string[];
 }
+
+type ConnectedUsersDB = IUserChat[];
+
+const findConnectedUser = (
+  connectedUsers: ConnectedUsersDB,
+  idSocket: string
+) => connectedUsers.find((user) => user.currentChats.includes(idSocket));
+
 export function startSocket(io: IOType) {
-  let connectedUsers: IUserChat[] = [];
+  let connectedUsers: ConnectedUsersDB = [];
 
   io.use((socket, next) => {
     const token = socket.handshake.auth.token;
@@ -44,7 +52,7 @@ export function startSocket(io: IOType) {
           if (!found) {
             throw new Error("User must log in");
           }
-          found;
+
           connectedUsers.push({
             ...found._doc,
             currentChats: [idSocket],
@@ -64,15 +72,16 @@ export function startSocket(io: IOType) {
         //aca tendria q hacer un POST EN EL COMMENT MMMM NO, creo q lo mejor es mandar el comment guardado en el payload, o no?
         //tengo q buscar el user en una fn, si no aparece, tendria q mandar un error (o no?
         //TENGO Q VER COMO LIDIO CON LOS ERRORES
-
-        socket.broadcast.emit("commentPosted", data);
+        const found = findConnectedUser(connectedUsers, idSocket);
+        socket.broadcast.emit("commentPosted", { data, user: found });
         //TENGO Q EVITAR Q EL USER ESTE DOS VECES EN LA MISMA DATABASE??? si el user ya esta conectado quizas le puedo agregar un array de links/id de socket?
       } catch (error) {
         /* console.log(error, 666, "AUTH IN IO"); */
       }
     });
     socket.on("commentDeleted", async (data) => {
-      socket.broadcast.emit("commentDeleted", data);
+      const found = findConnectedUser(connectedUsers, idSocket);
+      socket.broadcast.emit("commentDeleted", { data, user: found });
     });
 
     //a string that lists the reason of the disconnection
