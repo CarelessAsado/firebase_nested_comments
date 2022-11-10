@@ -18,6 +18,8 @@ const ModalUserNamesHover = styled.div`
   border-radius: 10px;
   position: absolute;
   display: none;
+  overflow-y: auto;
+  max-height: 50vh;
 `;
 
 const CommentCount = styled.div<{ isAbsolute?: boolean }>`
