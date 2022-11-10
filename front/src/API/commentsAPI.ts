@@ -34,9 +34,13 @@ export const likeUnlikeComment = async function (obj: IComment, user: IUser) {
 };
 
 export const getLikesUserData = function (comment: IComment) {
-  return axios.post(BACKEND_URL.LIKESUSERDATAdyn(comment._id), comment.likes);
+  return axios.get<UserNotNull[]>(BACKEND_URL.LIKESUSERDATAdyn(comment._id));
 };
 
+export const test = function () {
+  return axios.get<UserNotNull[]>("test");
+};
+type UserDataAxiosPromise = ReturnType<typeof getLikesUserData>;
 export const customApiCall = async function <TData>({
   body,
   method,

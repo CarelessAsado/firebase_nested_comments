@@ -6,6 +6,8 @@ import { AiFillLike } from "react-icons/ai";
 import Spinner from "components/loaders/loader";
 import useApiCall from "hooks/useApiCall";
 import { useState } from "react";
+import useTestApiCall from "hooks/TEST";
+import * as commentAPI from "API/commentsAPI";
 
 const LikeCountDisplay = styled.div`
   position: relative;
@@ -52,9 +54,9 @@ const LikesUsersDataModal = ({
     error,
     loading: indLoading,
     execute,
-  } = useApiCall<UserNotNull>({
-    url: BACKEND_URL.LIKESUSERDATAdyn(comment._id),
-    method: "get",
+  } = useTestApiCall({
+    apiCallPromise: commentAPI.getLikesUserData,
+    args: comment,
   });
 
   if (comment.likes.length > 0) {
