@@ -19,7 +19,8 @@ const BlockBehindNavBar = styled.div`
 `;
 const NavBar = styled.nav`
   height: ${navHeight};
-  background-color: white;
+  background-color: var(--mainWhite);
+  color: var(--fbBody);
   padding: 0 150px;
   display: flex;
   justify-content: space-between;
@@ -63,7 +64,6 @@ export const Overlay = styled.div<PropsShowNav>`
     bottom: 0;
 
     background-color: rgba(0, 0, 0, 0.2);
-    color: white;
     width: 100%;
     transform: ${(props) => !props.show && "translateX(-3000%)"};
   }
@@ -78,7 +78,7 @@ const Links = styled.ul`
     justify-content: center;
     flex-direction: column;
     background-color: var(--mainBlue);
-    color: white;
+    color: var(--mainWhite);
     width: calc(100% - 20px);
   }
 `;
@@ -124,7 +124,7 @@ const Span = styled.span`
     display: none;
   }
 `;
-export const BurgerButton = styled.div<PropsShowNav>`
+const BurgerButton = styled.div<PropsShowNav>`
   border: 3px solid var(--mainBlue);
   height: calc(100% - 5px);
   width: 50px;
@@ -148,7 +148,7 @@ export const BurgerButton = styled.div<PropsShowNav>`
       props.show && "rotate(45deg) translate(10px, 10px)"};
   }
   & div:nth-child(2) {
-    transform: ${(props) => props.show && "translateX( 30px)"};
+    transform: ${(props) => props.show && "translateX(30px)"};
     background: ${(props) => props.show && "transparent"};
   }
   & div:nth-child(3) {
@@ -166,6 +166,7 @@ const ProfilePic = styled.img`
   border-radius: 50%;
   object-fit: cover;
 `;
+
 export const Nav = () => {
   const { user } = useAppSelector((state) => state.user);
   const dispatch = useAppDispatch();

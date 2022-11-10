@@ -22,6 +22,7 @@ export const SideContainer = styled.div<SideContProps>`
   transform: ${(props) => !props.openChat && "translateX(-100%)"};
   width: ${widthSideChat};
   transition: 0.3s;
+  background-color: var(--fb3erBody);
   @media (max-width: ${disappearUserName}) {
     width: calc(${picHeight} + 20px);
   }
@@ -31,7 +32,7 @@ export const SolapaChat = styled.div<SideContProps>`
   left: 100%;
   top: 0;
   padding: 10px;
-  background-color: white;
+  background-color: var(--fbMessageBody);
   border: 1px solid grey;
   cursor: pointer;
   display: ${(props) => props.openChat && "none"};

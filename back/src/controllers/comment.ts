@@ -5,6 +5,8 @@ import { CustomError } from "../ERRORS/customErrors";
 import Task, { ITask } from "../models/Task";
 import Comment, { IDirectory } from "../models/Comment";
 import mongoose from "mongoose";
+import User from "../models/User";
+import getCleanUser from "../utils/getCleanUser";
 
 type IFacet = { commentsData: IDirectory[]; count: number };
 const DEFAULT_FACET_RESPONSE: IFacet = { commentsData: [], count: 0 };
@@ -307,9 +309,12 @@ export const updateComment = errorWrapper(async (req, res, next) => {
 });
 
 export const likeUnlikeComment = errorWrapper(async (req, res, next) => {
-  const { id } = req.params;
+  const { commentID: id } = req.params;
 
-  const commentToUpdate = await Comment.findById(id);
+  const commentToUpdate = await Comment.findById(id).populate({
+    path: "userID",
+    select: "img username _id",
+  });
 
   if (!commentToUpdate) {
     return next(new CustomError(404, "Comment does not exist."));
@@ -329,9 +334,30 @@ export const likeUnlikeComment = errorWrapper(async (req, res, next) => {
     );
   }
 
-  const saved = await commentToUpdate.save();
+  await commentToUpdate.save();
 
-  return res.json(saved);
+  return res.json(commentToUpdate);
+});
+export const likesUserData = errorWrapper(async (req, res, next) => {
+  const { commentID: id } = req.params;
+  console.log(req.body, 666666666666666);
+
+  const commentFound = await Comment.findById(id);
+
+  if (!commentFound) {
+    return next(new CustomError(404, "Comment does not exist."));
+  }
+  const arrayPromises = commentFound.likes.map((userID) =>
+    User.findById(userID)
+  );
+  const arrayOfUsers = await Promise.all(arrayPromises);
+  const cleanData = arrayOfUsers.map((i) => {
+    if (i) {
+      return getCleanUser(i);
+    }
+  });
+
+  return res.json(cleanData);
 });
 
 export const deleteComment = errorWrapper(async (req, res, next) => {

@@ -1,11 +1,12 @@
 import { Link } from "react-router-dom";
 import styled, { css } from "styled-components";
+import { AiOutlineSend } from "react-icons/ai";
 
 export const commentContainerBaseStyles = css`
   padding: 10px;
   border-radius: 5px;
-  background-color: black;
-  color: white;
+  background-color: var(--fbMessageBody);
+  color: var(--mainWhite);
   display: flex;
   flex-direction: column;
   gap: 5px;
@@ -24,16 +25,19 @@ export const Top = styled.div`
 
 export const Value = styled.div`
   font-size: var(--fontMed);
-  padding: 5px 0;
 `;
 
 export const Input = styled.input`
   padding: 10px;
 
-  border: 1px solid black;
+  border: none;
+  outline: none;
   border-radius: 5px;
   font-size: inherit;
   width: 100%;
+  border-radius: 8px;
+  color: var(--mainWhite);
+  background-color: var(--fb3erBody);
 `;
 
 export const ButtonContainer = styled.div`
@@ -48,3 +52,25 @@ export const Button = styled.button`
   background-color: var(--mainBlue);
   border-radius: 5px;
 `;
+
+/* ----------------------------------------------------- */
+
+export const FormSubmitNewSubComment = styled.form`
+  display: flex;
+  gap: 5px;
+  align-items: center;
+`;
+export const AddNewComment = styled.button`
+  background-color: inherit;
+  color: inherit;
+  cursor: pointer;
+  font-size: var(--fontMed);
+`;
+
+export const SendButton = () => {
+  return (
+    <AddNewComment>
+      <AiOutlineSend />
+    </AddNewComment>
+  );
+};

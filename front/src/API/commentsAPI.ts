@@ -32,3 +32,19 @@ export const deleteComment = async function (obj: IComment) {
 export const likeUnlikeComment = async function (obj: IComment, user: IUser) {
   return axios.put<IComment>(BACKEND_URL.LIKESdyn(user?._id || "", obj._id));
 };
+
+export const getLikesUserData = function (comment: IComment) {
+  return axios.post(BACKEND_URL.LIKESUSERDATAdyn(comment._id), comment.likes);
+};
+
+export const customApiCall = async function <TData>({
+  body,
+  method,
+  url,
+}: {
+  body: {};
+  method: AxiosMethodsCustomApiCall;
+  url: string;
+}) {
+  return axios[method]<TData>(url, body);
+};

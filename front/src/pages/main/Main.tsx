@@ -1,11 +1,7 @@
 import styled from "styled-components";
 import { useAppDispatch, useAppSelector } from "hooks/reduxDispatchAndSelector";
 import { useEffect, useState } from "react";
-import {
-  /*   getComments, */
-  newCommentDeleted,
-  newCommentPostedAdded,
-} from "context/generalSlice";
+import { newCommentDeleted, newCommentPostedAdded } from "context/generalSlice";
 import io, { Socket } from "socket.io-client";
 import { BACKEND_ROOT } from "config/constants";
 import { getHeadersChatAuth } from "API/axiosInstanceJWT";
@@ -24,7 +20,6 @@ const Container = styled.div<{ isChatOpen: boolean }>`
   //is chatClose, then margin-left:none
   margin-left: ${(props) => (props.isChatOpen ? widthSideChat : "none")};
   /* width: calc(100% - ${widthSideChat}); */
-  border: 2px solid green;
   min-height: 100vh;
   height: 100%;
   display: flex;
@@ -32,7 +27,7 @@ const Container = styled.div<{ isChatOpen: boolean }>`
   justify-content: center;
   padding: 0 10px;
   transition: 0.3s;
-  border: 1px solid green;
+
   @media (max-width: ${disappearUserName}) {
     margin-left: ${(props) =>
       props.isChatOpen ? `calc(${picHeight} + 20px)` : "none"};
@@ -44,13 +39,12 @@ const Center = styled.div`
   align-self: baseline;
   max-width: 1000px;
   width: 100%;
-  background-color: white;
 `;
 
 const ContainerAllComments = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 20px;
 `;
 
 export let socket: Socket | undefined;

@@ -52,13 +52,12 @@ export const Table = styled.table`
 
 const BtnLogout = styled.button`
   background-color: inherit;
-  color: var(--mainRed);
+  color: var(--mainWhite);
   padding: 10px;
   border-radius: 5px;
   transition: 0.3s;
   cursor: pointer;
   &:hover {
-    color: white;
     background-color: var(--mainRed);
   }
   font-size: inherit;

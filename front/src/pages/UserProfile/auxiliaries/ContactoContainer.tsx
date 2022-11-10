@@ -69,7 +69,7 @@ export const Email = styled(Nombre)`
 export const ReactIcon = styled.div`
   text-align: right;
   font-size: var(--fontMed);
-  color: var(--mainBlue);
+  color: var(--fbBlue);
   cursor: pointer;
   transition: 0.3s;
   &:hover {
@@ -79,7 +79,7 @@ export const ReactIcon = styled.div`
     color: var(--mainGreen);
   }
   &.cancel {
-    color: ${(props) => props.theme.red};
+    color: var(--mainRed);
   }
 `;
 export const ChangePwd = styled.h2`

@@ -20,7 +20,7 @@ scroll-behavior:smooth;
   --mainPink:#ff8000;
 /*    --mainPink:#ffa2a2;  */
 
-   --mainGray:grey;
+   --mainGray:rgb(133, 133, 133);
    --mainRed:crimson;
 
 
@@ -29,15 +29,14 @@ scroll-behavior:smooth;
   --fbGreen: #42b72a;
   --overlayReg: rgba(254, 254, 254, 0.8);
 
-  --grey: rgb(133, 133, 133);
   --greyless: rgb(180, 174, 174);
-  --light: rgb(226, 220, 220);
   --transition: 0.6s;
   --fbBlueOficial: #4267b2;
-
+  
   --fbBody: #18191a;
   --fbMessageBody: #242526;
   --fb3erBody: rgb(66, 66, 75);
+  --fbWhiteComments: rgb(226, 220, 220);
 
 --fontSmall:1rem;
   --fontMed:1.2rem;
@@ -57,7 +56,15 @@ scroll-behavior:smooth;
 a{
   text-decoration:none;
   color:inherit;
-}`;
+}
+
+
+body{
+  background-color:var(--fbBody);
+  color:var(--mainWhite)
+}
+
+`;
 
 export const animateOpacityFadeIn = keyframes`
   0% {

@@ -37,3 +37,5 @@ type GeneralState = {
 type ILoginInput = Pick<UserNotNull, "email"> & {
   password: string;
 };
+
+type AxiosMethodsCustomApiCall = "get" | "delete" | "put" | "post";

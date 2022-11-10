@@ -13,7 +13,8 @@ router.post("/subcomments/:parentCommentID", commentsController.getSubComments);
 /* OWNERSHIP CHECK MIDDLEWARE */
 router.delete("/:userID/:id", commentsController.deleteComment);
 router.put("/:userID/:id", commentsController.updateComment);
-router.put("/likes/:userID/:id", commentsController.likeUnlikeComment);
+router.put("/likes/:userID/:commentID", commentsController.likeUnlikeComment);
+router.get("/likes/userswholiked/:commentID", commentsController.likesUserData);
 router.get("/:userID/:id", commentsController.getSingleTask);
 
 module.exports = router;

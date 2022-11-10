@@ -50,14 +50,31 @@ export const ProfilePic = styled.img`
 `;
 const NoProfilePic = styled.div`
   min-width: ${picHeight};
-  min-height: ${picHeight};
+  height: ${picHeight};
+  display: grid;
+  place-items: center;
   border-radius: 50%;
-  background-color: #cfc9c9;
+  background-color: var(--mainGray);
   & svg {
     height: calc(100% - 10px);
     width: 100%;
   }
 `;
+export const NoPicOrPicUserImage = ({
+  img,
+}: {
+  img: string | null | undefined;
+}) => {
+  {
+    return img ? (
+      <ProfilePic src={img}></ProfilePic>
+    ) : (
+      <NoProfilePic>
+        <BiUser />
+      </NoProfilePic>
+    );
+  }
+};
 const UserNameText = styled.span`
   @media (max-width: ${disappearUserName}) {
     display: none;

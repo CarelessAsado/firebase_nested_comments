@@ -171,10 +171,9 @@ export const generalSlice = createSlice({
           comm._id === parentID
             ? {
                 ...comm,
-                children: [
-                  ...(comm.children as IComment[]).filter((i) => i._id !== _id),
-                  action.payload,
-                ],
+                children: (comm.children as IComment[]).map((i) =>
+                  i._id === _id ? action.payload : i
+                ),
               }
             : comm
         );

@@ -9,9 +9,6 @@ export const Container = styled.div`
   place-items: center;
   grid-column-gap: 40px;
 
-  background-color: var(--fbBody);
-  color: var(--mainWhite);
-
   @media screen and (max-width: 720px) {
     & {
       display: grid;
