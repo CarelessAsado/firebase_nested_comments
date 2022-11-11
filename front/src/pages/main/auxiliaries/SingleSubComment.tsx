@@ -9,20 +9,11 @@ import {
   commentContainerBaseStyles,
   Value,
 } from "./styles";
-import { BACKEND_URL, FRONTEND_ENDPOINTS } from "config/constants";
+import { FRONTEND_ENDPOINTS } from "config/constants";
 import { Link } from "react-router-dom";
-import { LikeIcon } from "./ParentComments";
-import { AiFillLike } from "react-icons/ai";
-import Spinner from "components/loaders/loader";
-import useApiCall from "hooks/useApiCall";
-import { useState } from "react";
 import LikesUsersDataModal from "./LikesUsersDataModal";
 
 const SingleSubCommentContainer = styled.div`
-  //copiar y pegar estilos
-
-  // dejé este método de lado xq no me gustaba q el comment estuviera adentro del otro
-  //c/subcommentContainer va a tomar una prop, y en base a ese indice va a multiplicar
   ${commentContainerBaseStyles}
   width: max-content;
 `;
@@ -34,34 +25,6 @@ const ColoredPadding = styled.div`
   position: relative;
 `;
 
-export const LikeCountDisplay = styled.div`
-  position: relative;
-`;
-//lo pongo antes de comment count p/poder referenciarlo en CommentCount:hover
-export const ModalUserNamesHover = styled.div`
-  background-color: rgb(248, 248, 243, 0.7);
-  color: black;
-  padding: 10px;
-  border-radius: 10px;
-  position: absolute;
-  display: none;
-`;
-
-const CommentCount = styled.div`
-  position: absolute;
-  right: 0;
-  background-color: var(--fb3erBody);
-  border-radius: 10px;
-  padding: 2px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 3px;
-  font-size: calc(var(--fontSmall) - 0.2rem);
-  &:hover ${ModalUserNamesHover} {
-    display: block;
-  }
-`;
 const Functionalities = styled.div`
   display: flex;
   gap: 10px;
@@ -97,19 +60,7 @@ interface IProps {
 }
 
 export function SingleSubComment({ comment, user, focus }: IProps) {
-  /* const [newChildComment, setNewChildComment] = useState(""); */
-  const [mouseEntered, setMouseEntered] = useState(false);
   const dispatch = useAppDispatch();
-
-  const {
-    data: usersLiking,
-    error,
-    loading: indLoading,
-    execute,
-  } = useApiCall<UserNotNull>({
-    url: BACKEND_URL.LIKESUSERDATAdyn(comment._id),
-    method: "get",
-  });
 
   const handleDelete = () => {
     dispatch(deleteComment(comment));
@@ -120,12 +71,6 @@ export function SingleSubComment({ comment, user, focus }: IProps) {
       Eliminar
     </Button>
   );
-  //si estamos en el limite de 4 pero no hay additionalChildren no tiene sentido mostrar el btn
-
-  //add a btn to maybe fetch more, if there are more comments
-  //update useState with the new topLevel when btnPressed
-  //how can I deal with go back to previous comment
-  //stop recursion
 
   return (
     <>
@@ -156,16 +101,9 @@ export function SingleSubComment({ comment, user, focus }: IProps) {
                 <ReplyFunctionality onClick={focus}>Reply</ReplyFunctionality>
                 <TimeAgo datetime={comment.createdAt} />
               </Functionalities>
-              {/*     <Input
-                placeholder="Add reply..."
-                value={newChildComment}
-                onChange={(e) => setNewChildComment(e.target.value)}
-              ></Input>{" "} */}
-              <ButtonContainer>
-                {/*  <Button onClick={handleSubmit}>Comentar</Button> */}
-                {comment.userID._id === user?._id && deleteBtn}
 
-                {/* <Button>Likear</Button> */}
+              <ButtonContainer>
+                {comment.userID._id === user?._id && deleteBtn}
               </ButtonContainer>
             </ColumnFlex>
           </FlexIt>

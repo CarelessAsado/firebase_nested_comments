@@ -1,7 +1,4 @@
 import styled from "styled-components";
-
-import { BACKEND_URL } from "config/constants";
-import { LikeIcon } from "./ParentComments";
 import { AiFillLike } from "react-icons/ai";
 import Spinner from "components/loaders/loader";
 import useApiCall from "hooks/useApiCall";
@@ -40,6 +37,17 @@ const CommentCount = styled.div<{ isAbsolute?: boolean }>`
   }
 `;
 
+const LikeIcon = styled.span`
+  background-color: var(--fbBlue);
+  height: 18px;
+  min-width: 18px;
+  border-radius: 50%;
+  font-size: calc(var(--fontSmall) - 0.3rem);
+  cursor: pointer;
+  color: var(--mainWhite);
+  display: grid;
+  place-items: center;
+`;
 const LikesUsersDataModal = ({
   comment,
   isAbsolute,

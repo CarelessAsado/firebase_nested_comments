@@ -65,21 +65,6 @@ export const LikeSection = styled.div`
   align-items: center;
   position: relative;
 `;
-export const LikeIcon = styled.span`
-  background-color: var(--fbBlue);
-  height: 18px;
-  min-width: 18px;
-  border-radius: 50%;
-  font-size: calc(var(--fontSmall) - 0.3rem);
-  cursor: pointer;
-  color: var(--mainWhite);
-  display: grid;
-  place-items: center;
-`;
-export const LikeCount = styled.span`
-  color: var(--mainGray);
-  font-weight: bold;
-`;
 
 interface IProps {
   comment: IComment;
