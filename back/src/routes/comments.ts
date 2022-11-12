@@ -11,7 +11,7 @@ router.post("/", commentsController.createComment);
 router.get("/", commentsController.getAllParentComments);
 router.post("/subcomments/:parentCommentID", commentsController.getSubComments);
 /* OWNERSHIP CHECK MIDDLEWARE */
-router.delete("/:userID/:id", commentsController.deleteComment);
+router.delete("/:userID/:commentID", commentsController.deleteComment);
 router.put("/:userID/:id", commentsController.updateComment);
 router.put("/likes/:userID/:commentID", commentsController.likeUnlikeComment);
 router.get("/likes/userswholiked/:commentID", commentsController.likesUserData);

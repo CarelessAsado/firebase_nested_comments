@@ -1,4 +1,5 @@
 import { IOType } from "..";
+import { IDirectory } from "../models/Comment";
 import User, { IUser } from "../models/User";
 import { firebaseAuth } from "./firebase";
 
@@ -75,6 +76,21 @@ export function startSocket(io: IOType) {
         const found = findConnectedUser(connectedUsers, idSocket);
         socket.broadcast.emit("commentPosted", { data, user: found });
         //TENGO Q EVITAR Q EL USER ESTE DOS VECES EN LA MISMA DATABASE??? si el user ya esta conectado quizas le puedo agregar un array de links/id de socket?
+      } catch (error) {
+        /* console.log(error, 666, "AUTH IN IO"); */
+      }
+    });
+    socket.on("commentLikedUnliked", async (data) => {
+      try {
+        const found = findConnectedUser(connectedUsers, idSocket);
+        //el front me tiene q decir de alguna manera si likeo o unlikeo, y con eso señalo aca yo tmb
+        //necesito buscar al connectedUser? creo q si porque esa info ya esta chequeada, sino el front me puede mandar cualquier cosa
+        return socket.broadcast.emit("commentLikedUnliked", {
+          data,
+          user: found,
+        });
+
+        return;
       } catch (error) {
         /* console.log(error, 666, "AUTH IN IO"); */
       }

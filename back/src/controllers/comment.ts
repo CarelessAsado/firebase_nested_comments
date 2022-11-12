@@ -221,7 +221,8 @@ export const getSubComments = errorWrapper(async (req, res, next) => {
               createdAt: -1,
             },
           },
-
+          //falta el slice
+          { $limit: SUBCOMMENTS_TO_RETRIEVE_PER_PARENT },
           //POPULATE USERID
           {
             $lookup: {
@@ -248,6 +249,7 @@ export const getSubComments = errorWrapper(async (req, res, next) => {
       $unwind: "$count",
     },
     //ahora pasa a ser un obj adentro de otro obj, así count:{totalComments:3}, asi q destructuro con $project
+
     {
       $project: {
         //como no puedo usar $lastN en facet, sino q uso limit, tengo q volver a revertir el array p/q los subcomentarios + antiguos aparezcan on top, en la UI de la PARENT COMMENT
@@ -338,6 +340,7 @@ export const likeUnlikeComment = errorWrapper(async (req, res, next) => {
 
   return res.json(commentToUpdate);
 });
+
 export const likesUserData = errorWrapper(async (req, res, next) => {
   const { commentID: id } = req.params;
   console.log(req.body, 666666666666666);
@@ -361,10 +364,13 @@ export const likesUserData = errorWrapper(async (req, res, next) => {
 });
 
 export const deleteComment = errorWrapper(async (req, res, next) => {
-  const { id } = req.params;
+  const { commentID: id, userID } = req.params;
 
   //check ownership? eventualmente pasar a esto a un MIDDLEWARE
-  const found = await Comment.findOneAndDelete({ id, userID: req.user._id });
+  const found = await Comment.findOneAndDelete({ _id: id, userID });
+  if (!found) {
+    return res.sendStatus(204);
+  }
 
   if (found?.parentID === null) {
     //aca no entramos si borramos subcomment
