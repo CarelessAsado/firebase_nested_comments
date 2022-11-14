@@ -6,8 +6,6 @@ import {
   Form,
   Input,
   Error,
-  Header,
-  Bottom,
   SecondaryButton,
   SectionLeft,
   RodriBook,
@@ -16,6 +14,7 @@ import {
 import { FRONTEND_ENDPOINTS } from "config/constants";
 import { login } from "context/userSlice";
 import { useAppDispatch, useAppSelector } from "hooks/reduxDispatchAndSelector";
+import Spinner from "components/loaders/loader";
 
 const Label = styled.label``;
 
@@ -78,7 +77,17 @@ export const Login = () => {
               placeholder="Password *"
               id="password"
             ></Input>
-            <Input type="submit" value={loading ? "Loading..." : "Log In"} />
+            <Input className="main" as="button" disabled={loading}>
+              {loading ? (
+                <Spinner
+                  fz={"var(--fontSmall)"}
+                  h="100%"
+                  color="var(--mainWhite)"
+                />
+              ) : (
+                "Log In"
+              )}
+            </Input>
             <Error aria-live="assertive">{error}</Error>
             <MarginLine className="marginLine"></MarginLine>
             <SecondaryButton

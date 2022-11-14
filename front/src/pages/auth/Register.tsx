@@ -13,6 +13,7 @@ import {
 import { FRONTEND_ENDPOINTS } from "config/constants";
 import { register } from "context/userSlice";
 import { useAppDispatch, useAppSelector } from "hooks/reduxDispatchAndSelector";
+import Spinner from "components/loaders/loader";
 
 const Label = styled.label``;
 
@@ -88,7 +89,18 @@ export const Register = () => {
           placeholder="Confirm password *"
           id="Confirmpassword"
         ></Input>
-        <Input type="submit" value={loading ? "Loading..." : "Submit"}></Input>
+        <Input className="main" as="button" disabled={loading}>
+          {loading ? (
+            <Spinner
+              fz={"var(--fontSmall)"}
+              h="100%"
+              color="var(--mainWhite)"
+            />
+          ) : (
+            "Submit"
+          )}
+        </Input>
+
         <Bottom>
           Already have an account?
           <RegisterLink to={FRONTEND_ENDPOINTS.LOGIN}>

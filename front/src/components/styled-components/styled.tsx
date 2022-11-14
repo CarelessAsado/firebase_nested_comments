@@ -81,7 +81,7 @@ export const Input = styled.input`
     outline: none;
     border: 1px solid var(--lightblue);
   }
-  &[type="submit"] {
+  &.main {
     color: inherit;
     border: none;
 

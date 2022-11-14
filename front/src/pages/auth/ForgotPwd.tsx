@@ -34,12 +34,14 @@ export const ForgotPwd = () => {
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    !email && dispatchNotification(dispatch, "You must provide your email.");
     try {
       await dispatch(forgotPwd(email)).unwrap();
       dispatchNotification(
         dispatch,
         "Check your inbox to finish the password change."
       );
+      setEmail("");
     } catch (error) {}
   }
 
@@ -52,14 +54,18 @@ export const ForgotPwd = () => {
         <Input
           autoFocus
           type="email"
-          name="email"
           onChange={(e) => setEmail(e.target.value)}
+          value={email}
           placeholder="Email *"
           id="email"
         ></Input>
         <Label htmlFor="email"></Label>
 
-        <Input type="submit" value={loading ? "Loading..." : "Submit"}></Input>
+        <Input
+          className="main"
+          type="submit"
+          value={loading ? "Loading..." : "Submit"}
+        ></Input>
         <Bottom>
           We will send you an email. Follow the steps therein and you will be
           able to recover your account.
