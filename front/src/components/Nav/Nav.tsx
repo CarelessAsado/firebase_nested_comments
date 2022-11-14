@@ -75,6 +75,7 @@ interface IPadding {
 
 const Links = styled.ul`
   width: 100%;
+  height: 100%;
   display: flex;
   //stretch full height of the nav, dont set height on children
   align-items: stretch;
@@ -84,7 +85,6 @@ const Links = styled.ul`
     //dejar 20px de overlay en p/q se vea el background
     width: calc(100% - 20px);
 
-    height: 100%;
     flex-direction: column;
 
     justify-content: center;
@@ -177,7 +177,7 @@ const ProfilePic = styled.img`
 export const Nav = () => {
   const { user } = useAppSelector((state) => state.user);
   const dispatch = useAppDispatch();
-  const [showNav, setShowNav] = useState<boolean>(true);
+  const [showNav, setShowNav] = useState<boolean>(false);
   return (
     <>
       <BlockBehindNavBar />

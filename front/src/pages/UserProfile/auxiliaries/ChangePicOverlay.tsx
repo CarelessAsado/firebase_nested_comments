@@ -17,6 +17,7 @@ export const SubContainer = styled.div<SubContainerProps>`
   justify-content: space-between;
   font-size: 1.3rem;
   gap: 10px;
+  color: var(--fbBody);
 `;
 type BtnProps = {
   danger?: boolean;
@@ -26,13 +27,14 @@ export const Btn = styled.div<BtnProps>`
   color: white;
   border-radius: 5px;
   cursor: pointer;
-  background-color: ${(props) => (props.danger ? "crimson" : "grey")};
-  border: 1px solid ${(props) => props.danger && "crimson"};
+  background-color: ${(props) =>
+    props.danger ? "var(--mainRed)" : "var(--mainGray)"};
+  border: 1px solid ${(props) => props.danger && "var(--mainRed)"};
   &:hover {
-    background-color: ${(props) => props.danger && "crimson"};
+    background-color: ${(props) => props.danger && "var(--mainRed)"};
   }
 `;
-export const Header = styled.h2`
+const Header = styled.h2`
   position: relative;
   text-align: center;
   font-weight: bold;
@@ -40,27 +42,27 @@ export const Header = styled.h2`
   padding: 30px 20px 20px 50px;
   text-transform: uppercase;
 `;
-export const Line = styled.div`
-  background-color: ${(props) => props.theme.border};
+const Line = styled.div`
+  background-color: var(--greyless);
   height: 1px;
 `;
-export const LabelImg = styled.label`
+const LabelImg = styled.label`
+  cursor: pointer;
   display: flex;
   flex-direction: column;
   font-size: 1.5rem;
-  cursor: pointer;
   & > * {
     font-size: 6rem;
   }
 `;
-export const Input = styled.input`
+const Input = styled.input`
   display: none;
 `;
-export const ContainerImg = styled.div`
+const ContainerImg = styled.div`
   position: relative;
   height: 250px;
 `;
-export const Img = styled.img`
+const Img = styled.img`
   width: 100%;
   height: 100%;
   object-fit: contain;
@@ -100,7 +102,7 @@ export const ChangePicOverlay = ({ show, close }: OpenCloseOv) => {
       </Header>
       <Line />
       <SubContainer>
-        {img ? (
+        {!!img ? (
           <ContainerImg>
             <Img
               src={
@@ -130,6 +132,7 @@ export const ChangePicOverlay = ({ show, close }: OpenCloseOv) => {
           </LabelImg>
         )}
       </SubContainer>
+
       <Line />
       <SubContainer flexIt>
         <Btn

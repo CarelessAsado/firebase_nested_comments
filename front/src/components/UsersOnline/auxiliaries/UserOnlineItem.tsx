@@ -26,6 +26,11 @@ const ContainerItem = styled(Link)`
   align-items: center;
   gap: 10px;
   font-size: var(--fontMed);
+
+  &:nth-child(even) {
+    background-color: var(--fb3erBodyDarker);
+  }
+  &:nth-child(even):hover,
   &:hover {
     background-color: rgba(0, 0, 0, 0.1);
   }
@@ -68,15 +73,13 @@ export const NoPicOrPicUserImage = ({
 }: {
   img: string | null | undefined;
 }) => {
-  {
-    return img ? (
-      <ProfilePic src={img}></ProfilePic>
-    ) : (
-      <NoProfilePic>
-        <BiUser />
-      </NoProfilePic>
-    );
-  }
+  return img ? (
+    <ProfilePic src={img}></ProfilePic>
+  ) : (
+    <NoProfilePic>
+      <BiUser />
+    </NoProfilePic>
+  );
 };
 const UserNameText = styled.span`
   @media (max-width: ${disappearUserName}) {

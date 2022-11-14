@@ -33,7 +33,7 @@ function App() {
             return setLoading(false);
           });
       } else {
-        alert("aca no sé q hacer aun");
+        //al hacer logout paso x aca
         /*        setUser(null); */
         setLoading(false);
       }

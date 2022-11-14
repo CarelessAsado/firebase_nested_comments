@@ -1,14 +1,11 @@
-import { useState } from "react";
-
 import UserOnlineItem, {
   disappearUserName,
   picHeight,
 } from "./auxiliaries/UserOnlineItem";
-
 import styled from "styled-components";
 import { navHeight } from "components/Nav/Nav";
-import { ScrollStyles } from "Global styles/Globalstyle";
 import { AiFillWechat, AiOutlineCloseCircle } from "react-icons/ai";
+
 export const widthSideChat = "300px";
 //2 width, una p/
 interface SideContProps {
@@ -23,6 +20,7 @@ export const SideContainer = styled.div<SideContProps>`
   width: ${widthSideChat};
   transition: 0.3s;
   background-color: var(--fb3erBody);
+
   @media (max-width: ${disappearUserName}) {
     width: calc(${picHeight} + 20px);
   }

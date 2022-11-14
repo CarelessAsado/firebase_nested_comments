@@ -36,6 +36,7 @@ scroll-behavior:smooth;
   --fbBody: #18191a;
   --fbMessageBody: #242526;
   --fb3erBody: rgb(66, 66, 75);
+  --fb3erBodyDarker: rgb(79, 79, 89);
   --fbWhiteComments: rgb(226, 220, 220);
 
 --fontSmall:1rem;

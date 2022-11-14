@@ -10,6 +10,7 @@ import { useAppDispatch } from "hooks/reduxDispatchAndSelector";
 import { updateEmail, updatePwd, updateUsername } from "context/userSlice";
 import { dispatchNotification } from "config/utils/dispatchNotification";
 import { ChangePicOverlay } from "./ChangePicOverlay";
+import Spinner from "components/loaders/loader";
 
 const FlexIt = styled.div`
   display: flex;
@@ -210,7 +211,16 @@ export function Contacto({
   return (
     <ContactoContainer>
       <Header>
-        <FlexIt>Personal info {Indloading && "Loading"}</FlexIt>
+        <FlexIt>
+          Personal info{" "}
+          {Indloading && (
+            <Spinner
+              fz={"var(--fontSmall)"}
+              h="100%"
+              color="var(--mainWhite)"
+            />
+          )}
+        </FlexIt>
       </Header>
 
       <ContactInfo>
