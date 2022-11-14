@@ -1,12 +1,11 @@
 import { AnyAction, ThunkDispatch } from "@reduxjs/toolkit";
 
-import { logout, renderError } from "./userSlice";
+import { renderError } from "./userSlice";
 
-export default function handleError(
+export default async function handleError(
   error: any, //esto lo copié directamente del dispatch en userSlice
   dispatch: ThunkDispatch<unknown, unknown, AnyAction>
 ) {
-  console.log(error?.config?.sent, "VER EL CONFIG");
   console.log(error?.response);
   console.log(JSON.stringify(error));
 
@@ -18,13 +17,17 @@ export default function handleError(
   ) {
     return dispatch(renderError("No internet. "));
   }
-  /* ABORT CONTROLLLER, no es tecnicamente un error, asi q simplemente devolvemos */
-  if (error?.message === "canceled") return;
 
-  if (error?.config?.sent && error?.response?.status === 403) {
-    console.log("aca es un error pos-refresh-token api call", error.config);
-    return dispatch(logout());
+  /* ESTO EXISTE ESPECIALMENTE POR FIREBASE */
+  if (error?.name === "FirebaseError") {
+    return dispatch(renderError(error.code));
   }
+
+  if (error?.message === "canceled") {
+    /* ABORT CONTROLLLER, no es tecnicamente un error, asi q simplemente devolvemos */
+    return;
+  }
+
   dispatch(
     renderError(
       error?.response?.data?.message ||

@@ -19,6 +19,7 @@ export const addTask = errorWrapper(async (req, res, next) => {
 });
 
 export const getAllTasks = errorWrapper(async (req, res, next) => {
+  console.log(req.firebase, 999999999999);
   const { _id: userID } = req.user;
 
   const allTasks = await Task.find<ITask>({ userID }, { userID: 0 });

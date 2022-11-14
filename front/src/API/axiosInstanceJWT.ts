@@ -1,9 +1,9 @@
 import axios, { HeadersDefaults } from "axios";
-import { BACKEND_ROOT } from "config/constants";
+import { BACKEND_ROOT, BACKEND_URL } from "config/constants";
 
 export const headerKey = "auth-token";
 const axiosInstanceJWT = axios.create({
-  baseURL: BACKEND_ROOT,
+  baseURL: BACKEND_ROOT + BACKEND_URL.ROOT_API_VERSION,
   headers: {
     [headerKey]: "",
   },
@@ -19,4 +19,9 @@ export function setHeaders(accessToken: string = "") {
   console.log(axiosInstanceJWT.defaults.headers, 666);
 }
 
+export function getHeadersChatAuth() {
+  return (axiosInstanceJWT.defaults.headers as CommonHeaderProperties)[
+    headerKey
+  ];
+}
 export default axiosInstanceJWT;

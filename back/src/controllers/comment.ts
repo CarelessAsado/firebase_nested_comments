@@ -1,34 +1,287 @@
-import User, { IUser } from "../models/User";
 import errorWrapper from "../ERRORS/asyncErrorWrapper";
-import { CustomError, Error401, Error403 } from "../ERRORS/customErrors";
-import { COOKIE_RT_KEY, COOKIE_OPTIONS, JWT_SECRET } from "../constants";
-import jwt from "jsonwebtoken";
-import getCleanUser from "../utils/getCleanUser";
+import { CustomError } from "../ERRORS/customErrors";
 
 /*VER XQ NO ME SALEN LOS METODOS DE MONGOOSE*/
 import Task, { ITask } from "../models/Task";
 import Comment, { IDirectory } from "../models/Comment";
+import mongoose from "mongoose";
+import User from "../models/User";
+import getCleanUser from "../utils/getCleanUser";
+
+type IFacet = { commentsData: IDirectory[]; count: number };
+const DEFAULT_FACET_RESPONSE: IFacet = { commentsData: [], count: 0 };
+const SUBCOMMENTS_TO_RETRIEVE_PER_PARENT = 3;
 
 export const createComment = errorWrapper(async (req, res, next) => {
-  const { value, id, path } = req.body;
+  //enviar parentID
+  const { value, parentID } = req.body;
   console.log(req.body);
   const { _id } = req.user;
-  if (!id) {
-    const newComment = new Comment({ userID: _id, value });
-    const addedComment = await newComment.save();
-    return res.json(addedComment);
-  }
-  const newComment = new Comment({ userID: _id, value, path: `${path},${id}` });
+
+  const newComment = new Comment({ userID: _id, value, parentID });
   const addedComment = await newComment.save();
+  console.log(addedComment);
   return res.json(addedComment);
 });
 
-export const getAllTasks = errorWrapper(async (req, res, next) => {
+export const getAllParentComments = errorWrapper(async (req, res, next) => {
+  const { _id: userID } = req.user;
+  let { page = 1, limit = 3 } = req.query;
+  console.log(req.query);
+  limit = Number(limit);
+  page = Number(page);
+  if (limit > 50) {
+    limit = 30;
+  }
+  /* const allComments = await Comment.find<IDirectory>(/* { userID } ).populate(
+    { path: "userID", select: "img username _id" }
+  ); */
+
+  const facet = await Comment.aggregate<IFacet>([
+    {
+      $match: {
+        parentID: null,
+      },
+    },
+    //Por c/object en al cual le hago populate, tmb puedo hacer una query adicional, y agregarle extra info
+    //https://www.mongodb.com/docs/manual/reference/operator/aggregation/lookup/#perform-an-uncorrelated-subquery-with--lookup
+    {
+      $facet: {
+        commentsData: [
+          //order latest messages first
+          {
+            //tengo q poner $sort antes del skip y el limit, xq sino no obtengo la data + reciente
+            $sort: {
+              createdAt: -1,
+            },
+          },
+          { $skip: (page - 1) * limit },
+          { $limit: limit },
+
+          //una vez q limité el nro de PARENT CONV, hago el populate del user id y la subquery
+          //POPULATE USERID
+          {
+            $lookup: {
+              from: "users", //usé mongosh p/ver los nombres de las collections
+              as: "userID", //le podés poner el nombre q quieras
+              localField: "userID",
+              foreignField: "_id",
+            },
+          },
+
+          { $unwind: "$userID" },
+          //SUBQUERY PER PARENT CONVERSATION,busco TODOS los children (FIRST LEVEL, y subsequents)
+          {
+            $lookup: {
+              from: "comments",
+              //usé mongosh p/ver los nombres de las collections
+              as: "nested",
+              //le podés poner el nombre q quieras
+              let: {
+                parentID: "$_id",
+              },
+              pipeline: [
+                {
+                  $match: {
+                    $expr: {
+                      $eq: ["$parentID", "$$parentID"],
+                    },
+                  },
+                },
+                {
+                  $sort: {
+                    createdAt: 1,
+                  },
+                },
+
+                //hacer esto dsp de hacer el sliceeeeeeeeeeeee, p/evitar lookups innecesarios
+                {
+                  $lookup: {
+                    from: "users", //usé mongosh p/ver los nombres de las collections
+                    as: "userID", //le podés poner el nombre q quieras
+                    localField: "userID",
+                    foreignField: "_id",
+                  },
+                },
+
+                { $unwind: "$userID" },
+              ],
+            },
+          },
+          //ACA CIERRA LOOKUP
+          //el problema en realidad es q count si no hay docs, devuelve nada, y cuando hago unwind es como q desaparece "nested" key. Se me ocurre cotejar si el array esta vacio o no, y en base a eso agregar count:0. O podria hacer dsp, si nested no existe, agregar nested:0
+          //https://www.google.com/search?q=%24count+returns+nothing+if+query+is+empty+mongodb&sxsrf=ALiCzsYUKI4VVmRcmnFf8U-TFAbxRFV4KA%3A1666914742492&ei=thlbY-7RHdLu1sQPnM6zcA&ved=0ahUKEwjuhOOozYH7AhVSt5UCHRznDA4Q4dUDCA8&uact=5&oq=%24count+returns+nothing+if+query+is+empty+mongodb&gs_lcp=Cgdnd3Mtd2l6EAMyBQghEKABMgUIIRCgAToKCAAQRxDWBBCwAzoICCEQFhAeEB06BAghEBU6BwghEKABEApKBAhNGAFKBAhBGABKBAhGGABQywZYhRRg0xVoAXABeACAAZUBiAHUB5IBAzAuOJgBAKABAcgBCMABAQ&sclient=gws-wiz
+          //https://stackoverflow.com/questions/68891421/mongo-count-return-no-docoument-found-instead-of-0
+
+          //dsp de esto, tengo q contar todos los first levelchildren,
+          //ver si puedo contar y en 2do lugar hacer el slice, todo en el mismo set
+          {
+            $set: {
+              //CONTAMOS CANTIDAD DE ITEMS EN EL ARRAY, y le restamos la cantidad de subdocs q vamos a devolverle al user junto al parent comment
+              totalSubcomments: {
+                $size: "$nested",
+              },
+              children: {
+                $lastN: {
+                  n: SUBCOMMENTS_TO_RETRIEVE_PER_PARENT,
+                  input: "$nested",
+                },
+              },
+              //ACA TENGO Q HACER MATEMATICA,con el nroslice q haga al array de FIRST LEVEL CHILDREN
+              remainingChildren: {
+                $subtract: [
+                  {
+                    $size: "$nested",
+                  },
+                  SUBCOMMENTS_TO_RETRIEVE_PER_PARENT,
+                ],
+              },
+            },
+          },
+          //como el array de remainingFirstLevelComments puede estar vacío. Al restar 1 queda en negativo, asi q lo seteamos a 0
+          {
+            $set: {
+              remainingChildren: {
+                $cond: [
+                  {
+                    $lt: ["$remainingChildren", 0],
+                  },
+                  0,
+                  "$remainingChildren",
+                ],
+              },
+            },
+          },
+
+          //projection p/borrar $nested
+          {
+            $project: {
+              nested: 0,
+            },
+          },
+        ],
+        count: [
+          {
+            $count: "totalComments",
+          },
+        ],
+      },
+    },
+    //count viene como un single Object adentro de un array
+    //hay q hacerlo fuera de $facet y count, xq ese array se le agrega una vez finalizado $facet creo, aunq no estoy seguro
+    //cotejar tmb si puedo deestructurar el array completo de $facet
+    {
+      $unwind: "$count",
+    },
+    //ahora pasa a ser un obj adentro de otro obj, así count:{totalComments:3}, asi q destructuro con $project
+    {
+      $project: {
+        commentsData: "$commentsData",
+        count: "$count.totalComments",
+      },
+    },
+  ]);
+  //si no hay comments en la collection no vuelve nada
+  console.log(facet[0]);
+  res.status(200).json(facet[0] || DEFAULT_FACET_RESPONSE);
+});
+
+export const getSubComments = errorWrapper(async (req, res, next) => {
   const { _id: userID } = req.user;
 
-  const allComments = await Comment.find<IDirectory>({ userID });
+  let { page = 1 } = req.query;
+  page = Number(page);
+  const { parentCommentID } = req.params;
+  const lastComment = req.body;
 
-  res.status(200).json(allComments);
+  console.log(req.body);
+
+  const facet = await Comment.aggregate<IFacet>([
+    {
+      $match: {
+        //necesito mandar el ultimo children, me va a dar toda la info q necesito
+        parentID: new mongoose.Types.ObjectId(parentCommentID),
+        createdAt: {
+          $lte: new Date(lastComment.createdAt),
+        },
+        _id: {
+          $not: {
+            $eq: new mongoose.Types.ObjectId(lastComment._id),
+          },
+        },
+      },
+    },
+    //Por c/object en al cual le hago populate, tmb puedo hacer una query adicional, y agregarle extra info
+    //https://www.mongodb.com/docs/manual/reference/operator/aggregation/lookup/#perform-an-uncorrelated-subquery-with--lookup
+    {
+      $facet: {
+        commentsData: [
+          //order latest messages first
+          {
+            $sort: {
+              createdAt: -1,
+            },
+          },
+          //falta el slice
+          { $limit: SUBCOMMENTS_TO_RETRIEVE_PER_PARENT },
+          //POPULATE USERID
+          {
+            $lookup: {
+              from: "users", //usé mongosh p/ver los nombres de las collections
+              as: "userID", //le podés poner el nombre q quieras
+              localField: "userID",
+              foreignField: "_id",
+            },
+          },
+
+          { $unwind: "$userID" },
+        ],
+        count: [
+          {
+            $count: "totalComments",
+          },
+        ],
+      },
+    },
+    //count viene como un single Object adentro de un array
+    //hay q hacerlo fuera de $facet y count, xq ese array se le agrega una vez finalizado $facet creo, aunq no estoy seguro
+    //cotejar tmb si puedo deestructurar el array completo de $facet
+    {
+      $unwind: "$count",
+    },
+    //ahora pasa a ser un obj adentro de otro obj, así count:{totalComments:3}, asi q destructuro con $project
+
+    {
+      $project: {
+        //como no puedo usar $lastN en facet, sino q uso limit, tengo q volver a revertir el array p/q los subcomentarios + antiguos aparezcan on top, en la UI de la PARENT COMMENT
+        commentsData: { $reverseArray: "$commentsData" },
+        count: {
+          $subtract: [
+            "$count.totalComments",
+            SUBCOMMENTS_TO_RETRIEVE_PER_PARENT,
+          ],
+        },
+      },
+    },
+
+    //como el array de remainingFirstLevelComments puede estar vacío. Al restar 1 queda en negativo, asi q lo seteamos a 0
+    {
+      $set: {
+        count: {
+          $cond: [
+            {
+              $lt: ["$count", 0],
+            },
+            0,
+            "$count",
+          ],
+        },
+      },
+    },
+  ]);
+
+  console.log(facet[0]);
+  res.status(200).json(facet[0] || DEFAULT_FACET_RESPONSE);
 });
 
 export const getSingleTask = errorWrapper(async (req, res, next) => {
@@ -41,42 +294,89 @@ export const getSingleTask = errorWrapper(async (req, res, next) => {
   res.status(200).json(task);
 });
 
-export const updateTask = errorWrapper(async (req, res, next) => {
+export const updateComment = errorWrapper(async (req, res, next) => {
   const { id } = req.params;
   const { name, done } = req.body;
   console.log(req.body, "estamos en update");
-  const taskToUpdate = await Task.findById(id);
+  const commentToUpdate = await Comment.findById(id);
 
-  if (!taskToUpdate) {
+  if (!commentToUpdate) {
     return next(new CustomError(404, "Task does not exist."));
   }
 
-  taskToUpdate.name = name;
-  taskToUpdate.done = done;
+  //UPDATE STH
 
-  await taskToUpdate.save();
-  console.log(taskToUpdate, "ver q done este bien");
-  return res.json(taskToUpdate);
+  await commentToUpdate.save();
+  console.log(commentToUpdate, "ver q done este bien");
+  return res.json(commentToUpdate);
 });
 
-export const deleteTask = errorWrapper(async (req, res, next) => {
-  const { id } = req.params;
-  //check ownership?
-  console.log(req.body, req.params);
-  /* (!i.path.includes(comment.path) && i.path === comment.path) ||
-          //con este borro el item q clickeo, e incluyo todos (x ende tengo q filtrar +)
-          i.id !== comment.id
-      ) */
-  const regExp = new RegExp("^" + req.body.path + "," + req.body._id, "gi");
-  const found = await Comment.deleteMany({
-    $or: [{ path: { $regex: regExp } }, { _id: req.body._id }],
+export const likeUnlikeComment = errorWrapper(async (req, res, next) => {
+  const { commentID: id } = req.params;
+
+  const commentToUpdate = await Comment.findById(id).populate({
+    path: "userID",
+    select: "img username _id",
   });
-  /*   const found = await Comment.find({
-    $or: [{ path: { $regex: regExp } }, { _id: req.body._id }],
-  }); */
-  /* {$and:[{path: req.body.path },{}]} */
-  console.log(found);
-  /*   await Task.findByIdAndDelete(id);
-  await User.findByIdAndUpdate(req.user._id, { $pull: { tasks: id } }); */
-  return res.sendStatus(204);
+
+  if (!commentToUpdate) {
+    return next(new CustomError(404, "Comment does not exist."));
+  }
+
+  const index = commentToUpdate.likes.findIndex((user) =>
+    user.equals(req.user._id)
+  );
+
+  if (index < 0) {
+    //USER NO ESTA INCLUIDO, asi q LIKEAMOS
+    commentToUpdate.likes.push(req.user._id);
+  } else {
+    //USER YA ESTA INCLUIDO, significa  q deslikea
+    commentToUpdate.likes = commentToUpdate.likes.filter(
+      (id) => !id.equals(req.user._id)
+    );
+  }
+
+  await commentToUpdate.save();
+
+  return res.json(commentToUpdate);
+});
+
+export const likesUserData = errorWrapper(async (req, res, next) => {
+  const { commentID: id } = req.params;
+  console.log(req.body, 666666666666666);
+
+  const commentFound = await Comment.findById(id);
+
+  if (!commentFound) {
+    return next(new CustomError(404, "Comment does not exist."));
+  }
+  const arrayPromises = commentFound.likes.map((userID) =>
+    User.findById(userID)
+  );
+  const arrayOfUsers = await Promise.all(arrayPromises);
+  const cleanData = arrayOfUsers.map((i) => {
+    if (i) {
+      return getCleanUser(i);
+    }
+  });
+
+  return res.json(cleanData);
+});
+
+export const deleteComment = errorWrapper(async (req, res, next) => {
+  const { commentID: id, userID } = req.params;
+
+  //check ownership? eventualmente pasar a esto a un MIDDLEWARE
+  const found = await Comment.findOneAndDelete({ _id: id, userID });
+  if (!found) {
+    return res.sendStatus(204);
+  }
+
+  if (found?.parentID === null) {
+    //aca no entramos si borramos subcomment
+    await Comment.deleteMany({ parentID: id });
+  }
+
+  return res.sendStatus(200);
 });

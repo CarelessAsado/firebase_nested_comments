@@ -9,14 +9,11 @@ type IUser = {
   username: string;
   _id: string;
   email: string;
+  img: string | null;
 } | null;
 type UserNotNull = NonNullable<IUser>;
 
 type AccessTkn = { accessToken: string };
-
-type LoginSuccessful = {
-  user: UserNotNull;
-} & AccessTkn;
 
 type IRegisterInput = Pick<UserNotNull, "username" | "email"> & {
   password: string;
@@ -25,13 +22,20 @@ type IRegisterInput = Pick<UserNotNull, "username" | "email"> & {
 
 type State = {
   tareas: ITarea[];
-  comments: IComment[];
   user: IUser;
   error: boolean | string;
   loading: boolean;
-  successRegister: string;
+};
+type GeneralState = {
+  comments: IComment[];
+  totalComments: number;
+  loading: boolean;
+  notification: string;
+  nextPage: number;
 };
 
-type ILoginInput = Pick<IUser, "email"> & {
+type ILoginInput = Pick<UserNotNull, "email"> & {
   password: string;
 };
+
+type AxiosMethodsCustomApiCall = "get" | "delete" | "put" | "post";

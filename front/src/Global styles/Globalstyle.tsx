@@ -10,18 +10,41 @@ border: 0;
 scroll-behavior:smooth;
 }
 :root {
-  --mainBlue:#335ef0;
-  --mainBlueHover:#1a49ee;
-  /* --mainGreen:#1f9c; */
+  --mainBody:white;
+  --mainBlue:#2775a8;
+  --mainBlueHover:#226491;
    --mainGreen:#1f9c35; 
+     --mainWhite: #fff;
   --mlGreen:#00a650;
   --mainGreenHover:#187829;
   --mainPink:#ff8000;
 /*    --mainPink:#ffa2a2;  */
+  --mainSolapa:rgb(248, 248, 243, 0.7);
+   --mainGray:rgb(133, 133, 133);
+   --mainRed:crimson;
+
+
+  --white2: rgb(248, 242, 242);
+  --fbBlue: #1877f2;
+  --fbGreen: #42b72a;
+
+
+  --greyless: rgb(180, 174, 174);
+  --transition: 0.6s;
+  --fbBlueOficial: #4267b2;
+  
+  --fbBody: #18191a;
+  --fbMessageBody: #242526;
+  --fb3erBody: rgb(66, 66, 75);
+  --fb3erBodyDarker: rgb(79, 79, 89);
+  --fbWhiteComments: rgb(226, 220, 220);
+
 --fontSmall:1rem;
   --fontMed:1.2rem;
   --fontBig:1.4rem;
   --fontLarge:2rem;
+
+
 }
 @media (max-width:640px){
   :root{
@@ -34,7 +57,15 @@ scroll-behavior:smooth;
 a{
   text-decoration:none;
   color:inherit;
-}`;
+}
+
+
+body{
+  background-color:var(--fbBody);
+  color:var(--mainWhite)
+}
+
+`;
 
 export const animateOpacityFadeIn = keyframes`
   0% {
@@ -62,17 +93,17 @@ export const ScrollStyles = css`
 
   &::-webkit-scrollbar-track {
     border-radius: 10px;
-    background-color: ${(props) => props.theme.border};
+    background-color: grey;
   }
   &::-webkit-scrollbar {
     /* la width es p/scroll on the Y axis */
     width: 5px;
     /* la height es para horizontal scroll */
     height: 5px;
-    background-color: ${(props) => props.theme.border};
+    background-color: grey;
   }
   &::-webkit-scrollbar-thumb {
     border-radius: 10px;
-    background-color: ${(props) => props.theme.blue};
+    background-color: white;
   }
 `;

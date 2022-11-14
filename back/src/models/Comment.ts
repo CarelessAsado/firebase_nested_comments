@@ -1,14 +1,21 @@
 import mongoose, { Types, Document } from "mongoose";
 export interface IDirectory extends Document {
   value: string;
-  path: string;
   userID: Types.ObjectId;
   likes: Types.ObjectId[];
+  parentID: Types.ObjectId;
 }
 const Comment = new mongoose.Schema<IDirectory>(
   {
     value: { type: String, required: [true, "Comment cannot be empty. "] },
-    path: { type: String, default: "" },
+
+    //parentID
+    parentID: {
+      type: "ObjectID",
+      ref: "Comment",
+      default: null,
+    },
+
     userID: {
       type: "ObjectID",
       ref: "User",

@@ -1,4 +1,5 @@
 import styled from "styled-components";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import {
   BiLogOut,
@@ -10,12 +11,16 @@ import {
 import { FRONTEND_ENDPOINTS } from "config/constants";
 import { useAppDispatch, useAppSelector } from "hooks/reduxDispatchAndSelector";
 import { logout } from "context/userSlice";
+
+export const navHeight = "60px";
+const showBurgerButton = "550px";
 const BlockBehindNavBar = styled.div`
-  height: 60px;
+  height: ${navHeight};
 `;
 const NavBar = styled.nav`
-  height: 60px;
-  background-color: white;
+  height: ${navHeight};
+  background-color: var(--mainWhite);
+  color: var(--fbBody);
   padding: 0 150px;
   display: flex;
   justify-content: space-between;
@@ -35,7 +40,7 @@ const NavBar = styled.nav`
   }
 `;
 const Logo = styled.div`
-  color: #2775a8;
+  color: var(--mainBlue);
   font-size: 3rem;
   transition: 0.3s;
   &:hover {
@@ -45,31 +50,69 @@ const Logo = styled.div`
     font-size: 2.3rem;
   }
 `;
+interface PropsShowNav {
+  show: boolean;
+}
+
+export const Overlay = styled.div<PropsShowNav>`
+  height: 100%;
+
+  @media (max-width: ${showBurgerButton}) {
+    transition: 0.3s;
+    position: fixed;
+    top: ${navHeight};
+    left: 0;
+    bottom: 0;
+
+    background-color: rgba(0, 0, 0, 0.2);
+    width: 100%;
+    transform: ${(props) => !props.show && "translateX(-3000%)"};
+  }
+`;
+interface IPadding {
+  padding?: boolean;
+}
+
 const Links = styled.ul`
+  width: 100%;
   height: 100%;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  //stretch full height of the nav, dont set height on children
+  align-items: stretch;
+  /*   justify-content: space-between; */
+  /*   justify-content: center; */
+  @media (max-width: ${showBurgerButton}) {
+    //dejar 20px de overlay en p/q se vea el background
+    width: calc(100% - 20px);
+
+    flex-direction: column;
+
+    justify-content: center;
+
+    background-color: var(--mainBlue);
+    color: var(--mainWhite);
+  }
 `;
-const LinkItem = styled.li`
-  height: inherit;
+
+//align stretch no anda si el child tiene height 100%, pero sí si ponés "auto"
+const LinkItem = styled.li<IPadding>`
+  flex: 1;
   display: flex;
   gap: 5px;
   align-items: center;
-  padding: 10px;
-  font-size: 1.5rem;
+  justify-content: center;
+  padding: ${(props) => props.padding && "10px"};
+  font-size: var(--fontSmall);
   cursor: pointer;
   transition: 0.3s;
   &:hover {
     background-color: #b2e7f0;
   }
-  @media (max-width: 500px) {
-    font-size: 1.25rem;
-    padding: 5px;
-  }
-  @media (max-width: 400px) {
-    font-size: 1.2rem;
-    padding: 2px;
+  @media (max-width: ${showBurgerButton}) {
+    flex-grow: 0;
+    &:hover {
+      background-color: var(--mainBlueHover);
+    }
   }
 `;
 const NavLink = styled(Link)`
@@ -78,16 +121,63 @@ const NavLink = styled(Link)`
   height: inherit;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 5px;
+  width: 100%;
+  padding: 10px;
 `;
 const Span = styled.span`
   @media (max-width: 400px) {
     display: none;
   }
 `;
+const BurgerButton = styled.div<PropsShowNav>`
+  border: 3px solid var(--mainBlue);
+  height: calc(100% - 5px);
+  width: 50px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+  flex-direction: column;
+  cursor: pointer;
+
+  & div {
+    transition: 0.3s;
+    width: calc(100% - 5px);
+    height: 3px;
+    border-radius: 5px;
+    background-color: var(--mainBlue);
+  }
+  /* ----------------------ANIMATION------------------------------ */
+  & div:nth-child(1) {
+    transform: ${(props) =>
+      props.show && "rotate(45deg) translate(10px, 10px)"};
+  }
+  & div:nth-child(2) {
+    transform: ${(props) => props.show && "translateX(30px)"};
+    background: ${(props) => props.show && "transparent"};
+  }
+  & div:nth-child(3) {
+    transform: ${(props) =>
+      props.show && "rotate(-45deg) translate(8px, -10px)"};
+  }
+  /*------------------------------------------------------------- */
+  @media (min-width: ${showBurgerButton}) {
+    display: none;
+  }
+`;
+const ProfilePic = styled.img`
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+`;
+
 export const Nav = () => {
   const { user } = useAppSelector((state) => state.user);
   const dispatch = useAppDispatch();
+  const [showNav, setShowNav] = useState<boolean>(false);
   return (
     <>
       <BlockBehindNavBar />
@@ -95,45 +185,57 @@ export const Nav = () => {
         <Link to={FRONTEND_ENDPOINTS.HOME}>
           <Logo>ROD</Logo>
         </Link>
-        <Links>
-          {user ? (
-            <>
-              <LinkItem>
-                <NavLink to={FRONTEND_ENDPOINTS.HOME}>
-                  <BiHomeHeart />
-                  <Span>Home</Span>
-                </NavLink>
-              </LinkItem>
-              <LinkItem>
-                <NavLink to={FRONTEND_ENDPOINTS.PROFILEdyn(user._id)}>
-                  <BiUser />
-                  {user.username.split(" ")[0].length > 10
-                    ? "user"
-                    : user.username.split(" ")[0]}
-                </NavLink>
-              </LinkItem>
-              <LinkItem onClick={() => dispatch(logout())}>
-                <BiLogOut />
-                <Span>Logout</Span>
-              </LinkItem>
-            </>
-          ) : (
-            <>
-              <LinkItem>
-                <NavLink to={FRONTEND_ENDPOINTS.REGISTER}>
-                  <BiUserPlus />
-                  Register
-                </NavLink>
-              </LinkItem>
-              <LinkItem>
-                <NavLink to={FRONTEND_ENDPOINTS.LOGIN}>
-                  <BiLogIn></BiLogIn>
-                  Login
-                </NavLink>
-              </LinkItem>
-            </>
-          )}
-        </Links>
+        <BurgerButton show={showNav} onClick={() => setShowNav((v) => !v)}>
+          <div></div>
+          <div></div>
+          <div></div>
+        </BurgerButton>
+        <Overlay show={showNav} onClick={() => setShowNav((v) => !v)}>
+          <Links>
+            {user ? (
+              <>
+                <LinkItem>
+                  <NavLink to={FRONTEND_ENDPOINTS.HOME}>
+                    <BiHomeHeart />
+                    <Span>Home</Span>
+                  </NavLink>
+                </LinkItem>
+                <LinkItem>
+                  <NavLink to={FRONTEND_ENDPOINTS.PROFILEdyn(user._id)}>
+                    {user?.img ? (
+                      <ProfilePic src={user.img}></ProfilePic>
+                    ) : (
+                      <BiUser />
+                    )}
+
+                    {user.username.split(" ")[0].length > 10
+                      ? "user"
+                      : user.username.split(" ")[0]}
+                  </NavLink>
+                </LinkItem>
+                <LinkItem onClick={() => dispatch(logout())} padding>
+                  <BiLogOut />
+                  <Span>Logout</Span>
+                </LinkItem>
+              </>
+            ) : (
+              <>
+                <LinkItem>
+                  <NavLink to={FRONTEND_ENDPOINTS.REGISTER}>
+                    <BiUserPlus />
+                    Register
+                  </NavLink>
+                </LinkItem>
+                <LinkItem>
+                  <NavLink to={FRONTEND_ENDPOINTS.LOGIN}>
+                    <BiLogIn></BiLogIn>
+                    Login
+                  </NavLink>
+                </LinkItem>
+              </>
+            )}
+          </Links>
+        </Overlay>
       </NavBar>
     </>
   );

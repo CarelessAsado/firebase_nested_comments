@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import { Link, useNavigate } from "react-router-dom";
 import {
-  Container,
+  ContainerNotLogin,
   Input,
   Form,
   Error,
@@ -13,6 +13,7 @@ import {
 import { FRONTEND_ENDPOINTS } from "config/constants";
 import { register } from "context/userSlice";
 import { useAppDispatch, useAppSelector } from "hooks/reduxDispatchAndSelector";
+import Spinner from "components/loaders/loader";
 
 const Label = styled.label``;
 
@@ -51,12 +52,10 @@ export const Register = () => {
       .catch(() => {}); //pevitar uncaught in promise en el browser log
   }
   return (
-    <Container>
+    <ContainerNotLogin>
       <Form onSubmit={handleRegister}>
         <Header>Create new account.</Header>
-        <Error error={error} aria-live="assertive">
-          {error}
-        </Error>
+        <Error aria-live="assertive">{error}</Error>
         <Label htmlFor="username"></Label>
         <Input
           autoFocus
@@ -90,7 +89,18 @@ export const Register = () => {
           placeholder="Confirm password *"
           id="Confirmpassword"
         ></Input>
-        <Input type="submit" value={loading ? "Loading..." : "Submit"}></Input>
+        <Input className="main" as="button" disabled={loading}>
+          {loading ? (
+            <Spinner
+              fz={"var(--fontSmall)"}
+              h="100%"
+              color="var(--mainWhite)"
+            />
+          ) : (
+            "Submit"
+          )}
+        </Input>
+
         <Bottom>
           Already have an account?
           <RegisterLink to={FRONTEND_ENDPOINTS.LOGIN}>
@@ -98,6 +108,6 @@ export const Register = () => {
           </RegisterLink>{" "}
         </Bottom>
       </Form>
-    </Container>
+    </ContainerNotLogin>
   );
 };

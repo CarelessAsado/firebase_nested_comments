@@ -6,53 +6,33 @@ import jwt from "jsonwebtoken";
 import getCleanUser from "../utils/getCleanUser";
 
 export const registerUser = errorWrapper(async (req, res, next) => {
-  const { username, password, email, confirmPassword } = req.body;
-  /*------------------TENDRIA Q TRATAR DE HACER TODA LA VALIDATION DE UN SAQUE*/
-  if (password !== confirmPassword) {
-    return next(new CustomError(401, "Passwords do not match. "));
+  const { username, email } = req.body;
+
+  //uid de firebase guardar en mongo
+  if (req.firebase.email !== email) {
+    //tengo q ver como hacer un logout o cancelar la operacion cuando el mongo register falla, xq el useEffect listening for changes la esta cagando
+    return next(new CustomError(403, "Firebase email does not match."));
   }
+  //tendria q mandar el token, cotejar a que mail pertenece, y cotejar q sea identico al mail q me manda en input
+
+  //ver q eventualmente tengo q organizar como sincronizo isConfirmed / hasValidated el email
+
   /*---NO HACE FALTA BUSCAR USER CON EMAIL PREVIAMENTE YA Q AL
         GUARDARLO AUTOMATICAMENTE MONGOOSE VA TIRAR ERROR DUPLICATE*/
-  const newUser = new User({ username, password, email });
-  await newUser.hashPass();
-  await newUser.save();
-  return res.sendStatus(201);
+  const newUser = new User({
+    username,
+    email,
+    uid: req.firebase.uid,
+  });
+  const savedUser = await newUser.save();
+  return res.status(201).json(getCleanUser(savedUser));
 });
 
 export const loginUser = errorWrapper(async (req, res, next) => {
-  const cookies = req.cookies;
-  const maybeLeftOverRT = cookies?.[COOKIE_RT_KEY];
-  const { email, password } = req.body;
-
-  let user = await User.findOne<IUser>({ email }).select("+password");
-
-  const errorMessage = "Username or password do not match.";
-  if (!user) {
-    return next(new CustomError(401, errorMessage));
-  }
-
   /*---------------JWT INSTANCE METHOD-------------*/
-  if (await user.verifyPass(password)) {
-    const accessToken = user.generateAccessToken();
-    const newRefreshToken = user.generateRefreshToken();
+  const cleanUser = getCleanUser(req.user);
 
-    const filteredRefreshTokens = !maybeLeftOverRT
-      ? user.refreshToken
-      : user.refreshToken.filter((rt) => rt !== maybeLeftOverRT);
-
-    //SET REFRESH TKN COOKIE
-    //do I need to delete the maybeLeftOverRT,
-    res.cookie(COOKIE_RT_KEY, newRefreshToken, COOKIE_OPTIONS);
-
-    user.refreshToken = [...filteredRefreshTokens, newRefreshToken];
-    await user.save();
-
-    const cleanUser = getCleanUser(user);
-
-    return res.status(200).json({ user: cleanUser, accessToken });
-  } else {
-    return next(new Error401(errorMessage));
-  }
+  return res.status(200).json({ user: cleanUser });
 });
 
 export const logout = errorWrapper(async (req, res, next) => {

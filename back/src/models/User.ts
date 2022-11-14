@@ -7,11 +7,13 @@ interface DocumentResult<T> {
   _doc: T;
 }
 export interface IUser extends Document, DocumentResult<IUser> {
+  uid: string;
   username: string;
-  password: string;
   email: string;
   tasks: Types.Array<Types.ObjectId>;
   refreshToken: string[];
+  img: string;
+  public_id: string;
   /*------INSTANCE METHODS-----------------*/
   hashPass: () => Promise<void>;
   verifyPass: (password: string) => Promise<boolean>;
@@ -26,10 +28,9 @@ export const User = new Schema<IUser>({
     required: [true, "Username cannot be an empty value. "],
     maxlength: [15, "Username must not have more than 15 characters. "],
   },
-  password: {
+  uid: {
     type: String,
-    required: [true, "Password cannot be an empty value. "],
-    select: false,
+    required: [true, "Uid cannot be an empty value. "],
   },
   email: {
     type: String,
@@ -39,7 +40,8 @@ export const User = new Schema<IUser>({
     lowercase: true,
   },
   tasks: [{ type: "ObjectID", ref: "Task" }],
-  refreshToken: [String],
+  img: String,
+  public_id: String,
 });
 /*-------------------INSTANCE METHODS-----------------------*/
 User.methods.hashPass = async function () {

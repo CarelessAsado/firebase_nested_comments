@@ -8,10 +8,13 @@ import { checkOwnership } from "../middleware/checkOwnership";
 router.param("userID", checkOwnership);
 
 router.post("/", commentsController.createComment);
-router.get("/", commentsController.getAllTasks);
+router.get("/", commentsController.getAllParentComments);
+router.post("/subcomments/:parentCommentID", commentsController.getSubComments);
 /* OWNERSHIP CHECK MIDDLEWARE */
-router.delete("/:userID/:id", commentsController.deleteTask);
-router.put("/:userID/:id", commentsController.updateTask);
+router.delete("/:userID/:commentID", commentsController.deleteComment);
+router.put("/:userID/:id", commentsController.updateComment);
+router.put("/likes/:userID/:commentID", commentsController.likeUnlikeComment);
+router.get("/likes/userswholiked/:commentID", commentsController.likesUserData);
 router.get("/:userID/:id", commentsController.getSingleTask);
 
 module.exports = router;
