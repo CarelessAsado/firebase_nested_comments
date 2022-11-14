@@ -6,7 +6,7 @@ import { OverlayStructure } from "components/OverlayStructure/Overlay";
 import { CloseButton } from "components/styled-components/styled";
 import { useAppDispatch, useAppSelector } from "hooks/reduxDispatchAndSelector";
 import { uploadImg } from "context/userSlice";
-import { dispatchNotification } from "config/utils/dispatchNotification";
+import { dispatchNotification } from "config/utilsFns/dispatchNotification";
 
 type SubContainerProps = {
   flexIt?: boolean;

@@ -13,7 +13,7 @@ import {
 import { FRONTEND_ENDPOINTS } from "config/constants";
 import { forgotPwd } from "context/userSlice";
 import { useAppDispatch, useAppSelector } from "hooks/reduxDispatchAndSelector";
-import { dispatchNotification } from "config/utils/dispatchNotification";
+import { dispatchNotification } from "config/utilsFns/dispatchNotification";
 
 const Label = styled.label``;
 

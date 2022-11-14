@@ -75,12 +75,10 @@ const LikeSection = styled.div`
 interface IProps {
   comment: IComment;
   children?: JSX.Element | JSX.Element[];
-  /*   setData: (value: React.SetStateAction<IComment[]>) => void; */
-  data: IComment[];
   user: IUser;
 }
-//esto eventualmente lo puedo borrar: "data"
-const ParentComment = ({ comment, user, data }: IProps) => {
+
+const ParentComment = ({ comment, user }: IProps) => {
   const dispatch = useAppDispatch();
   const inputFocus = useRef<HTMLInputElement>(null);
   const [newChildComment, setNewChildComment] = useState("");

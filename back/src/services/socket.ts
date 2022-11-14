@@ -34,10 +34,6 @@ export function startSocket(io: IOType) {
   io.on("connection", (socket) => {
     //con esta global variable ya tengo identificado la socket.id hasta q se desconecte el socket
     const idSocket = socket.id;
-    console.log(
-      "holllllllllllllllllllllllllllllllllllllllllllllllllllllllaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-    );
-    console.log(socket.connected);
 
     socket.on("first", async (data) => {
       try {

@@ -14,7 +14,7 @@ import {
   disappearUserName,
   picHeight,
 } from "components/UsersOnline/auxiliaries/UserOnlineItem";
-import { dispatchNotification } from "config/utils/dispatchNotification";
+import { dispatchNotification } from "config/utilsFns/dispatchNotification";
 import { APP_WIDTH } from "pages/main/auxiliaries/NewPostForm";
 import { Outlet } from "react-router-dom";
 

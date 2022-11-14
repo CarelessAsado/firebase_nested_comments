@@ -1,32 +1,39 @@
 import { createSlice, PayloadAction, createAsyncThunk } from "@reduxjs/toolkit";
-import { socket } from "pages/main/Main";
 import * as commentsAPI from "API/commentsAPI";
+import { socket } from "components/middle/ChatLayout";
 import errorHandler from "./errorHandler";
 import { AppDispatch, RootState } from "./store";
+import { logout } from "./userSlice";
 
 const initialState: GeneralState = {
   notification: "",
   comments: [],
   totalComments: 0,
   loading: false,
+  nextPage: 1,
 };
 
-//COMO BORRO LOS COMMENTS EN EL LOGOUT ???????????
-
-/* ------------------------COMMENTS SUCCESS ACTIONS--------------------- */
-export const getComments = createAsyncThunk(
-  "general/getComments",
-  async function (nextPage: number, { dispatch }) {
-    try {
-      const { data } = await commentsAPI.getComments({ nextPage });
-      return data;
-    } catch (error) {
-      errorHandler(error, dispatch);
-      //este error lo tiro xq si hago el unwrap en el front voy directo al .then()
-      throw error;
+export const getComments = createAsyncThunk<
+  commentsAPI.FacetResponse,
+  void,
+  { dispatch: AppDispatch; state: RootState }
+>("general/getComments", async function (_, { dispatch, getState }) {
+  try {
+    const {
+      general: { nextPage, totalComments },
+    } = getState();
+    //si no hay next page no cargamos mas, lo queria hacer previo a despachar pero con el useEffect me generaba loops
+    if (!nextPage) {
+      return { count: totalComments, commentsData: [] as IComment[] };
     }
+    const { data } = await commentsAPI.getComments({ nextPage });
+    return data;
+  } catch (error) {
+    errorHandler(error, dispatch);
+    //este error lo tiro xq si hago el unwrap en el front voy directo al .then()
+    throw error;
   }
-);
+});
 export const getMoreSubComments = createAsyncThunk(
   "general/getMoreSubComments",
   async function (lastComment: IComment, { dispatch }) {
@@ -145,6 +152,13 @@ export const generalSlice = createSlice({
   extraReducers: (builder) => {
     builder.addCase(getComments.fulfilled, (state, action) => {
       //add pagination
+      const totalItemsOnStore =
+        state.comments.length + action.payload.commentsData.length;
+      if (totalItemsOnStore < action.payload.count) {
+        state.nextPage = state.nextPage + 1;
+      } else {
+        state.nextPage = 0;
+      }
       state.totalComments = action.payload.count;
       state.comments = [...state.comments, ...action.payload.commentsData];
     });
@@ -193,6 +207,10 @@ export const generalSlice = createSlice({
 
       state.comments = modified;
     });
+
+    builder.addCase(logout.fulfilled, (state, action) => {
+      return initialState;
+    });
   },
 });
 
@@ -237,7 +255,7 @@ function deleteCommentState(
   comments: IComment[],
   commentToBeDeleted: IComment
 ) {
-  const { path, _id, parentID } = commentToBeDeleted;
+  const { _id, parentID } = commentToBeDeleted;
 
   //EN ESTE CASO SE TRATA DE UN PARENT COMMENT
   if (!parentID) {
@@ -255,9 +273,7 @@ function deleteCommentState(
       : {
           ...parentComment,
           children: (parentComment.children as IComment[]).filter(
-            (
-              i //si estan al mismo level dos folders, el path va a coincidir pero no la tengo q borrar, x eso agrego doble check
-            ) =>
+            (i) =>
               //con este borro el item EL CHILD dentro del PARENT COMPONENT
               i._id !== _id
           ),

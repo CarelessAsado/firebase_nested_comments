@@ -6,15 +6,13 @@ import {
 } from "@reduxjs/toolkit";
 import * as authAPI from "API/authAPI";
 import * as userAPI from "API/user";
-import * as commentsAPI from "API/commentsAPI";
 import { setHeaders } from "API/axiosInstanceJWT";
 import errorHandler from "./errorHandler";
 import { fireBaseAuth } from "services/firebaseConfig";
 import reauthenticateSpecialOps from "services/reauthenticateEspecialOps";
 import { PasswordsInputType } from "pages/UserProfile/auxiliaries/ContactoContainer";
+import { socket } from "components/middle/ChatLayout";
 
-import { socket } from "pages/main/Main";
-import { AppDispatch, RootState } from "./store";
 const initialState: State = {
   user: null,
   loading: false,
@@ -223,8 +221,6 @@ export const logout = createAsyncThunk(
   }
 );
 
-/* ------------------------COMMENTS SUCCESS ACTIONS--------------------- */
-
 export const userSlice = createSlice({
   name: "user",
   initialState,
@@ -252,11 +248,8 @@ export const userSlice = createSlice({
     });
 
     //logout
-
     builder.addCase(logout.fulfilled, (state, action) => {
-      state.loading = initialState.loading;
-      state.user = initialState.user;
-      state.tareas = initialState.tareas;
+      return initialState;
     });
 
     builder.addCase(updatePwd.fulfilled, (state, action) => {

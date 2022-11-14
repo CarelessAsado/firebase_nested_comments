@@ -8,7 +8,7 @@ import {
 import { dataPasswords } from "./data";
 import { useAppDispatch } from "hooks/reduxDispatchAndSelector";
 import { updateEmail, updatePwd, updateUsername } from "context/userSlice";
-import { dispatchNotification } from "config/utils/dispatchNotification";
+import { dispatchNotification } from "config/utilsFns/dispatchNotification";
 import { ChangePicOverlay } from "./ChangePicOverlay";
 import Spinner from "components/loaders/loader";
 

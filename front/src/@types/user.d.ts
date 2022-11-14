@@ -31,6 +31,7 @@ type GeneralState = {
   totalComments: number;
   loading: boolean;
   notification: string;
+  nextPage: number;
 };
 
 type ILoginInput = Pick<UserNotNull, "email"> & {

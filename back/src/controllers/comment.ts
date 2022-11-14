@@ -27,7 +27,7 @@ export const createComment = errorWrapper(async (req, res, next) => {
 export const getAllParentComments = errorWrapper(async (req, res, next) => {
   const { _id: userID } = req.user;
   let { page = 1, limit = 3 } = req.query;
-
+  console.log(req.query);
   limit = Number(limit);
   page = Number(page);
   if (limit > 50) {

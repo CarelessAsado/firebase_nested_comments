@@ -9,7 +9,7 @@ import { ExpelLoggedUser } from "components/middle/ExpelLoggedUser";
 import { fireBaseAuth } from "services/firebaseConfig";
 import { useEffect, useState } from "react";
 import { refresh } from "context/userSlice";
-import { useAppDispatch, useAppSelector } from "hooks/reduxDispatchAndSelector";
+import { useAppDispatch } from "hooks/reduxDispatchAndSelector";
 import { ForgotPwd } from "pages/auth/ForgotPwd";
 import { UserProfile } from "pages/UserProfile/UserProfile";
 import { Notification } from "components/Notification";
