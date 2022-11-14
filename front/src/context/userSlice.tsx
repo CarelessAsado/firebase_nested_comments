@@ -1,4 +1,9 @@
-import { createSlice, createAsyncThunk, isPending } from "@reduxjs/toolkit";
+import {
+  createSlice,
+  createAsyncThunk,
+  isPending,
+  isFulfilled,
+} from "@reduxjs/toolkit";
 import * as authAPI from "API/authAPI";
 import * as userAPI from "API/user";
 import * as commentsAPI from "API/commentsAPI";
@@ -259,7 +264,7 @@ export const userSlice = createSlice({
       state.loading = false;
     });
 
-    /* -----------------------------------ADDMATCHER PENDING----------------------------------- */
+    /* -----------------------------------ADDMATCHER PENDING Y ISFULFILLED, aplica a todos los slices----------------------------------- */
     // .addMatcher tiene q ir DSP de los addCase, si lo ponés antes no ANDA
     //Lo uso como default case p/loading
     //https://redux-toolkit.js.org/api/createReducer#builderaddmatcher
@@ -267,6 +272,11 @@ export const userSlice = createSlice({
     // matcher can be defined outside as a type predicate function
     builder.addMatcher(isPending, (state, action) => {
       state.loading = true;
+      state.error = false;
+    });
+
+    builder.addMatcher(isFulfilled, (state, action) => {
+      state.loading = false;
       state.error = false;
     });
   },

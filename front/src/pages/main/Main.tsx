@@ -1,7 +1,12 @@
 import styled from "styled-components";
 import { useAppDispatch, useAppSelector } from "hooks/reduxDispatchAndSelector";
-import { useEffect, useState } from "react";
-import { newCommentDeleted, newCommentPostedAdded } from "context/generalSlice";
+import { useEffect, useRef, useState } from "react";
+import {
+  likeUnlikeComment,
+  newCommentDeleted,
+  newCommentLikedUnliked,
+  newCommentPostedAdded,
+} from "context/generalSlice";
 import io, { Socket } from "socket.io-client";
 import { BACKEND_ROOT } from "config/constants";
 import { getHeadersChatAuth } from "API/axiosInstanceJWT";
@@ -13,8 +18,10 @@ import {
 import { dispatchNotification } from "config/utils/dispatchNotification";
 
 import ParentComment from "./auxiliaries/ParentComments";
-import NewPostForm from "./auxiliaries/NewPostForm";
+import NewPostForm, { APP_WIDTH } from "./auxiliaries/NewPostForm";
 import { getComments } from "context/generalSlice";
+import { useIntersectionObserver } from "hooks/useIntersectionObserver";
+import { FacetResponse } from "API/commentsAPI";
 
 const Container = styled.div<{ isChatOpen: boolean }>`
   //is chatClose, then margin-left:none
@@ -37,7 +44,7 @@ const Center = styled.div`
   margin: 100px auto;
   min-height: 10vh;
   align-self: baseline;
-  max-width: 1000px;
+  max-width: ${APP_WIDTH};
   width: 100%;
 `;
 
@@ -46,17 +53,22 @@ const ContainerAllComments = styled.div`
   flex-direction: column;
   gap: 20px;
 `;
-
+const HitRockBottomInfinite = styled.div`
+  height: 22px;
+  background-color: red;
+`;
 export let socket: Socket | undefined;
 
 type ISocketResponse = { data: IComment; user: IUser };
 //el problema de hacer esto es q el primer connect event se produce, pero yo no lo registro (ver q pasa si entro directamente en esta view, pero sospecho q va a ser lo mismo).
 
 //puedo hacer un useRef en app, y q si no hay user, directamente logueé out, y hacer los users connected desde el STORE
+let firstLoad: boolean = false;
 
 export const Main = () => {
   const { user } = useAppSelector((state) => state.user);
-  const { comments } = useAppSelector((state) => state.general);
+  const { comments, totalComments } = useAppSelector((state) => state.general);
+  const [nextPage, setNextPage] = useState<number>(1);
   /*   const { comments } = useAppSelector((state) => state.general); */
   /*   const { socket } = useAppSelector((state) => state.user); */
 
@@ -68,8 +80,28 @@ export const Main = () => {
   const [usersOnline, setUsersOnline] = useState<UserNotNull[]>([]);
   const dispatch = useAppDispatch();
 
+  const checkIfThereAreMoreComments = (facetResponse: FacetResponse) => {
+    //ver como hago p/establecer next page
+    /*     alert(JSON.stringify({ totalComments, commentsAhora: comments.length })); */
+    if (facetResponse.commentsData.length < facetResponse.count) {
+      setNextPage((v) => v + 1);
+    } else {
+      setNextPage(0);
+    }
+  };
+
   useEffect(() => {
-    dispatch(getComments());
+    //le tengo q pasar el nextPage p/q sepa
+
+    // tengo q ir al back y agregar ma logica p/determinar si nextPage se llama o no
+
+    dispatch(getComments(nextPage))
+      .unwrap() //when page loads, bottom is intersecting, so to avoid calling for comment-results-page 2 before its necessary, we wait for this variable to become true
+      .then((data) => {
+        firstLoad = true;
+
+        checkIfThereAreMoreComments(data);
+      });
   }, [dispatch]);
 
   useEffect(() => {
@@ -94,7 +126,6 @@ export const Main = () => {
     //estp es p/cuando me desconecta el server, podria usarlo en caso de error
     //tmb se dispara cuando hago un disconnect yo mismo en el logout, ver si saco el disconnect del logout si se dispara tmb
     socket.on("disconnect", () => {
-      /*   alert("disconnected by the server"); */
       /*  setIsConnected(false); */
     });
 
@@ -119,6 +150,23 @@ export const Main = () => {
       );
     });
 
+    socket.on(
+      "commentLikedUnliked",
+      ({ data, user: liker }: ISocketResponse) => {
+        dispatch(newCommentLikedUnliked(data));
+        if (typeof data.userID !== "string") {
+          /* si el usuario owner del comment just liked coincide con el usuario, lo notificamos q ahora es un influencer */
+
+          if (data.userID._id === user?._id) {
+            dispatchNotification(
+              dispatch,
+              `${liker?.username || "Somebody"} has liked/unliked your comment`
+            );
+          }
+        }
+      }
+    );
+
     return () => {
       socket?.off("connect");
       socket?.off("disconnect");
@@ -126,22 +174,50 @@ export const Main = () => {
       socket?.off("userLeft");
       socket?.off("commentPosted");
       socket?.off("commentDeleted");
+      socket?.off("commentLikedUnliked");
       /*   alert("about to disconnect"); */
       //no sirve poner un clean-up disconnect con useRef xq el socket no se vuelve a conectar automaticamente
 
       /* socket.disconnect(); */
     };
   }, [user?._id, dispatch]);
-  console.log(comments, 777);
+
+  const { entriesCB, setHTMLElementsObserved } = useIntersectionObserver();
+
+  const InfiniteScrollPagContainer = useRef<HTMLDivElement>(null);
+  //page 1, hacemos call, y incrementamos a page 2, cuando llegamos a rock bottom hacemos pedido con page 2, e incrementamos
+  useEffect(() => {
+    if (
+      //onfirst load comment section is empty so bottom is intersecting
+      firstLoad &&
+      nextPage &&
+      entriesCB.length > 0 &&
+      entriesCB[0].isIntersecting
+    ) {
+      alert("aca aun no");
+
+      dispatch(getComments(nextPage))
+        .unwrap() //when page loads, bottom is intersecting, so to avoid calling for comment-results-page 2 before its necessary, we wait for this variable to become true
+        .then(checkIfThereAreMoreComments);
+    }
+  }, [entriesCB]);
+
+  useEffect(() => {
+    if (InfiniteScrollPagContainer.current) {
+      setHTMLElementsObserved([InfiniteScrollPagContainer.current]);
+    }
+  }, [setHTMLElementsObserved]);
+
   return (
     <Container isChatOpen={openChat}>
-      <NewPostForm />
+      <NewPostForm user={user} />
       <Center>
         <UsersOnline
           users={usersOnline}
           setOpenChat={openAndCloseChat}
           openChat={openChat}
         />
+
         <ContainerAllComments>
           {comments.length > 0 &&
             comments.map((c) => (
@@ -154,6 +230,10 @@ export const Main = () => {
               />
             ))}
         </ContainerAllComments>
+
+        <HitRockBottomInfinite
+          ref={InfiniteScrollPagContainer}
+        ></HitRockBottomInfinite>
       </Center>
     </Container>
   );

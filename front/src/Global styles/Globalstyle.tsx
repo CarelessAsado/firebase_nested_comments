@@ -19,7 +19,7 @@ scroll-behavior:smooth;
   --mainGreenHover:#187829;
   --mainPink:#ff8000;
 /*    --mainPink:#ffa2a2;  */
-
+  --mainSolapa:rgb(248, 248, 243, 0.7);
    --mainGray:rgb(133, 133, 133);
    --mainRed:crimson;
 
@@ -27,7 +27,7 @@ scroll-behavior:smooth;
   --white2: rgb(248, 242, 242);
   --fbBlue: #1877f2;
   --fbGreen: #42b72a;
-  --overlayReg: rgba(254, 254, 254, 0.8);
+
 
   --greyless: rgb(180, 174, 174);
   --transition: 0.6s;

@@ -5,20 +5,19 @@ import {
   AiOutlineCloseCircle,
   AiOutlineCheck,
 } from "react-icons/ai";
-
 import { dataPasswords } from "./data";
 import { useAppDispatch } from "hooks/reduxDispatchAndSelector";
 import { updateEmail, updatePwd, updateUsername } from "context/userSlice";
 import { dispatchNotification } from "config/utils/dispatchNotification";
 import { ChangePicOverlay } from "./ChangePicOverlay";
 
-export const FlexIt = styled.div`
+const FlexIt = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 5px;
 `;
-export const ContactoContainer = styled.div`
+const ContactoContainer = styled.div`
   border: 1px solid ${(props) => props.theme.border};
   border-radius: 5px;
   display: flex;
@@ -26,12 +25,12 @@ export const ContactoContainer = styled.div`
   gap: 10px;
   background-color: ${(props) => props.theme.secondaryBody};
 `;
-export const Header = styled.h2`
+const Header = styled.h2`
   font-size: inherit;
   border-bottom: 1px solid ${(props) => props.theme.border};
   padding: 10px;
 `;
-export const ContactInfo = styled.div`
+const ContactInfo = styled.div`
   display: flex;
   overflow-x: hidden;
 `;
@@ -82,11 +81,11 @@ export const ReactIcon = styled.div`
     color: var(--mainRed);
   }
 `;
-export const ChangePwd = styled.h2`
+const ChangePwd = styled.h2`
   cursor: pointer;
   font-size: inherit;
 `;
-export const Input = styled.input`
+const Input = styled.input`
   &:focus::placeholder {
     color: rgb(175, 168, 175);
   }
@@ -95,10 +94,16 @@ export const Input = styled.input`
   width: 100%;
   border-radius: 10px;
 `;
-export const Button = styled.button`
+const Button = styled.button`
+  cursor: pointer;
+  color: var(--mainWhite);
+  background-color: var(--fbGreen);
   padding: 5px;
   width: calc(80px + var(--fontSmall));
   font-size: inherit;
+  &.danger {
+    background-color: var(--mainRed);
+  }
 `;
 
 const pwdInitialState = {
@@ -178,7 +183,12 @@ export function Contacto({
     e.preventDefault();
     try {
       setLoading(true);
-      /*  VALIDATION CHECK ???*/
+      /*  VALIDATION CHECK */
+      const notValidated = Object.values(passwords).some((i) => !i);
+
+      if (notValidated) {
+        return dispatchNotification(dispatch, "Fields cannot be empty.");
+      }
       await dispatch(updatePwd(passwords)).unwrap();
 
       //SHOW SUCCESS MESSAGE
@@ -191,6 +201,7 @@ export function Contacto({
       setLoading(false);
     }
   }
+
   function handlePwdsChange({ target }: React.ChangeEvent<HTMLInputElement>) {
     setPasswords({ ...passwords, [target.name]: target.value });
   }
@@ -304,6 +315,7 @@ export function Contacto({
               <FlexIt>
                 <Button
                   type="button"
+                  className="danger"
                   onClick={() => setEditPwd((v) => !v)}
                   disabled={Indloading}
                 >

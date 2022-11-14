@@ -3,12 +3,7 @@ import { deleteComment, likeUnlikeComment } from "context/generalSlice";
 import styled from "styled-components";
 import TimeAgo from "timeago-react";
 import { NoPicOrPicUserImage } from "components/UsersOnline/auxiliaries/UserOnlineItem";
-import {
-  Button,
-  ButtonContainer,
-  commentContainerBaseStyles,
-  Value,
-} from "./styles";
+import { commentContainerBaseStyles, Value } from "./styles";
 import { FRONTEND_ENDPOINTS } from "config/constants";
 import { Link } from "react-router-dom";
 import LikesUsersDataModal from "./LikesUsersDataModal";
@@ -66,12 +61,6 @@ export function SingleSubComment({ comment, user, focus }: IProps) {
     dispatch(deleteComment(comment));
   };
 
-  const deleteBtn = (
-    <Button style={{ backgroundColor: "crimson" }} onClick={handleDelete}>
-      Eliminar
-    </Button>
-  );
-
   return (
     <>
       <SingleSubCommentContainer>
@@ -98,13 +87,17 @@ export function SingleSubComment({ comment, user, focus }: IProps) {
                 >
                   Like
                 </LikeFunctionality>
+
                 <ReplyFunctionality onClick={focus}>Reply</ReplyFunctionality>
+
+                {comment.userID._id === user?._id && (
+                  <LikeFunctionality onClick={handleDelete}>
+                    Delete
+                  </LikeFunctionality>
+                )}
+
                 <TimeAgo datetime={comment.createdAt} />
               </Functionalities>
-
-              <ButtonContainer>
-                {comment.userID._id === user?._id && deleteBtn}
-              </ButtonContainer>
             </ColumnFlex>
           </FlexIt>
         )}

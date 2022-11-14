@@ -125,7 +125,7 @@ export const Bottom = styled.div`
   background-color: #f0efc1;
   color: #768810;
   padding: 20px;
-  font-size: 1.5rem;
+  font-size: var(--fontSmall);
   margin: 50px 0 0;
   letter-spacing: 1px;
 `;

@@ -6,10 +6,11 @@ export const postNewComment = (newTaskInput: INewCommentInput) => {
   return axios.post<IComment>(BACKEND_URL.COMMENTS, newTaskInput);
 };
 
-type FacetResponse = { commentsData: IComment[]; count: number };
+export type FacetResponse = { commentsData: IComment[]; count: number };
 
-export const getComments = function (controller?: AbortController) {
-  return axios.get<FacetResponse>(BACKEND_URL.COMMENTS, {
+type Args = { controller?: AbortController; nextPage?: number };
+export const getComments = function ({ controller, nextPage }: Args = {}) {
+  return axios.get<FacetResponse>(BACKEND_URL.COMMENTS_PAGEdyn(nextPage), {
     signal: controller?.signal,
   });
 };

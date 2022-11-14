@@ -12,8 +12,6 @@ import TimeAgo from "timeago-react";
 import { NoPicOrPicUserImage } from "components/UsersOnline/auxiliaries/UserOnlineItem";
 import { SingleSubComment } from "./SingleSubComment";
 import {
-  Button,
-  ButtonContainer,
   commentContainerBaseStyles,
   FormSubmitNewSubComment,
   GrowFlex1,
@@ -22,19 +20,19 @@ import {
   Top,
   Value,
 } from "./styles";
-import { AiFillLike, AiOutlineComment, AiOutlineSend } from "react-icons/ai";
+import { AiFillLike, AiOutlineComment, AiFillDelete } from "react-icons/ai";
 import LikesUsersDataModal from "./LikesUsersDataModal";
 
 const ParentCommentContainer = styled.div`
   ${commentContainerBaseStyles}
 `;
-export const ContainerAllSubComments = styled.div`
+const ContainerAllSubComments = styled.div`
   display: flex;
   flex-direction: column;
   gap: 5px;
 `;
 
-export const Functionalities = styled.div`
+const Functionalities = styled.div`
   display: flex;
   justify-content: space-between;
   color: var(--fbWhiteComments);
@@ -53,12 +51,20 @@ export const Functionalities = styled.div`
     }
   }
 `;
-export const MeGustaFunctionality = styled.div<{ likedBefore: boolean }>`
+const MeGustaFunctionality = styled.div<{ likedBefore: boolean }>`
   color: ${(props) => props.likedBefore && "var(--fbBlue)"};
 `;
-export const ComentarFunctionality = styled.div``;
+const ComentarFunctionality = styled.div``;
+const FetchMoreSubComments = styled.div`
+  font-weight: bold;
+  cursor: pointer;
+  padding: 10px 0;
+  &:hover {
+    text-decoration: underline;
+  }
+`;
 
-export const LikeSection = styled.div`
+const LikeSection = styled.div`
   display: flex;
   gap: 8px;
   padding: 5px 10px;
@@ -89,12 +95,6 @@ const ParentComment = ({ comment, user, data }: IProps) => {
   const handleDelete = () => {
     dispatch(deleteComment(comment));
   };
-
-  const deleteBtn = (
-    <Button style={{ backgroundColor: "crimson" }} onClick={handleDelete}>
-      Eliminar
-    </Button>
-  );
 
   async function getSubCommentsFn() {
     dispatch(getMoreSubComments(comment.children[0]));
@@ -137,22 +137,24 @@ const ParentComment = ({ comment, user, data }: IProps) => {
             <AiOutlineComment />
             Comment
           </ComentarFunctionality>
-        </Functionalities>
-        {/* ----------------------------------------------------------------- */}
-        <ButtonContainer>
+          {/* -------------DELETE BUTTON ONLY FOR OWNER OF THE COMMENT---------- */}
           {typeof comment.userID !== "string" &&
-            comment.userID._id === user?._id &&
-            deleteBtn}
-          {comment.userID === user?._id && deleteBtn}
-        </ButtonContainer>
+            comment.userID._id === user?._id && (
+              <ComentarFunctionality onClick={handleDelete}>
+                <AiFillDelete />
+                Delete
+              </ComentarFunctionality>
+            )}
+          {/* ------------------------------------------------------------------- */}
+        </Functionalities>
         {/* --------------------FETCH MORE SUBCOMMENTS--------------------- */}
         {!!comment.remainingChildren && comment.remainingChildren > 0 && (
           //esto setea los children en PARENTCOMPONENT AHORA
-          <Button onClick={getSubCommentsFn}>
+          <FetchMoreSubComments onClick={getSubCommentsFn}>
             {comment.remainingChildren > 1
               ? `See all ${comment.remainingChildren} answers`
               : "See response"}
-          </Button>
+          </FetchMoreSubComments>
         )}
         {!!comment.children && comment.children.length > 0 && (
           <ContainerAllSubComments>

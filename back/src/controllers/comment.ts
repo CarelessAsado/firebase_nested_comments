@@ -26,7 +26,7 @@ export const createComment = errorWrapper(async (req, res, next) => {
 
 export const getAllParentComments = errorWrapper(async (req, res, next) => {
   const { _id: userID } = req.user;
-  let { page = 1, limit = 30 } = req.query;
+  let { page = 1, limit = 3 } = req.query;
 
   limit = Number(limit);
   page = Number(page);
@@ -188,6 +188,7 @@ export const getAllParentComments = errorWrapper(async (req, res, next) => {
 
 export const getSubComments = errorWrapper(async (req, res, next) => {
   const { _id: userID } = req.user;
+
   let { page = 1 } = req.query;
   page = Number(page);
   const { parentCommentID } = req.params;

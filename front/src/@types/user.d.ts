@@ -29,7 +29,6 @@ type State = {
 type GeneralState = {
   comments: IComment[];
   totalComments: number;
-  error: boolean | string;
   loading: boolean;
   notification: string;
 };

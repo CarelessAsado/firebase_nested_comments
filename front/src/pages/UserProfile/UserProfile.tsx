@@ -9,8 +9,8 @@ import { Contacto } from "./auxiliaries/ContactoContainer";
 import * as userAPI from "API/user";
 import errorHandler from "context/errorHandler";
 import { Error } from "components/styled-components/styled";
-
-export const Container = styled.div`
+import { BiUser } from "react-icons/bi";
+const Container = styled.div`
   max-width: 500px;
   margin: 0 auto;
   display: flex;
@@ -18,7 +18,7 @@ export const Container = styled.div`
   gap: 10px;
   padding: 10px;
 `;
-export const ProfileSection = styled.section`
+const ProfileSection = styled.section`
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -26,7 +26,7 @@ export const ProfileSection = styled.section`
 
   /* min-height: 100%; */
 `;
-export const ColumnFlex = styled.div`
+const ColumnFlex = styled.div`
   flex: 2;
   display: flex;
   flex-direction: column;
@@ -35,17 +35,17 @@ export const ColumnFlex = styled.div`
     padding-bottom: 20px;
   }
 `;
-export const TopPart = styled(ColumnFlex)`
+const TopPart = styled(ColumnFlex)`
   gap: 20px;
   flex: 1;
   gap: 20px;
 `;
 
-export const NoPurchase = styled.td`
+const NoPurchase = styled.td`
   padding-top: 30px;
   text-align: center;
 `;
-export const Table = styled.table`
+const Table = styled.table`
   width: 100%;
   border-spacing: 0;
 `;
@@ -76,13 +76,22 @@ const TopLink = styled(Link)`
   margin-top: -10px;
   margin-bottom: 8px;
 `;
-export const ProfileImg = styled.img`
+
+const ProfileImgContainer = styled.div`
   width: 200px;
   height: 200px;
   border-radius: 50%;
-  object-fit: cover;
   margin: auto;
   border: 2px solid var(--mainGray);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+`;
+const ProfileImg = styled.img`
+  object-fit: cover;
+  height: 100%;
+  width: 100%;
 `;
 export const UserProfile = () => {
   const { user, error } = useAppSelector((state) => state.user);
@@ -110,7 +119,13 @@ export const UserProfile = () => {
   const isOwner = paramsUserid === user?._id;
   return (
     <Container>
-      <ProfileImg src={userProfile?.img || ""}></ProfileImg>
+      <ProfileImgContainer>
+        {userProfile?.img ? (
+          <ProfileImg src={userProfile.img}></ProfileImg>
+        ) : (
+          <BiUser style={{ color: "var(--mainGray)", fontSize: "6rem" }} />
+        )}
+      </ProfileImgContainer>
       <TopLink to={`${FRONTEND_ENDPOINTS.HOME}`} style={{ padding: "20px 0" }}>
         Back to home
       </TopLink>

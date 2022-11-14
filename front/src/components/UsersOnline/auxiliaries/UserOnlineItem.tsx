@@ -1,9 +1,10 @@
-import React from "react";
+import { FRONTEND_ENDPOINTS } from "config/constants";
 import { BiUser } from "react-icons/bi";
+import { Link } from "react-router-dom";
 import styled from "styled-components";
 
 export const disappearUserName = "730px";
-export const HoverInfo = styled.div`
+const HoverInfo = styled.div`
   display: none;
   position: absolute;
   top: 0;
@@ -12,12 +13,14 @@ export const HoverInfo = styled.div`
   align-items: center;
   gap: 5px;
   padding: 5px;
+  background-color: var(--mainSolapa);
+  color: var(--fbBody);
   &:hover {
     display: flex;
   }
 `;
 
-const ContainerItem = styled.div`
+const ContainerItem = styled(Link)`
   display: flex;
 
   align-items: center;
@@ -83,7 +86,7 @@ const UserNameText = styled.span`
 const UserOnlineItem = ({ userOnline }: { userOnline: UserNotNull }) => {
   return (
     <>
-      <ContainerItem>
+      <ContainerItem to={FRONTEND_ENDPOINTS.PROFILEdyn(userOnline._id)}>
         {userOnline.img ? (
           <ProfilePic src={userOnline.img}></ProfilePic>
         ) : (

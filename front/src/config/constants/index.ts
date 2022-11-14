@@ -24,6 +24,9 @@ class URL_BACK_ENDPOINTS {
   UPLOADIMGdyn = (user_id: string) => `/users/profilepic/${user_id}`;
   TASKS = `/tasks`;
   COMMENTS = `/comments`;
+  COMMENTS_PAGEdyn = (number: number = 1) => {
+    return `${this.COMMENTS}/?page=${number}`;
+  };
   SUBCOMMENTSdyn = (parentID: IParentID) =>
     `${this.COMMENTS}/subcomments/${parentID}`;
   LIKESdyn = (user_id: string, comment_id: string) => {

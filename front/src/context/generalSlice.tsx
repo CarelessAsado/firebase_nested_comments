@@ -1,9 +1,4 @@
-import {
-  createSlice,
-  PayloadAction,
-  createAsyncThunk,
-  isPending,
-} from "@reduxjs/toolkit";
+import { createSlice, PayloadAction, createAsyncThunk } from "@reduxjs/toolkit";
 import { socket } from "pages/main/Main";
 import * as commentsAPI from "API/commentsAPI";
 import errorHandler from "./errorHandler";
@@ -14,7 +9,6 @@ const initialState: GeneralState = {
   comments: [],
   totalComments: 0,
   loading: false,
-  error: false,
 };
 
 //COMO BORRO LOS COMMENTS EN EL LOGOUT ???????????
@@ -22,9 +16,9 @@ const initialState: GeneralState = {
 /* ------------------------COMMENTS SUCCESS ACTIONS--------------------- */
 export const getComments = createAsyncThunk(
   "general/getComments",
-  async function (_, { dispatch }) {
+  async function (nextPage: number, { dispatch }) {
     try {
-      const { data } = await commentsAPI.getComments();
+      const { data } = await commentsAPI.getComments({ nextPage });
       return data;
     } catch (error) {
       errorHandler(error, dispatch);
@@ -95,9 +89,9 @@ export const likeUnlikeComment = createAsyncThunk<
   } = getState();
   try {
     const { data } = await commentsAPI.likeUnlikeComment(obj, user);
-    console.log(data, 888);
-    //hacer logica emit like event
-    /*   socket?.emit("commentDeleted", data); */
+
+    socket?.emit("commentLikedUnliked", data);
+
     return data;
   } catch (error) {
     await errorHandler(error, dispatch);
@@ -117,21 +111,42 @@ export const generalSlice = createSlice({
 
     newCommentPostedAdded: (state, action) => {
       state.loading = false;
-      state.error = false;
       state.comments = addCommentState(state.comments, action.payload);
     },
     newCommentDeleted: (state, action) => {
       state.loading = false;
-      state.error = false;
       state.comments = deleteCommentState(state.comments, action.payload);
+    },
+    newCommentLikedUnliked: (state, action) => {
+      //esto lo tengo q refactorizar xq lo repito en dos lugares
+      const { parentID, _id, likes } = action.payload;
+      let modified: IComment[];
+      if (!parentID) {
+        modified = state.comments.map((comm) =>
+          comm._id === _id ? { ...comm, likes } : comm
+        );
+      } else {
+        modified = state.comments.map((comm) =>
+          comm._id === parentID
+            ? {
+                ...comm,
+                children: (comm.children as IComment[]).map((i) =>
+                  i._id === _id ? action.payload : i
+                ),
+              }
+            : comm
+        );
+      }
+
+      state.comments = modified;
+      state.loading = false;
     },
   },
   extraReducers: (builder) => {
     builder.addCase(getComments.fulfilled, (state, action) => {
       //add pagination
       state.totalComments = action.payload.count;
-      state.comments = action.payload.commentsData;
-      state.loading = false;
+      state.comments = [...state.comments, ...action.payload.commentsData];
     });
 
     builder.addCase(getMoreSubComments.fulfilled, (state, action) => {
@@ -149,15 +164,12 @@ export const generalSlice = createSlice({
             }
           : parentComm
       );
-      state.loading = false;
     });
     builder.addCase(postNewComment.fulfilled, (state, action) => {
       state.comments = addCommentState(state.comments, action.payload);
-      state.loading = false;
     });
     builder.addCase(deleteComment.fulfilled, (state, action) => {
       state.comments = deleteCommentState(state.comments, action.payload);
-      state.loading = false;
     });
     builder.addCase(likeUnlikeComment.fulfilled, (state, action) => {
       const { parentID, _id, likes } = action.payload;
@@ -180,18 +192,6 @@ export const generalSlice = createSlice({
       }
 
       state.comments = modified;
-      state.loading = false;
-    });
-
-    /* -----------------------------------ADDMATCHER PENDING----------------------------------- */
-    // .addMatcher tiene q ir DSP de los addCase, si lo ponés antes no ANDA
-    //Lo uso como default case p/loading
-    //https://redux-toolkit.js.org/api/createReducer#builderaddmatcher
-    //calculo q si queres overridear el matcher tenés q agregar otro dsp no?
-    // matcher can be defined outside as a type predicate function
-    builder.addMatcher(isPending, (state, action) => {
-      state.loading = true;
-      state.error = false;
     });
   },
 });
@@ -200,6 +200,7 @@ export const {
   showOrCloseNotification,
   newCommentPostedAdded,
   newCommentDeleted,
+  newCommentLikedUnliked,
 } = generalSlice.actions;
 
 export default generalSlice.reducer;

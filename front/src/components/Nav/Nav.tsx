@@ -56,6 +56,7 @@ interface PropsShowNav {
 
 export const Overlay = styled.div<PropsShowNav>`
   height: 100%;
+
   @media (max-width: ${showBurgerButton}) {
     transition: 0.3s;
     position: fixed;
@@ -68,41 +69,47 @@ export const Overlay = styled.div<PropsShowNav>`
     transform: ${(props) => !props.show && "translateX(-3000%)"};
   }
 `;
-const Links = styled.ul`
-  height: 100%;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-
-  @media (max-width: ${showBurgerButton}) {
-    justify-content: center;
-    flex-direction: column;
-    background-color: var(--mainBlue);
-    color: var(--mainWhite);
-    width: calc(100% - 20px);
-  }
-`;
-
 interface IPadding {
   padding?: boolean;
 }
+
+const Links = styled.ul`
+  width: 100%;
+  display: flex;
+  //stretch full height of the nav, dont set height on children
+  align-items: stretch;
+  /*   justify-content: space-between; */
+  /*   justify-content: center; */
+  @media (max-width: ${showBurgerButton}) {
+    //dejar 20px de overlay en p/q se vea el background
+    width: calc(100% - 20px);
+
+    height: 100%;
+    flex-direction: column;
+
+    justify-content: center;
+
+    background-color: var(--mainBlue);
+    color: var(--mainWhite);
+  }
+`;
+
+//align stretch no anda si el child tiene height 100%, pero sí si ponés "auto"
 const LinkItem = styled.li<IPadding>`
-  height: inherit;
+  flex: 1;
   display: flex;
   gap: 5px;
   align-items: center;
   justify-content: center;
-  width: 100%;
   padding: ${(props) => props.padding && "10px"};
-  font-size: 1.5rem;
+  font-size: var(--fontSmall);
   cursor: pointer;
   transition: 0.3s;
   &:hover {
     background-color: #b2e7f0;
   }
   @media (max-width: ${showBurgerButton}) {
-    font-size: 1.2rem;
-    height: max-content;
+    flex-grow: 0;
     &:hover {
       background-color: var(--mainBlueHover);
     }
@@ -170,7 +177,7 @@ const ProfilePic = styled.img`
 export const Nav = () => {
   const { user } = useAppSelector((state) => state.user);
   const dispatch = useAppDispatch();
-  const [showNav, setShowNav] = useState<boolean>(false);
+  const [showNav, setShowNav] = useState<boolean>(true);
   return (
     <>
       <BlockBehindNavBar />

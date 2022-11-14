@@ -8,10 +8,11 @@ import * as commentAPI from "API/commentsAPI";
 
 const LikeCountDisplay = styled.div`
   position: relative;
+  z-index: 3;
 `;
 //lo pongo antes de comment count p/poder referenciarlo en CommentCount:hover
 const ModalUserNamesHover = styled.div`
-  background-color: rgb(248, 248, 243, 0.7);
+  background-color: var(--mainSolapa);
   color: black;
   padding: 10px;
   border-radius: 10px;
@@ -19,6 +20,8 @@ const ModalUserNamesHover = styled.div`
   display: none;
   overflow-y: auto;
   max-height: 50vh;
+  width: max-content;
+  max-width: 50vh;
 `;
 
 const CommentCount = styled.div<{ isAbsolute?: boolean }>`

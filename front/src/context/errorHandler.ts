@@ -23,9 +23,10 @@ export default async function handleError(
     return dispatch(renderError(error.code));
   }
 
-  if (error?.message === "canceled")
+  if (error?.message === "canceled") {
     /* ABORT CONTROLLLER, no es tecnicamente un error, asi q simplemente devolvemos */
     return;
+  }
 
   dispatch(
     renderError(

@@ -26,8 +26,9 @@ export const SideContainer = styled.div<SideContProps>`
   @media (max-width: ${disappearUserName}) {
     width: calc(${picHeight} + 20px);
   }
+  z-index: 2;
 `;
-export const SolapaChat = styled.div<SideContProps>`
+const SolapaChat = styled.div<SideContProps>`
   position: absolute;
   left: 100%;
   top: 0;
@@ -38,7 +39,7 @@ export const SolapaChat = styled.div<SideContProps>`
   display: ${(props) => props.openChat && "none"};
 `;
 
-export const CloseTab = styled.span`
+const CloseTab = styled.span`
   padding: 10px;
   display: inline-flexbox;
   cursor: pointer;
@@ -55,6 +56,12 @@ export const CloseTab = styled.span`
     display: grid;
     place-items: center;
   }
+`;
+
+const NoUsersOnline = styled.div`
+  font-size: calc(var(--fontSmall) - 0.4rem);
+  font-weight: bold;
+  padding: 10px 5px;
 `;
 const UsersOnline = ({
   users,
@@ -73,7 +80,7 @@ const UsersOnline = ({
         </CloseTab>
       </div>
       {users.length === 0 ? (
-        <>"NO USERS ONLINE AT THE MOMENT"</>
+        <NoUsersOnline>NO USERS ONLINE</NoUsersOnline>
       ) : (
         users.map((i) => {
           return <UserOnlineItem userOnline={i} />;
@@ -82,7 +89,6 @@ const UsersOnline = ({
       <SolapaChat openChat={openChat} onClick={() => setOpenChat()}>
         <AiFillWechat />
       </SolapaChat>
-      {users.length === 0 && "blabla"}
     </SideContainer>
   );
 };

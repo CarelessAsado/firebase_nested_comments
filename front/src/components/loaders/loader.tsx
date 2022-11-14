@@ -2,8 +2,8 @@ import styled from "styled-components";
 import { AiOutlineLoading } from "react-icons/ai";
 
 interface PreloaderProps {
-  fz: string;
-  h: string;
+  fz?: string;
+  h?: string;
   color?: string;
 }
 const Preloader = styled.div<PreloaderProps>`

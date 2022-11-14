@@ -1,24 +1,31 @@
 import Spinner from "components/loaders/loader";
 import { Error } from "components/styled-components/styled";
+import { NoPicOrPicUserImage } from "components/UsersOnline/auxiliaries/UserOnlineItem";
 import { postNewComment } from "context/generalSlice";
 import { useAppDispatch, useAppSelector } from "hooks/reduxDispatchAndSelector";
 import { useState } from "react";
 import styled from "styled-components";
-import { Input } from "./styles";
+import { commentContainerBaseStyles, Input } from "./styles";
 
+export const APP_WIDTH = "1000px";
 /* ---------------------------------REEMPLAZAR OLD FORM */
 const Form = styled.form`
   margin: 0 auto;
-  max-width: 1000px;
+  max-width: ${APP_WIDTH};
   width: 100%;
-  background-color: #d4d2c7;
+  ${commentContainerBaseStyles}
 `;
 const Decoration = styled.div`
-  border: 1px solid black;
   display: flex;
   width: 80%;
   margin: 50px auto;
-  font-size: 1.5rem;
+  font-size: var(--fontMed);
+
+  //center the user profile img
+  & :first-child {
+    align-self: center;
+    margin-right: 5px;
+  }
 `;
 
 const SubmitBtn = styled.button`
@@ -27,13 +34,13 @@ const SubmitBtn = styled.button`
   color: white;
   padding: 20px;
   transition: 0.3s;
-  cursor: pointer;
   &:hover {
     background-color: var(--mainBlueHover);
   }
   &:active {
     transform: scale(0.8);
   }
+  cursor: pointer;
 `;
 const LoadingRelative = styled.div`
   padding: 30px 10px;
@@ -44,13 +51,12 @@ const Loading = styled.h2`
   top: 50%;
   transform: translateY(-50%);
   left: 50%;
-  color: #6e6a7a;
 `;
 
-const NewPostForm = () => {
+const NewPostForm = ({ user }: { user: IUser }) => {
   const [comment, setComment] = useState("");
 
-  const { loading, error } = useAppSelector((state) => state.general);
+  const { loading, error } = useAppSelector((state) => state.user);
   const dispatch = useAppDispatch();
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -62,8 +68,9 @@ const NewPostForm = () => {
   return (
     <Form onSubmit={handleSubmit}>
       <Decoration>
+        <NoPicOrPicUserImage img={user?.img} />
         <Input
-          placeholder="Add new post"
+          placeholder="What's on your mind?"
           value={comment}
           onChange={(e) => setComment(e.target.value)}
         ></Input>
@@ -72,7 +79,7 @@ const NewPostForm = () => {
       <LoadingRelative>
         {loading && (
           <Loading>
-            <Spinner fz="3rem" h="100%" />
+            <Spinner fz="3rem" h="100%" color={" var(--fbWhiteComments)"} />
           </Loading>
         )}
         {error && <Error>{error}</Error>}

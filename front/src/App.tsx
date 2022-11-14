@@ -7,31 +7,42 @@ import { FRONTEND_ENDPOINTS } from "config/constants";
 import { useResetErrors } from "hooks/useResetErrors";
 import { ExpelLoggedUser } from "components/middle/ExpelLoggedUser";
 import { fireBaseAuth } from "services/firebaseConfig";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { refresh } from "context/userSlice";
 import { useAppDispatch, useAppSelector } from "hooks/reduxDispatchAndSelector";
 import { ForgotPwd } from "pages/auth/ForgotPwd";
 import { UserProfile } from "pages/UserProfile/UserProfile";
 import { Notification } from "components/Notification";
+import FullPageLoader from "components/loaders/FullPageLoader";
 
 function App() {
   useResetErrors();
 
   const dispatch = useAppDispatch();
-
+  const [loading, setLoading] = useState(false);
   useEffect(() => {
+    setLoading(true);
     fireBaseAuth.onAuthStateChanged(async (userData) => {
       console.log(userData);
       if (userData) {
         //esto no salta en el login, pero sí salta en el register
         /*  alert("cambiazo"); */
-        dispatch(refresh());
+        dispatch(refresh())
+          .unwrap()
+          .then(() => {
+            return setLoading(false);
+          });
       } else {
+        alert("aca no sé q hacer aun");
         /*        setUser(null); */
+        setLoading(false);
       }
     });
   }, [dispatch]);
 
+  if (loading) {
+    return <FullPageLoader />;
+  }
   return (
     <>
       <Nav />
