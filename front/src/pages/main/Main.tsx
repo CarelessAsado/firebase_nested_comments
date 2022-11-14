@@ -53,10 +53,7 @@ const ContainerAllComments = styled.div`
   flex-direction: column;
   gap: 20px;
 `;
-const HitRockBottomInfinite = styled.div`
-  height: 22px;
-  background-color: red;
-`;
+const HitRockBottomInfinite = styled.div``;
 export let socket: Socket | undefined;
 
 type ISocketResponse = { data: IComment; user: IUser };
@@ -67,23 +64,18 @@ let firstLoad: boolean = false;
 
 export const Main = () => {
   const { user } = useAppSelector((state) => state.user);
-  const { comments, totalComments } = useAppSelector((state) => state.general);
+  const { comments } = useAppSelector((state) => state.general);
   const [nextPage, setNextPage] = useState<number>(1);
   /*   const { comments } = useAppSelector((state) => state.general); */
   /*   const { socket } = useAppSelector((state) => state.user); */
 
-  //antes openChat estaba en UsersOnline component, lo terminé guardando aca, ya q el container de Main varia en su margin-left (es decir la width), cuando cierro o abro el chat
-  const [openChat, setOpenChat] = useState(true);
-  const openAndCloseChat = () => {
-    setOpenChat((v) => !v);
-  };
-  const [usersOnline, setUsersOnline] = useState<UserNotNull[]>([]);
   const dispatch = useAppDispatch();
 
   const checkIfThereAreMoreComments = (facetResponse: FacetResponse) => {
-    //ver como hago p/establecer next page
-    /*     alert(JSON.stringify({ totalComments, commentsAhora: comments.length })); */
-    if (facetResponse.commentsData.length < facetResponse.count) {
+    if (
+      facetResponse.commentsData.length + comments.length <
+      facetResponse.count
+    ) {
       setNextPage((v) => v + 1);
     } else {
       setNextPage(0);
@@ -91,10 +83,6 @@ export const Main = () => {
   };
 
   useEffect(() => {
-    //le tengo q pasar el nextPage p/q sepa
-
-    // tengo q ir al back y agregar ma logica p/determinar si nextPage se llama o no
-
     dispatch(getComments(nextPage))
       .unwrap() //when page loads, bottom is intersecting, so to avoid calling for comment-results-page 2 before its necessary, we wait for this variable to become true
       .then((data) => {
@@ -103,84 +91,6 @@ export const Main = () => {
         checkIfThereAreMoreComments(data);
       });
   }, [dispatch]);
-
-  useEffect(() => {
-    socket = io(BACKEND_ROOT);
-  }, []);
-
-  useEffect(() => {
-    //esto lo hago xq el LOGOUT no genera automaticamente un "disconnect" event en el backend como x ej lo hace el page refresh
-    //no sirve, xq ya sin user, nunca llego a esta etapa
-    if (!socket) return;
-
-    socket.on("connect", () => {
-      /* setIsConnected(true); */
-      //send token for auth on first connection
-      socket?.emit("first", getHeadersChatAuth());
-    });
-
-    socket.on("newUserConnected", (data: UserNotNull[]) => {
-      setUsersOnline(data.filter((i) => i._id !== user?._id));
-    });
-
-    //estp es p/cuando me desconecta el server, podria usarlo en caso de error
-    //tmb se dispara cuando hago un disconnect yo mismo en el logout, ver si saco el disconnect del logout si se dispara tmb
-    socket.on("disconnect", () => {
-      /*  setIsConnected(false); */
-    });
-
-    socket.on("userLeft", (data: UserNotNull[]) => {
-      setUsersOnline(data.filter((i) => i._id !== user?._id));
-    });
-
-    //cuando envié al user conectado doble
-    socket.on("commentPosted", ({ data, user }: ISocketResponse) => {
-      dispatch(newCommentPostedAdded(data));
-      dispatchNotification(
-        dispatch,
-        `${user?.username || "Somebody"} posted a comment`
-      );
-    });
-
-    socket.on("commentDeleted", ({ data, user }: ISocketResponse) => {
-      dispatch(newCommentDeleted(data));
-      dispatchNotification(
-        dispatch,
-        `${user?.username || "Somebody"} deleted a comment`
-      );
-    });
-
-    socket.on(
-      "commentLikedUnliked",
-      ({ data, user: liker }: ISocketResponse) => {
-        dispatch(newCommentLikedUnliked(data));
-        if (typeof data.userID !== "string") {
-          /* si el usuario owner del comment just liked coincide con el usuario, lo notificamos q ahora es un influencer */
-
-          if (data.userID._id === user?._id) {
-            dispatchNotification(
-              dispatch,
-              `${liker?.username || "Somebody"} has liked/unliked your comment`
-            );
-          }
-        }
-      }
-    );
-
-    return () => {
-      socket?.off("connect");
-      socket?.off("disconnect");
-      socket?.off("newUserConnected");
-      socket?.off("userLeft");
-      socket?.off("commentPosted");
-      socket?.off("commentDeleted");
-      socket?.off("commentLikedUnliked");
-      /*   alert("about to disconnect"); */
-      //no sirve poner un clean-up disconnect con useRef xq el socket no se vuelve a conectar automaticamente
-
-      /* socket.disconnect(); */
-    };
-  }, [user?._id, dispatch]);
 
   const { entriesCB, setHTMLElementsObserved } = useIntersectionObserver();
 
@@ -194,8 +104,6 @@ export const Main = () => {
       entriesCB.length > 0 &&
       entriesCB[0].isIntersecting
     ) {
-      alert("aca aun no");
-
       dispatch(getComments(nextPage))
         .unwrap() //when page loads, bottom is intersecting, so to avoid calling for comment-results-page 2 before its necessary, we wait for this variable to become true
         .then(checkIfThereAreMoreComments);
@@ -209,32 +117,24 @@ export const Main = () => {
   }, [setHTMLElementsObserved]);
 
   return (
-    <Container isChatOpen={openChat}>
+    <>
       <NewPostForm user={user} />
-      <Center>
-        <UsersOnline
-          users={usersOnline}
-          setOpenChat={openAndCloseChat}
-          openChat={openChat}
-        />
+      <ContainerAllComments>
+        {comments.length > 0 &&
+          comments.map((c) => (
+            <ParentComment
+              comment={c}
+              //fijarse dsp de borrar
+              data={comments}
+              key={c._id}
+              user={user}
+            />
+          ))}
+      </ContainerAllComments>
 
-        <ContainerAllComments>
-          {comments.length > 0 &&
-            comments.map((c) => (
-              <ParentComment
-                comment={c}
-                //fijarse dsp de borrar
-                data={comments}
-                key={c._id}
-                user={user}
-              />
-            ))}
-        </ContainerAllComments>
-
-        <HitRockBottomInfinite
-          ref={InfiniteScrollPagContainer}
-        ></HitRockBottomInfinite>
-      </Center>
-    </Container>
+      <HitRockBottomInfinite
+        ref={InfiniteScrollPagContainer}
+      ></HitRockBottomInfinite>
+    </>
   );
 };

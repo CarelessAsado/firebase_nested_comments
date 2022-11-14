@@ -14,6 +14,7 @@ const Form = styled.form`
   max-width: ${APP_WIDTH};
   width: 100%;
   ${commentContainerBaseStyles}
+  margin-bottom:40px;
 `;
 const Decoration = styled.div`
   display: flex;

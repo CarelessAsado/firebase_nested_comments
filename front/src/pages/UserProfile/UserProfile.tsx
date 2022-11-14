@@ -41,15 +41,6 @@ const TopPart = styled(ColumnFlex)`
   gap: 20px;
 `;
 
-const NoPurchase = styled.td`
-  padding-top: 30px;
-  text-align: center;
-`;
-const Table = styled.table`
-  width: 100%;
-  border-spacing: 0;
-`;
-
 const BtnLogout = styled.button`
   background-color: inherit;
   color: var(--mainWhite);

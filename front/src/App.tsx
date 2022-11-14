@@ -14,6 +14,7 @@ import { ForgotPwd } from "pages/auth/ForgotPwd";
 import { UserProfile } from "pages/UserProfile/UserProfile";
 import { Notification } from "components/Notification";
 import FullPageLoader from "components/loaders/FullPageLoader";
+import { ChatLayout } from "components/middle/ChatLayout";
 
 function App() {
   useResetErrors();
@@ -26,7 +27,6 @@ function App() {
       console.log(userData);
       if (userData) {
         //esto no salta en el login, pero sí salta en el register
-        /*  alert("cambiazo"); */
         dispatch(refresh())
           .unwrap()
           .then(() => {
@@ -56,11 +56,14 @@ function App() {
         </Route>
 
         <Route element={<ProtectedByAuth />}>
-          <Route path={FRONTEND_ENDPOINTS.HOME} element={<Main />}></Route>
-          <Route
-            path={FRONTEND_ENDPOINTS.PROFILE}
-            element={<UserProfile />}
-          ></Route>
+          {/* ChatLayout contains all the io functionality + the sidebar */}
+          <Route element={<ChatLayout />}>
+            <Route path={FRONTEND_ENDPOINTS.HOME} element={<Main />}></Route>
+            <Route
+              path={FRONTEND_ENDPOINTS.PROFILE}
+              element={<UserProfile />}
+            ></Route>
+          </Route>
         </Route>
       </Routes>
     </>

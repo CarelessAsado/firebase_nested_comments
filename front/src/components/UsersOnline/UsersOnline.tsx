@@ -81,7 +81,7 @@ const UsersOnline = ({
         <NoUsersOnline>NO USERS ONLINE</NoUsersOnline>
       ) : (
         users.map((i) => {
-          return <UserOnlineItem userOnline={i} />;
+          return <UserOnlineItem userOnline={i} key={i._id} />;
         })
       )}
       <SolapaChat openChat={openChat} onClick={() => setOpenChat()}>
