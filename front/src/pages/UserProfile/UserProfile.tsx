@@ -10,6 +10,7 @@ import * as userAPI from "API/user";
 import errorHandler from "context/errorHandler";
 import { Error } from "components/styled-components/styled";
 import { BiUser } from "react-icons/bi";
+import Spinner from "components/loaders/loader";
 const Container = styled.div`
   max-width: 500px;
   margin: 0 auto;
@@ -86,7 +87,7 @@ const ProfileImg = styled.img`
   width: 100%;
 `;
 export const UserProfile = () => {
-  const { user, error } = useAppSelector((state) => state.user);
+  const { user, error, loading } = useAppSelector((state) => state.user);
   const dispatch = useAppDispatch();
   const [userProfile, setUserProfile] = useState<IUser>(null);
 
@@ -122,6 +123,8 @@ export const UserProfile = () => {
         ) : (
           <BiUser style={{ color: "var(--mainGray)", fontSize: "6rem" }} />
         )}
+
+        {!!userProfile && loading && <Spinner color="var(--mainWhite)" />}
       </ProfileImgContainer>
       <TopLink to={`${FRONTEND_ENDPOINTS.HOME}`} style={{ padding: "20px 0" }}>
         Back to home
@@ -130,14 +133,16 @@ export const UserProfile = () => {
         <Error aria-live="assertive">{error}</Error>
         <ColumnFlex>
           <TopPart style={{ flex: 1 }} className="flex1 topPart">
-            {userProfile && (
+            {userProfile ? (
               <Contacto
                 user={userProfile}
                 isOwner={isOwner}
                 show={openClosePicModal}
                 openEditPicModal={openClosePicEditor}
               />
-            )}
+            ) : loading ? (
+              <Spinner color="var(--mainWhite)" />
+            ) : null}
           </TopPart>
           {isOwner && (
             <BtnLogout onClick={() => dispatch(logout())}>Logout</BtnLogout>

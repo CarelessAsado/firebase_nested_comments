@@ -300,7 +300,9 @@ export function Contacto({
             )}
           </Email>
           {isOwner && (
-            <ChangePwd onClick={openEditPicModal}>Change password</ChangePwd>
+            <ChangePwd onClick={() => setEditPwd((v) => !v)}>
+              Change password
+            </ChangePwd>
           )}
         </Section>
         {/* -------------TEMPLATE P/EDITAR CONTRASEñA--------------------- */}
