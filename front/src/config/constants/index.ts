@@ -6,7 +6,6 @@ class URL_FRONT_ENDPOINTS {
   PROFILE = "/profile/user/:id";
   PROFILEdyn = (id: string) => {
     return "/profile/user/" + id;
-    return this.PROFILE.replace(":_id", id);
   };
 }
 export const FRONTEND_ENDPOINTS = new URL_FRONT_ENDPOINTS();

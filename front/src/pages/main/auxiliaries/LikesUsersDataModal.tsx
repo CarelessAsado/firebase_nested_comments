@@ -1,7 +1,6 @@
 import styled from "styled-components";
 import { AiFillLike } from "react-icons/ai";
 import Spinner from "components/loaders/loader";
-import useApiCall from "hooks/useApiCall";
 import { useState } from "react";
 import useTestApiCall from "hooks/TEST";
 import * as commentAPI from "API/commentsAPI";

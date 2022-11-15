@@ -1,5 +1,5 @@
-import axios, { AxiosResponse } from "axios";
-import { useState, useEffect, useCallback } from "react";
+import { AxiosResponse } from "axios";
+import { useState, useEffect } from "react";
 
 //mando una fn con Promise y un generic Type q se va a inferir
 function useTestApiCall<Args, AxiosData>({

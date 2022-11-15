@@ -1,4 +1,3 @@
-import loginAxiosInstance from "./loginAxiosInstance";
 import { BACKEND_URL } from "config/constants";
 import axiosInstanceJWT from "./axiosInstanceJWT";
 
