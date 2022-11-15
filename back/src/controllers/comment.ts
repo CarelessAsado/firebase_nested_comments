@@ -116,7 +116,7 @@ export const getAllParentComments = errorWrapper(async (req, res, next) => {
           //dsp de esto, tengo q contar todos los first levelchildren,
           //ver si puedo contar y en 2do lugar hacer el slice, todo en el mismo set
           {
-            $set: {
+            $addFields: {
               //CONTAMOS CANTIDAD DE ITEMS EN EL ARRAY, y le restamos la cantidad de subdocs q vamos a devolverle al user junto al parent comment
               totalSubcomments: {
                 $size: "$nested",
@@ -140,7 +140,7 @@ export const getAllParentComments = errorWrapper(async (req, res, next) => {
           },
           //como el array de remainingFirstLevelComments puede estar vacío. Al restar 1 queda en negativo, asi q lo seteamos a 0
           {
-            $set: {
+            $addFields: {
               remainingChildren: {
                 $cond: [
                   {
@@ -266,7 +266,7 @@ export const getSubComments = errorWrapper(async (req, res, next) => {
 
     //como el array de remainingFirstLevelComments puede estar vacío. Al restar 1 queda en negativo, asi q lo seteamos a 0
     {
-      $set: {
+      $addFields: {
         count: {
           $cond: [
             {
