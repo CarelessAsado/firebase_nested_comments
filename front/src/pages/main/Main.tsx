@@ -5,6 +5,7 @@ import ParentComment from "./auxiliaries/ParentComments";
 import NewPostForm from "./auxiliaries/NewPostForm";
 import { getComments } from "context/generalSlice";
 import { useIntersectionObserver } from "hooks/useIntersectionObserver";
+import Spinner from "components/loaders/loader";
 
 const ContainerAllComments = styled.div`
   display: flex;
@@ -16,7 +17,7 @@ const HitRockBottomInfinite = styled.div``;
 /* export let firstLoad: boolean = false; */
 
 export const Main = () => {
-  const { user } = useAppSelector((state) => state.user);
+  const { user, loading } = useAppSelector((state) => state.user);
   const { comments } = useAppSelector((state) => state.general);
   const firstLoad = useRef(false);
   const dispatch = useAppDispatch();
@@ -59,6 +60,9 @@ export const Main = () => {
             <ParentComment comment={c} key={c._id} user={user} />
           ))}
       </ContainerAllComments>
+      {loading && (
+        <Spinner fz="3rem" h="100%" color={" var(--fbWhiteComments)"} />
+      )}
 
       <HitRockBottomInfinite
         ref={InfiniteScrollPagContainer}

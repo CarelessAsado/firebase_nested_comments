@@ -29,9 +29,9 @@ function App() {
         //esto no salta en el login, pero sí salta en el register
         dispatch(refresh())
           .unwrap()
-          .then(() => {
-            return setLoading(false);
-          });
+          .then(() => {})
+          .catch()
+          .finally(() => setLoading(false));
       } else {
         //al hacer logout paso x aca
         /*        setUser(null); */

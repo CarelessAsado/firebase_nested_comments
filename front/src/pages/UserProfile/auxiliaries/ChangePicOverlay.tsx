@@ -7,6 +7,7 @@ import { CloseButton } from "components/styled-components/styled";
 import { useAppDispatch, useAppSelector } from "hooks/reduxDispatchAndSelector";
 import { uploadImg } from "context/userSlice";
 import { dispatchNotification } from "config/utilsFns/dispatchNotification";
+import Spinner from "components/loaders/loader";
 
 type SubContainerProps = {
   flexIt?: boolean;
@@ -28,11 +29,13 @@ export const Btn = styled.div<BtnProps>`
   border-radius: 5px;
   cursor: pointer;
   background-color: ${(props) =>
-    props.danger ? "var(--mainRed)" : "var(--mainGray)"};
+    props.danger ? "var(--mainRed)" : "var(--mainGreen)"};
   border: 1px solid ${(props) => props.danger && "var(--mainRed)"};
   &:hover {
     background-color: ${(props) => props.danger && "var(--mainRed)"};
   }
+  width: 100px;
+  text-align: center;
 `;
 const Header = styled.h2`
   position: relative;
@@ -145,7 +148,18 @@ export const ChangePicOverlay = ({ show, close }: OpenCloseOv) => {
         >
           Cancel
         </Btn>
-        <Btn onClick={handleSubmit}>{loading ? "Loading" : "Confirm"}</Btn>
+
+        <Btn onClick={handleSubmit}>
+          {loading ? (
+            <Spinner
+              fz={"var(--fontSmall)"}
+              h="100%"
+              color="var(--mainWhite)"
+            />
+          ) : (
+            "Confirm"
+          )}
+        </Btn>
       </SubContainer>
     </OverlayStructure>
   );
