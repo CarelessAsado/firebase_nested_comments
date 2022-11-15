@@ -117,9 +117,13 @@ export type PasswordsInputType = typeof pwdInitialState;
 export function Contacto({
   user,
   isOwner,
+  show,
+  openEditPicModal,
 }: {
   user: UserNotNull;
   isOwner: boolean;
+  show: boolean;
+  openEditPicModal: () => void;
 }) {
   const [editName, setEditName] = useState(false);
   const [nombre, setNombre] = useState(user?.username);
@@ -207,7 +211,6 @@ export function Contacto({
     setPasswords({ ...passwords, [target.name]: target.value });
   }
 
-  const [show, setShow] = useState(false);
   return (
     <ContactoContainer>
       <Header>
@@ -297,9 +300,7 @@ export function Contacto({
             )}
           </Email>
           {isOwner && (
-            <ChangePwd onClick={() => setEditPwd((v) => !v)}>
-              Change password
-            </ChangePwd>
+            <ChangePwd onClick={openEditPicModal}>Change password</ChangePwd>
           )}
         </Section>
         {/* -------------TEMPLATE P/EDITAR CONTRASEñA--------------------- */}
@@ -341,14 +342,10 @@ export function Contacto({
       </ContactInfo>
       {/* --------------EDIT PROFILE PICTURE--------------------- */}
       {isOwner && (
-        <EditPic onClick={() => setShow((v) => !v)}>
-          Edit your profile picture
-        </EditPic>
+        <EditPic onClick={openEditPicModal}>Edit your profile picture</EditPic>
       )}
 
-      {show && (
-        <ChangePicOverlay show={show} close={() => setShow((v) => !v)} />
-      )}
+      {show && <ChangePicOverlay show={show} close={openEditPicModal} />}
     </ContactoContainer>
   );
 }

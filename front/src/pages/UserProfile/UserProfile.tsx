@@ -69,6 +69,7 @@ const TopLink = styled(Link)`
 `;
 
 const ProfileImgContainer = styled.div`
+  cursor: pointer;
   width: 200px;
   height: 200px;
   border-radius: 50%;
@@ -88,6 +89,11 @@ export const UserProfile = () => {
   const { user, error } = useAppSelector((state) => state.user);
   const dispatch = useAppDispatch();
   const [userProfile, setUserProfile] = useState<IUser>(null);
+
+  const [openClosePicModal, setOpenClosePicModal] = useState(false);
+  function openClosePicEditor() {
+    setOpenClosePicModal((v) => !v);
+  }
 
   const { id: paramsUserid } = useParams();
 
@@ -110,7 +116,7 @@ export const UserProfile = () => {
   const isOwner = paramsUserid === user?._id;
   return (
     <Container>
-      <ProfileImgContainer>
+      <ProfileImgContainer onClick={openClosePicEditor}>
         {userProfile?.img ? (
           <ProfileImg src={userProfile.img}></ProfileImg>
         ) : (
@@ -124,7 +130,14 @@ export const UserProfile = () => {
         <Error aria-live="assertive">{error}</Error>
         <ColumnFlex>
           <TopPart style={{ flex: 1 }} className="flex1 topPart">
-            {userProfile && <Contacto user={userProfile} isOwner={isOwner} />}
+            {userProfile && (
+              <Contacto
+                user={userProfile}
+                isOwner={isOwner}
+                show={openClosePicModal}
+                openEditPicModal={openClosePicEditor}
+              />
+            )}
           </TopPart>
           {isOwner && (
             <BtnLogout onClick={() => dispatch(logout())}>Logout</BtnLogout>

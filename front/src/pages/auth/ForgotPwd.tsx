@@ -39,7 +39,7 @@ export const ForgotPwd = () => {
       await dispatch(forgotPwd(email)).unwrap();
       dispatchNotification(
         dispatch,
-        "Check your inbox to finish the password change."
+        "Check your inbox to finish the password change. The email might be in your spam box"
       );
       setEmail("");
     } catch (error) {}

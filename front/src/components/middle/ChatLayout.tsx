@@ -29,7 +29,7 @@ const Container = styled.div<{ isChatOpen: boolean }>`
   justify-content: center;
   padding: 0 10px;
   transition: 0.3s;
-
+  min-height: 100vh;
   @media (max-width: ${disappearUserName}) {
     margin-left: ${(props) =>
       props.isChatOpen ? `calc(${picHeight} + 20px)` : "none"};
