@@ -122,10 +122,11 @@ export const getAllParentComments = errorWrapper(async (req, res, next) => {
                 $size: "$nested",
               },
               children: {
-                $lastN: {
+                $slice: ["$nested", -SUBCOMMENTS_TO_RETRIEVE_PER_PARENT],
+                /* $lastN: {
                   n: SUBCOMMENTS_TO_RETRIEVE_PER_PARENT,
                   input: "$nested",
-                },
+                }, */
               },
               //ACA TENGO Q HACER MATEMATICA,con el nroslice q haga al array de FIRST LEVEL CHILDREN
               remainingChildren: {
