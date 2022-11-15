@@ -40,6 +40,6 @@ export const BACKEND_URL = new URL_BACK_ENDPOINTS();
 export const BACKEND_ROOT =
   !process.env.NODE_ENV || process.env.NODE_ENV === "development"
     ? "http://localhost:5000"
-    : "https://typescript-backend-reactnode.herokuapp.com";
+    : "https://rodribook.onrender.com";
 
 export const LSTORAGE_KEY = "user";
