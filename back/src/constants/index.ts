@@ -1,6 +1,6 @@
 import { CookieOptions } from "express";
 export const FRONTEND_URL = process.env.NODE_ENV
-  ? "https://amazing-wright-70ac6b.netlify.app"
+  ? "https://bright-fudge-e510f2.netlify.app"
   : "http://localhost:3000";
 
 export const JWT_SECRET = process.env.JWT_SECRET as string;
